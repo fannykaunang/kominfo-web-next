@@ -1,18 +1,18 @@
-import { Card, CardContent } from "@/components/ui/card"
-import { Users, Building2, Briefcase, TrendingUp } from "lucide-react"
-import { LucideIcon } from "lucide-react"
+import { Card, CardContent } from "@/components/ui/card";
+import { Users, Building2, Briefcase, TrendingUp } from "lucide-react";
+import { LucideIcon } from "lucide-react";
 
 interface StatItem {
-  id: string
-  judul: string
-  nilai: string
-  satuan?: string
-  icon: string
-  kategori: string
+  id: string;
+  judul: string;
+  nilai: string;
+  satuan?: string;
+  icon: string;
+  kategori: string;
 }
 
 interface StatsSectionProps {
-  stats: StatItem[]
+  stats: StatItem[];
 }
 
 const iconMap: Record<string, LucideIcon> = {
@@ -20,19 +20,21 @@ const iconMap: Record<string, LucideIcon> = {
   building: Building2,
   briefcase: Briefcase,
   trending: TrendingUp,
-}
+};
 
 export function StatsSection({ stats }: StatsSectionProps) {
   const getIcon = (iconName: string) => {
-    const Icon = iconMap[iconName] || TrendingUp
-    return Icon
-  }
+    const Icon = iconMap[iconName] || TrendingUp;
+    return Icon;
+  };
 
   return (
-    <section className="py-12 bg-gradient-to-br from-merauke-50 to-blue-50 dark:from-slate-900 dark:to-slate-800">
+    <section className="py-12 bg-gradient-to-br from-merauke-50 to-blue-50 dark:from-slate-900 dark:to-slate-800 max-w-7xl mx-auto">
       <div className="container">
         <div className="text-center mb-10">
-          <h2 className="text-3xl font-bold mb-3">Statistik Kabupaten Merauke</h2>
+          <h2 className="text-3xl font-bold mb-3">
+            Statistik Kabupaten Merauke
+          </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
             Data dan informasi terkini tentang perkembangan Kabupaten Merauke
           </p>
@@ -40,14 +42,13 @@ export function StatsSection({ stats }: StatsSectionProps) {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {stats.map((stat, index) => {
-            const Icon = getIcon(stat.icon)
-            
+            const Icon = getIcon(stat.icon);
+
             return (
               <Card
                 key={stat.id}
                 className="group hover-lift border-0 shadow-xl overflow-hidden animate-fade-in"
-                style={{ animationDelay: `${index * 100}ms` }}
-              >
+                style={{ animationDelay: `${index * 100}ms` }}>
                 <CardContent className="p-6">
                   {/* Icon */}
                   <div className="mb-4">
@@ -77,23 +78,25 @@ export function StatsSection({ stats }: StatsSectionProps) {
                 {/* Decorative Element */}
                 <div className="h-1 bg-gradient-primary" />
               </Card>
-            )
+            );
           })}
         </div>
 
         {/* Additional Info */}
         <div className="mt-8 text-center">
           <p className="text-sm text-muted-foreground">
-            Data terakhir diperbarui: {new Date().toLocaleDateString("id-ID", {
+            Data terakhir diperbarui:{" "}
+            {new Date().toLocaleDateString("id-ID", {
               day: "numeric",
               month: "long",
-              year: "numeric"
+              year: "numeric",
+              timeZone: "UTC",
             })}
           </p>
         </div>
       </div>
     </section>
-  )
+  );
 }
 
 // Alternative Minimal Stats
@@ -103,8 +106,8 @@ export function StatsMinimal({ stats }: StatsSectionProps) {
       <div className="container">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           {stats.map((stat) => {
-            const Icon = iconMap[stat.icon] || TrendingUp
-            
+            const Icon = iconMap[stat.icon] || TrendingUp;
+
             return (
               <div key={stat.id} className="text-center group">
                 <Icon className="h-8 w-8 text-primary mx-auto mb-3 group-hover:scale-110 transition-transform" />
@@ -120,19 +123,25 @@ export function StatsMinimal({ stats }: StatsSectionProps) {
                   {stat.judul}
                 </div>
               </div>
-            )
+            );
           })}
         </div>
       </div>
     </section>
-  )
+  );
 }
 
 // Counter Animation Component (optional enhancement)
-export function AnimatedCounter({ value, duration = 2000 }: { value: string; duration?: number }) {
+export function AnimatedCounter({
+  value,
+  duration = 2000,
+}: {
+  value: string;
+  duration?: number;
+}) {
   // This would use client-side animation to count up to the value
   // Implementation would require useEffect and useState
-  return <span>{value}</span>
+  return <span>{value}</span>;
 }
 
 // Loading Skeleton
@@ -159,5 +168,5 @@ export function StatsSectionSkeleton() {
         </div>
       </div>
     </section>
-  )
+  );
 }

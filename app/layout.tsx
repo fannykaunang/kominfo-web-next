@@ -1,14 +1,16 @@
-import type { Metadata } from "next"
-import { GeistSans } from "geist/font/sans"
-import { GeistMono } from "geist/font/mono"
-import "./globals.css"
-import { Header } from "@/components/layout/header"
-import { Footer } from "@/components/layout/footer"
-import { ThemeProvider } from "@/components/theme-provider"
+//app/layout.tsx
+
+import type { Metadata } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
+import "./globals.css";
+import { Header } from "@/components/layout/header";
+import { Footer } from "@/components/layout/footer";
+import { ThemeProvider } from "@/components/theme-provider";
 
 export const metadata: Metadata = {
   title: "Portal Berita Kabupaten Merauke",
-  description: "Portal berita resmi Pemerintah Kabupaten Merauke - Informasi terkini seputar pemerintahan, pembangunan, dan kegiatan di Kabupaten Merauke, Papua Selatan",
+  description:
+    "Portal berita resmi Pemerintah Kabupaten Merauke - Informasi terkini seputar pemerintahan, pembangunan, dan kegiatan di Kabupaten Merauke, Papua Selatan",
   keywords: [
     "Merauke",
     "Papua Selatan",
@@ -21,13 +23,13 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "id_ID",
-    url: "https://meraukekab.go.id",
+    url: "https://merauke.go.id",
     siteName: "Portal Berita Kabupaten Merauke",
     title: "Portal Berita Kabupaten Merauke",
     description: "Portal berita resmi Pemerintah Kabupaten Merauke",
     images: [
       {
-        url: "/og-image.jpg",
+        url: "/images/og-default.png",
         width: 1200,
         height: 630,
         alt: "Portal Berita Kabupaten Merauke",
@@ -38,7 +40,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Portal Berita Kabupaten Merauke",
     description: "Portal berita resmi Pemerintah Kabupaten Merauke",
-    images: ["/og-image.jpg"],
+    images: ["/images/og-default.png"],
   },
   robots: {
     index: true,
@@ -56,24 +58,32 @@ export const metadata: Metadata = {
     shortcut: "/favicon-16x16.png",
     apple: "/apple-touch-icon.png",
   },
-}
+};
+
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
 
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode
+  children: React.ReactNode;
 }>) {
   return (
     <html lang="id" suppressHydrationWarning>
       <body
-        className={`${GeistSans.variable} ${GeistMono.variable} antialiased`}
-      >
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-50 text-gray-900 dark:text-gray-100 dark:bg-gray-900 dark:text-gray-100`}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
           enableSystem
-          disableTransitionOnChange
-        >
+          disableTransitionOnChange>
           <div className="flex min-h-screen flex-col">
             <Header />
             <div className="flex-1">{children}</div>
@@ -82,5 +92,5 @@ export default function RootLayout({
         </ThemeProvider>
       </body>
     </html>
-  )
+  );
 }

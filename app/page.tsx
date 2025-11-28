@@ -210,7 +210,7 @@ const mockCategories = [
 
 export default function HomePage() {
   return (
-    <main className="min-h-screen">
+    <main className="min-h-screen" suppressHydrationWarning>
       {/* Hero Section with Main News */}
       <Suspense fallback={<NewsHeroSkeleton />}>
         <NewsHero mainNews={mockMainNews} sideNews={mockSideNews} />
@@ -223,9 +223,9 @@ export default function HomePage() {
 
       {/* Latest News Section */}
       <section className="py-16">
-        <div className="container">
+        <div className="container mx-auto px-4">
           {/* Header */}
-          <div className="flex items-center justify-between mb-10">
+          <div className="flex items-center justify-between mb-10 max-w-7xl mx-auto">
             <div>
               <div className="flex items-center gap-2 mb-2">
                 <TrendingUp className="h-6 w-6 text-primary" />
@@ -244,7 +244,7 @@ export default function HomePage() {
           </div>
 
           {/* News Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
             <Suspense
               fallback={
                 <>
@@ -277,7 +277,7 @@ export default function HomePage() {
       </Suspense>
 
       {/* Call to Action */}
-      <section className="py-16 bg-gradient-hero text-white">
+      <section className="py-16 bg-gradient-hero text-white max-w-7xl mx-auto">
         <div className="container text-center">
           <h2 className="text-3xl font-bold mb-4">
             Ikuti Perkembangan Kabupaten Merauke
@@ -293,7 +293,7 @@ export default function HomePage() {
             <Button
               size="lg"
               variant="outline"
-              className="text-white border-white hover:bg-white hover:text-primary"
+              className="text-white border-white hover:bg-white hover:text-blue-500"
               asChild>
               <Link href="/kontak">Hubungi Kami</Link>
             </Button>

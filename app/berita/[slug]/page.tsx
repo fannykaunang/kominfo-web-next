@@ -1,18 +1,22 @@
-import Image from "next/image"
-import Link from "next/link"
-import { notFound } from "next/navigation"
-import { Calendar, Eye, User, Share2, Facebook, Twitter, Whatsapp, Clock } from "lucide-react"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { NewsCardCompact } from "@/components/berita/news-card"
+// app/berita/[slug]/page.tsx
+
+import Image from "next/image";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { Calendar, Eye, User, Share2, Clock } from "lucide-react";
+
+import { SiFacebook, SiX, SiWhatsapp } from "react-icons/si";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { NewsCardCompact } from "@/components/berita/news-card";
 
 interface NewsDetailPageProps {
   params: {
-    slug: string
-  }
+    slug: string;
+  };
 }
 
 // Mock data - In production, fetch from API/database
@@ -20,7 +24,8 @@ const mockNewsDetail = {
   id: "1",
   judul: "Pembangunan Jalan Trans Papua Merauke Dipercepat",
   slug: "pembangunan-jalan-trans-papua-merauke-dipercepat",
-  excerpt: "Pemerintah Kabupaten Merauke mempercepat pembangunan infrastruktur jalan Trans Papua untuk meningkatkan konektivitas dan aksesibilitas wilayah.",
+  excerpt:
+    "Pemerintah Kabupaten Merauke mempercepat pembangunan infrastruktur jalan Trans Papua untuk meningkatkan konektivitas dan aksesibilitas wilayah.",
   konten: `
     <p>Pemerintah Kabupaten Merauke terus berkomitmen untuk mempercepat pembangunan infrastruktur jalan Trans Papua. Program ini merupakan bagian dari upaya meningkatkan konektivitas dan aksesibilitas di wilayah Papua Selatan.</p>
 
@@ -44,7 +49,11 @@ const mockNewsDetail = {
     <p>Pemerintah Kabupaten Merauke berkomitmen untuk terus memantau dan memastikan kualitas pembangunan sesuai dengan standar yang ditetapkan. Pengawasan ketat dilakukan mulai dari proses perencanaan hingga pelaksanaan di lapangan.</p>
   `,
   featuredImage: "/images/news-1.jpg",
-  galeri: ["/images/gallery-1.jpg", "/images/gallery-2.jpg", "/images/gallery-3.jpg"],
+  galeri: [
+    "/images/gallery-1.jpg",
+    "/images/gallery-2.jpg",
+    "/images/gallery-3.jpg",
+  ],
   kategori: {
     nama: "Pembangunan",
     slug: "pembangunan",
@@ -62,7 +71,7 @@ const mockNewsDetail = {
     { id: "2", nama: "Infrastruktur", slug: "infrastruktur" },
     { id: "3", nama: "Pembangunan Daerah", slug: "pembangunan-daerah" },
   ],
-}
+};
 
 const mockRelatedNews = [
   {
@@ -86,15 +95,15 @@ const mockRelatedNews = [
     kategori: { nama: "Pembangunan", slug: "pembangunan", color: "#f59e0b" },
     publishedAt: new Date().toISOString(),
   },
-]
+];
 
 export default function NewsDetailPage({ params }: NewsDetailPageProps) {
   // In production, fetch news by slug
   // const news = await getNewsBySlug(params.slug)
   // if (!news) notFound()
 
-  const news = mockNewsDetail
-  const currentUrl = `https://meraukekab.go.id/berita/${params.slug}`
+  const news = mockNewsDetail;
+  const currentUrl = `https://meraukekab.go.id/berita/${params.slug}`;
 
   return (
     <main className="py-8">
@@ -105,8 +114,7 @@ export default function NewsDetailPage({ params }: NewsDetailPageProps) {
             {/* Category Badge */}
             <Badge
               className="mb-4"
-              style={{ backgroundColor: news.kategori.color }}
-            >
+              style={{ backgroundColor: news.kategori.color }}>
               {news.kategori.nama}
             </Badge>
 
@@ -133,6 +141,7 @@ export default function NewsDetailPage({ params }: NewsDetailPageProps) {
                     day: "numeric",
                     month: "long",
                     year: "numeric",
+                    timeZone: "UTC",
                   })}
                 </span>
               </div>
@@ -170,42 +179,36 @@ export default function NewsDetailPage({ params }: NewsDetailPageProps) {
                       size="sm"
                       variant="ghost"
                       className="h-9 w-9 p-0 hover:bg-[#1877f2] hover:text-white"
-                      asChild
-                    >
+                      asChild>
                       <a
                         href={`https://facebook.com/sharer/sharer.php?u=${currentUrl}`}
                         target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <Facebook className="h-4 w-4" />
+                        rel="noopener noreferrer">
+                        <SiFacebook className="h-4 w-4" />
                       </a>
                     </Button>
                     <Button
                       size="sm"
                       variant="ghost"
                       className="h-9 w-9 p-0 hover:bg-[#1da1f2] hover:text-white"
-                      asChild
-                    >
+                      asChild>
                       <a
                         href={`https://twitter.com/intent/tweet?url=${currentUrl}&text=${news.judul}`}
                         target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <Twitter className="h-4 w-4" />
+                        rel="noopener noreferrer">
+                        <SiX className="h-4 w-4" />
                       </a>
                     </Button>
                     <Button
                       size="sm"
                       variant="ghost"
                       className="h-9 w-9 p-0 hover:bg-[#25d366] hover:text-white"
-                      asChild
-                    >
+                      asChild>
                       <a
                         href={`https://wa.me/?text=${news.judul} ${currentUrl}`}
                         target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <Whatsapp className="h-4 w-4" />
+                        rel="noopener noreferrer">
+                        <SiWhatsapp className="h-4 w-4" />
                       </a>
                     </Button>
                   </div>
@@ -222,10 +225,14 @@ export default function NewsDetailPage({ params }: NewsDetailPageProps) {
             {/* Tags */}
             <div className="mt-8 pt-8 border-t">
               <div className="flex flex-wrap items-center gap-2">
-                <span className="text-sm font-medium text-muted-foreground">Tags:</span>
+                <span className="text-sm font-medium text-muted-foreground">
+                  Tags:
+                </span>
                 {news.tags.map((tag) => (
                   <Link key={tag.id} href={`/tag/${tag.slug}`}>
-                    <Badge variant="secondary" className="hover:bg-primary hover:text-white transition-colors">
+                    <Badge
+                      variant="secondary"
+                      className="hover:bg-primary hover:text-white transition-colors">
                       {tag.nama}
                     </Badge>
                   </Link>
@@ -263,5 +270,5 @@ export default function NewsDetailPage({ params }: NewsDetailPageProps) {
         </div>
       </div>
     </main>
-  )
+  );
 }

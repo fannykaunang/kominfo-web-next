@@ -1,6 +1,6 @@
-import Link from "next/link"
-import { Card, CardContent } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
+import Link from "next/link";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import {
   Building2,
   Hammer,
@@ -11,23 +11,23 @@ import {
   Music,
   Newspaper,
   ArrowRight,
-} from "lucide-react"
-import { LucideIcon } from "lucide-react"
+} from "lucide-react";
+import { LucideIcon } from "lucide-react";
 
 interface Category {
-  id: string
-  nama: string
-  slug: string
-  deskripsi?: string
-  icon?: string
-  color: string
+  id: string;
+  nama: string;
+  slug: string;
+  deskripsi?: string;
+  icon?: string;
+  color: string;
   _count?: {
-    berita: number
-  }
+    berita: number;
+  };
 }
 
 interface CategorySectionProps {
-  categories: Category[]
+  categories: Category[];
 }
 
 const iconMap: Record<string, LucideIcon> = {
@@ -39,18 +39,18 @@ const iconMap: Record<string, LucideIcon> = {
   palmtree: Palmtree,
   music: Music,
   newspaper: Newspaper,
-}
+};
 
 export function CategorySection({ categories }: CategorySectionProps) {
   const getIcon = (iconName?: string) => {
-    if (!iconName) return Newspaper
-    const Icon = iconMap[iconName] || Newspaper
-    return Icon
-  }
+    if (!iconName) return Newspaper;
+    const Icon = iconMap[iconName] || Newspaper;
+    return Icon;
+  };
 
   return (
     <section className="py-16">
-      <div className="container">
+      <div className="container mx-auto px-4">
         {/* Header */}
         <div className="flex items-center justify-between mb-10">
           <div>
@@ -70,25 +70,22 @@ export function CategorySection({ categories }: CategorySectionProps) {
         {/* Categories Grid */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {categories.map((category, index) => {
-            const Icon = getIcon(category.icon)
-            
+            const Icon = getIcon(category.icon);
+
             return (
               <Link
                 key={category.id}
                 href={`/kategori/${category.slug}`}
-                className="group"
-              >
+                className="group">
                 <Card
                   className="hover-lift border-0 shadow-lg h-full animate-fade-in"
-                  style={{ animationDelay: `${index * 50}ms` }}
-                >
+                  style={{ animationDelay: `${index * 50}ms` }}>
                   <CardContent className="p-6 text-center">
                     {/* Icon with Color */}
                     <div className="mb-4 mx-auto">
                       <div
                         className="h-16 w-16 rounded-2xl flex items-center justify-center text-white mx-auto group-hover:scale-110 transition-transform shadow-lg"
-                        style={{ backgroundColor: category.color }}
-                      >
+                        style={{ backgroundColor: category.color }}>
                         <Icon className="h-8 w-8" />
                       </div>
                     </div>
@@ -120,7 +117,7 @@ export function CategorySection({ categories }: CategorySectionProps) {
                   />
                 </Card>
               </Link>
-            )
+            );
           })}
         </div>
 
@@ -135,7 +132,7 @@ export function CategorySection({ categories }: CategorySectionProps) {
         </div>
       </div>
     </section>
-  )
+  );
 }
 
 // Compact Category Pills
@@ -143,8 +140,8 @@ export function CategoryPills({ categories }: CategorySectionProps) {
   return (
     <div className="flex flex-wrap gap-2">
       {categories.map((category) => {
-        const Icon = iconMap[category.icon || "newspaper"] || Newspaper
-        
+        const Icon = iconMap[category.icon || "newspaper"] || Newspaper;
+
         return (
           <Link key={category.id} href={`/kategori/${category.slug}`}>
             <Button
@@ -153,8 +150,7 @@ export function CategoryPills({ categories }: CategorySectionProps) {
               style={{
                 borderColor: category.color,
                 color: category.color,
-              }}
-            >
+              }}>
               <Icon className="h-4 w-4 mr-2" />
               {category.nama}
               {category._count && (
@@ -164,10 +160,10 @@ export function CategoryPills({ categories }: CategorySectionProps) {
               )}
             </Button>
           </Link>
-        )
+        );
       })}
     </div>
-  )
+  );
 }
 
 // Horizontal Scrollable Categories
@@ -176,20 +172,18 @@ export function CategoryScrollable({ categories }: CategorySectionProps) {
     <div className="overflow-x-auto custom-scrollbar pb-4">
       <div className="flex gap-4 min-w-max">
         {categories.map((category) => {
-          const Icon = iconMap[category.icon || "newspaper"] || Newspaper
-          
+          const Icon = iconMap[category.icon || "newspaper"] || Newspaper;
+
           return (
             <Link
               key={category.id}
               href={`/kategori/${category.slug}`}
-              className="group"
-            >
+              className="group">
               <Card className="w-40 hover-lift border-0 shadow-lg">
                 <CardContent className="p-4 text-center">
                   <div
                     className="h-12 w-12 rounded-xl flex items-center justify-center text-white mx-auto mb-3 group-hover:scale-110 transition-transform"
-                    style={{ backgroundColor: category.color }}
-                  >
+                    style={{ backgroundColor: category.color }}>
                     <Icon className="h-6 w-6" />
                   </div>
                   <h4 className="font-semibold text-sm mb-1 group-hover:text-primary transition-colors">
@@ -203,11 +197,11 @@ export function CategoryScrollable({ categories }: CategorySectionProps) {
                 </CardContent>
               </Card>
             </Link>
-          )
+          );
         })}
       </div>
     </div>
-  )
+  );
 }
 
 // Loading Skeleton
@@ -236,5 +230,5 @@ export function CategorySectionSkeleton() {
         </div>
       </div>
     </section>
-  )
+  );
 }

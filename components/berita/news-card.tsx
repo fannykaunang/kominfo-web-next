@@ -1,26 +1,26 @@
-import Image from "next/image"
-import Link from "next/link"
-import { Calendar, Eye, User } from "lucide-react"
-import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import Image from "next/image";
+import Link from "next/link";
+import { Calendar, Eye, User } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 interface NewsCardProps {
-  id: string
-  judul: string
-  slug: string
-  excerpt: string
-  featuredImage: string
+  id: string;
+  judul: string;
+  slug: string;
+  excerpt: string;
+  featuredImage: string;
   kategori: {
-    nama: string
-    slug: string
-    color: string
-  }
+    nama: string;
+    slug: string;
+    color: string;
+  };
   author: {
-    name: string
-  }
-  publishedAt: string
-  views: number
+    name: string;
+  };
+  publishedAt: string;
+  views: number;
 }
 
 export function NewsCard({
@@ -44,13 +44,12 @@ export function NewsCard({
             fill
             className="object-cover transition-transform duration-500 group-hover:scale-110"
           />
-          
+
           {/* Category Badge */}
           <div className="absolute top-3 left-3">
             <Badge
               style={{ backgroundColor: kategori.color }}
-              className="text-white shadow-lg"
-            >
+              className="text-white shadow-lg">
               {kategori.nama}
             </Badge>
           </div>
@@ -88,6 +87,7 @@ export function NewsCard({
                   {new Date(publishedAt).toLocaleDateString("id-ID", {
                     day: "numeric",
                     month: "short",
+                    timeZone: "UTC",
                   })}
                 </span>
               </div>
@@ -100,7 +100,7 @@ export function NewsCard({
         </CardContent>
       </Link>
     </Card>
-  )
+  );
 }
 
 // Compact version for sidebar or related news
@@ -130,15 +130,14 @@ export function NewsCardCompact({
             style={{
               backgroundColor: `${kategori.color}20`,
               color: kategori.color,
-            }}
-          >
+            }}>
             {kategori.nama}
           </Badge>
-          
+
           <h4 className="font-semibold text-sm line-clamp-2 mb-1 group-hover:text-primary transition-colors">
             {judul}
           </h4>
-          
+
           <div className="flex items-center gap-1 text-xs text-muted-foreground">
             <Calendar className="h-3 w-3" />
             <span>
@@ -146,13 +145,14 @@ export function NewsCardCompact({
                 day: "numeric",
                 month: "short",
                 year: "numeric",
+                timeZone: "UTC",
               })}
             </span>
           </div>
         </div>
       </div>
     </Link>
-  )
+  );
 }
 
 // Horizontal Card for List View
@@ -212,6 +212,7 @@ export function NewsCardHorizontal({
                         day: "numeric",
                         month: "long",
                         year: "numeric",
+                        timeZone: "UTC",
                       })}
                     </span>
                   </div>
@@ -227,7 +228,7 @@ export function NewsCardHorizontal({
         </div>
       </Link>
     </Card>
-  )
+  );
 }
 
 // Loading Skeleton
@@ -248,5 +249,5 @@ export function NewsCardSkeleton() {
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

@@ -5,6 +5,18 @@ const nextConfig: NextConfig = {
   output: "standalone", // penting: supaya server.js bisa jalan tanpa node_modules penuh
   reactStrictMode: true,
   poweredByHeader: false,
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "**",
+      },
+    ],
+    domains: ["localhost"],
+  },
+  // Suppress hydration warnings in development
+  onDemandEntries: {
+    maxInactiveAge: 25 * 1000,
+    pagesBufferLength: 2,
+  },
 };
-
-export default nextConfig;
