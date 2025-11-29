@@ -1,3 +1,5 @@
+// app/backend/berita/edit/[id]/page.ts
+
 import { BeritaRepository } from "@/lib/models/berita.model";
 import { getAllKategori } from "@/lib/models/kategori.model";
 import { redirect } from "next/navigation";
