@@ -1,22 +1,23 @@
-import pool from './db'
-import { RowDataPacket, ResultSetHeader, FieldPacket } from 'mysql2/promise'
+// lib/db-helpers.ts
+import pool from "./db";
+import { RowDataPacket, ResultSetHeader } from "mysql2/promise";
 
 /**
- * Execute a SELECT query
+ * Execute a SELECT query (generic)
  * @param query SQL query string
  * @param params Query parameters
- * @returns Array of results
+ * @returns Array of results sebagai T[]
  */
-export async function query<T extends RowDataPacket>(
-  query: string,
+export async function query<T = any>(
+  sql: string,
   params?: any[]
 ): Promise<T[]> {
   try {
-    const [rows] = await pool.execute<T[]>(query, params)
-    return rows
+    const [rows] = await pool.execute<RowDataPacket[]>(sql, params);
+    return rows as T[];
   } catch (error) {
-    console.error('Database query error:', error)
-    throw error
+    console.error("Database query error:", error);
+    throw error;
   }
 }
 
@@ -26,17 +27,30 @@ export async function query<T extends RowDataPacket>(
  * @param params Query parameters
  * @returns Single result or null
  */
-export async function queryOne<T extends RowDataPacket>(
-  query: string,
+export async function queryOne<T = any>(
+  sql: string,
   params?: any[]
 ): Promise<T | null> {
   try {
-    const [rows] = await pool.execute<T[]>(query, params)
-    return rows[0] || null
+    const [rows] = await pool.execute<RowDataPacket[]>(sql, params);
+    const typedRows = rows as T[];
+    return typedRows[0] || null;
   } catch (error) {
-    console.error('Database query error:', error)
-    throw error
+    console.error("Database query error:", error);
+    throw error;
   }
+}
+
+/**
+ * Alias lebih “jelas nama” untuk SELECT multiple rows
+ * Dipakai di model-model (misal: executeQuery<LogAktivitas>(...))
+ */
+export async function executeQuery<T = any>(
+  sql: string,
+  params?: any[]
+): Promise<T[]> {
+  // sekarang aman, `query` di sini jelas merujuk ke fungsi query()
+  return await query<T>(sql, params);
 }
 
 /**
@@ -50,11 +64,27 @@ export async function execute(
   params?: any[]
 ): Promise<ResultSetHeader> {
   try {
-    const [result] = await pool.execute<ResultSetHeader>(query, params)
-    return result
+    const [result] = await pool.execute<ResultSetHeader>(query, params);
+    return result;
   } catch (error) {
-    console.error('Database execute error:', error)
-    throw error
+    console.error("Database execute error:", error);
+    throw error;
+  }
+}
+
+/**
+ * Khusus INSERT: langsung balikin insertId sebagai number
+ */
+export async function executeInsert(
+  query: string,
+  params?: any[]
+): Promise<number> {
+  try {
+    const [result] = await pool.execute<ResultSetHeader>(query, params);
+    return result.insertId;
+  } catch (error) {
+    console.error("Database insert error:", error);
+    throw error;
   }
 }
 
@@ -66,25 +96,25 @@ export async function execute(
 export async function transaction(
   queries: { query: string; params?: any[] }[]
 ): Promise<any[]> {
-  const connection = await pool.getConnection()
-  
+  const connection = await pool.getConnection();
+
   try {
-    await connection.beginTransaction()
-    
-    const results = []
+    await connection.beginTransaction();
+
+    const results: any[] = [];
     for (const { query, params } of queries) {
-      const [result] = await connection.execute(query, params)
-      results.push(result)
+      const [result] = await connection.execute(query, params);
+      results.push(result);
     }
-    
-    await connection.commit()
-    return results
+
+    await connection.commit();
+    return results;
   } catch (error) {
-    await connection.rollback()
-    console.error('Transaction error:', error)
-    throw error
+    await connection.rollback();
+    console.error("Transaction error:", error);
+    throw error;
   } finally {
-    connection.release()
+    connection.release();
   }
 }
 
@@ -92,11 +122,11 @@ export async function transaction(
  * Generate UUID v4
  */
 export function generateUUID(): string {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-    const r = Math.random() * 16 | 0
-    const v = c === 'x' ? r : (r & 0x3 | 0x8)
-    return v.toString(16)
-  })
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
+    const r = (Math.random() * 16) | 0;
+    const v = c === "x" ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
 }
 
 /**
@@ -105,21 +135,20 @@ export function generateUUID(): string {
  * @returns {whereClause, values}
  */
 export function buildWhereClause(filters: Record<string, any>) {
-  const conditions: string[] = []
-  const values: any[] = []
+  const conditions: string[] = [];
+  const values: any[] = [];
 
   for (const [key, value] of Object.entries(filters)) {
     if (value !== undefined && value !== null) {
-      conditions.push(`${key} = ?`)
-      values.push(value)
+      conditions.push(`${key} = ?`);
+      values.push(value);
     }
   }
 
-  const whereClause = conditions.length > 0 
-    ? `WHERE ${conditions.join(' AND ')}` 
-    : ''
+  const whereClause =
+    conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
 
-  return { whereClause, values }
+  return { whereClause, values };
 }
 
 /**
@@ -129,25 +158,25 @@ export function buildWhereClause(filters: Record<string, any>) {
  * @returns {offset, limitClause}
  */
 export function buildPagination(page: number = 1, limit: number = 10) {
-  const offset = (page - 1) * limit
-  const limitClause = `LIMIT ${limit} OFFSET ${offset}`
-  
-  return { offset, limit, limitClause }
+  const offset = (page - 1) * limit;
+  const limitClause = `LIMIT ${limit} OFFSET ${offset}`;
+
+  return { offset, limit, limitClause };
 }
 
 /**
  * Escape LIKE pattern
  */
 export function escapeLike(value: string): string {
-  return value.replace(/[%_]/g, '\\$&')
+  return value.replace(/[%_]/g, "\\$&");
 }
 
 /**
  * Format date for MySQL
  */
 export function formatDateForDB(date: Date): string {
-  return date.toISOString().slice(0, 19).replace('T', ' ')
+  return date.toISOString().slice(0, 19).replace("T", " ");
 }
 
 // Export pool for advanced usage
-export { pool }
+export { pool };

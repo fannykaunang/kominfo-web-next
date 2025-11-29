@@ -3,236 +3,286 @@
  * Centralized type definitions untuk semua database models
  */
 
-import { RowDataPacket } from "mysql2/promise"
+import { RowDataPacket } from "mysql2/promise";
 
 /**
  * User Model
  */
 export interface User extends RowDataPacket {
-  id: string
-  name: string
-  email: string
-  password: string
-  role: "ADMIN" | "EDITOR" | "AUTHOR"
-  avatar: string | null
-  is_active: number
-  email_verified: number
-  last_login_at: Date | null
-  created_at: Date
-  updated_at: Date
+  id: string;
+  name: string;
+  email: string;
+  password: string;
+  role: "ADMIN" | "EDITOR" | "AUTHOR";
+  avatar: string | null;
+  is_active: number;
+  email_verified: number;
+  last_login_at: Date | null;
+  created_at: Date;
+  updated_at: Date;
 }
 
 /**
  * OTP Code Model
  */
 export interface OTPCode extends RowDataPacket {
-  id: number
-  email: string
-  code: string
-  type: "login" | "register" | "reset_password"
-  expires_at: Date
-  is_used: number
-  created_at: Date
+  id: number;
+  email: string;
+  code: string;
+  type: "login" | "register" | "reset_password";
+  expires_at: Date;
+  is_used: number;
+  created_at: Date;
 }
 
 /**
  * Login Attempt Model
  */
 export interface LoginAttempt extends RowDataPacket {
-  id: number
-  email: string | null
-  ip_address: string
-  user_agent: string | null
-  success: number
-  failure_reason: string | null
-  created_at: Date
+  id: number;
+  email: string | null;
+  ip_address: string;
+  user_agent: string | null;
+  success: number;
+  failure_reason: string | null;
+  created_at: Date;
 }
 
 /**
  * Kategori Model
+ * (sudah termasuk `berita_count?` untuk hasil JOIN)
  */
 export interface Kategori extends RowDataPacket {
-  id: string
-  nama: string
-  slug: string
-  deskripsi: string | null
-  icon: string | null
-  color: string | null
-  created_at: Date
-  updated_at: Date
+  id: string;
+  nama: string;
+  slug: string;
+  deskripsi: string | null;
+  icon: string | null;
+  color: string | null;
+  created_at: Date;
+  updated_at: Date;
+  berita_count?: number; // From JOIN query
 }
 
 /**
- * Berita Model
+ * Berita Model (row dari database)
  */
 export interface Berita extends RowDataPacket {
-  id: string
-  judul: string
-  slug: string
-  excerpt: string
-  konten: string
-  featured_image: string | null
-  galeri: string | null // JSON string
-  views: number
-  is_highlight: number
-  is_published: number
-  published_at: Date | null
-  kategori_id: string
-  author_id: string
-  created_at: Date
-  updated_at: Date
+  id: string;
+  judul: string;
+  slug: string;
+  excerpt: string;
+  konten: string;
+  featured_image: string | null;
+  galeri: string | null; // JSON string di DB
+  views: number;
+  is_highlight: number; // tinyint(1) di DB
+  is_published: number; // tinyint(1) di DB
+  published_at: Date | null;
+  kategori_id: string;
+  author_id: string;
+  created_at: Date;
+  updated_at: Date;
+
+  // Joined fields (opsional, dari JOIN dengan kategori & users)
+  kategori_nama?: string;
+  kategori_slug?: string;
+  kategori_color?: string;
+  author_name?: string;
 }
 
 /**
  * Tag Model
  */
 export interface Tag extends RowDataPacket {
-  id: string
-  nama: string
-  slug: string
-  created_at: Date
+  id: string;
+  nama: string;
+  slug: string;
+  created_at: Date;
 }
 
 /**
  * Berita Tag Junction
  */
 export interface BeritaTag extends RowDataPacket {
-  berita_id: string
-  tag_id: string
+  berita_id: string;
+  tag_id: string;
 }
 
 /**
  * Komentar Model
  */
 export interface Komentar extends RowDataPacket {
-  id: string
-  nama: string
-  email: string
-  konten: string
-  is_approved: number
-  berita_id: string
-  created_at: Date
+  id: string;
+  nama: string;
+  email: string;
+  konten: string;
+  is_approved: number;
+  berita_id: string;
+  created_at: Date;
 }
 
 /**
  * Statistik Model
  */
 export interface Statistik extends RowDataPacket {
-  id: string
-  judul: string
-  nilai: string
-  satuan: string | null
-  icon: string | null
-  kategori: string | null
-  urutan: number
-  created_at: Date
-  updated_at: Date
+  id: string;
+  judul: string;
+  nilai: string;
+  satuan: string | null;
+  icon: string | null;
+  kategori: string | null;
+  urutan: number;
+  created_at: Date;
+  updated_at: Date;
 }
 
 /**
  * Banner Model
  */
 export interface Banner extends RowDataPacket {
-  id: string
-  judul: string
-  deskripsi: string | null
-  image: string
-  link: string | null
-  urutan: number
-  is_active: number
-  created_at: Date
-  updated_at: Date
+  id: string;
+  judul: string;
+  deskripsi: string | null;
+  image: string;
+  link: string | null;
+  urutan: number;
+  is_active: number;
+  created_at: Date;
+  updated_at: Date;
 }
 
 /**
  * Galeri Model
  */
 export interface Galeri extends RowDataPacket {
-  id: string
-  judul: string
-  deskripsi: string | null
-  image: string
-  kategori: string | null
-  created_at: Date
+  id: string;
+  judul: string;
+  deskripsi: string | null;
+  image: string;
+  kategori: string | null;
+  created_at: Date;
 }
 
 /**
  * Settings Model
  */
 export interface Settings extends RowDataPacket {
-  id: string
-  key: string
-  value: string
-  type: string | null
-  created_at: Date
-  updated_at: Date
+  id: string;
+  key: string;
+  value: string;
+  type: string | null;
+  created_at: Date;
+  updated_at: Date;
 }
 
 /**
  * Newsletter Model
  */
 export interface Newsletter extends RowDataPacket {
-  id: string
-  email: string
-  is_active: number
-  subscribed_at: Date
-  unsubscribed_at: Date | null
+  id: string;
+  email: string;
+  is_active: number;
+  subscribed_at: Date;
+  unsubscribed_at: Date | null;
 }
 
 /**
  * Safe User Type (without password)
  */
-export type SafeUser = Omit<User, "password">
+export type SafeUser = Omit<User, "password">;
 
 /**
  * User Create Input
  */
 export interface UserCreateInput {
-  name: string
-  email: string
-  password: string
-  role: "ADMIN" | "EDITOR" | "AUTHOR"
-  avatar?: string | null
+  name: string;
+  email: string;
+  password: string;
+  role: "ADMIN" | "EDITOR" | "AUTHOR";
+  avatar?: string | null;
 }
 
 /**
  * User Update Input
  */
 export interface UserUpdateInput {
-  name?: string
-  email?: string
-  password?: string
-  role?: "ADMIN" | "EDITOR" | "AUTHOR"
-  avatar?: string | null
-  is_active?: number
+  name?: string;
+  email?: string;
+  password?: string;
+  role?: "ADMIN" | "EDITOR" | "AUTHOR";
+  avatar?: string | null;
+  is_active?: number;
 }
 
 /**
- * Berita Create Input
+ * Berita Create Input (app-level, bukan RowDataPacket)
+ * Dipakai di service / repository untuk input dari form
  */
 export interface BeritaCreateInput {
-  judul: string
-  slug: string
-  excerpt: string
-  konten: string
-  featured_image?: string | null
-  galeri?: string | null
-  is_highlight?: number
-  is_published?: number
-  published_at?: Date | null
-  kategori_id: string
-  author_id: string
+  judul: string;
+  slug: string;
+  excerpt: string;
+  konten: string;
+  featured_image?: string | null;
+  galeri?: string[]; // array di app, disimpan ke DB sebagai JSON string
+  is_highlight?: boolean; // app-level boolean
+  is_published?: boolean; // app-level boolean
+  published_at?: Date | null;
+  kategori_id: string;
+  author_id: string;
 }
+
+/**
+ * Berita Update Input
+ */
+export interface BeritaUpdateInput extends Partial<BeritaCreateInput> {}
 
 /**
  * Pagination Result
  */
 export interface PaginationResult<T> {
-  data: T[]
+  data: T[];
   pagination: {
-    page: number
-    limit: number
-    total: number
-    totalPages: number
-  }
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+}
+
+/**
+ * Log Aktivitas
+ */
+export interface LogAktivitas extends RowDataPacket {
+  log_id: number;
+  pegawai_id: number | null;
+  aksi: string;
+  modul: string;
+  detail_aksi?: string;
+  data_sebelum?: any; // JSON
+  data_sesudah?: any; // JSON
+  ip_address?: string;
+  user_agent?: string;
+  endpoint?: string;
+  method?: string;
+  created_at?: Date;
+}
+
+export interface CreateLogInput {
+  user_id: string | null;
+  aksi: string;
+  modul: string;
+  detail_aksi?: string | null;
+  data_sebelum?: any | null;
+  data_sesudah?: any | null;
+  ip_address?: string | null;
+  user_agent?: string | null;
+  endpoint?: string | null;
+  method?: string | null;
+}
+
+export interface CreateLogWithDataInput extends CreateLogInput {
+  data_sebelum: any;
+  data_sesudah: any;
 }

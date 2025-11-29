@@ -1,37 +1,19 @@
+// lib/models/berita.model.ts
+
 import {
   query,
   queryOne,
   execute,
   generateUUID,
-  buildWhereClause,
   buildPagination,
 } from "../db-helpers";
-import { RowDataPacket } from "mysql2/promise";
+import { Berita, PaginationResult } from "../types";
 
-// Types
-export interface Berita extends RowDataPacket {
-  id: string;
-  judul: string;
-  slug: string;
-  excerpt: string;
-  konten: string;
-  featured_image: string | null;
-  galeri: string | null;
-  views: number;
-  is_highlight: boolean;
-  is_published: boolean;
-  published_at: Date | null;
-  created_at: Date;
-  updated_at: Date;
-  kategori_id: string;
-  author_id: string;
-  // Joined fields
-  kategori_nama?: string;
-  kategori_slug?: string;
-  kategori_color?: string;
-  author_name?: string;
-}
-
+/**
+ * Input untuk membuat berita (app-level)
+ * - galeri: array of string, nanti disimpan sebagai JSON string di DB
+ * - is_highlight / is_published: boolean, nanti dikonversi ke 0/1
+ */
 export interface BeritaCreateInput {
   judul: string;
   slug: string;
@@ -43,12 +25,17 @@ export interface BeritaCreateInput {
   author_id: string;
   is_highlight?: boolean;
   is_published?: boolean;
-  published_at?: Date;
+  published_at?: Date | null;
 }
 
+/**
+ * Input untuk update berita
+ */
 export interface BeritaUpdateInput extends Partial<BeritaCreateInput> {}
 
-// Repository class
+/**
+ * Repository untuk tabel `berita`
+ */
 export class BeritaRepository {
   /**
    * Get all berita with pagination and filters
@@ -62,7 +49,7 @@ export class BeritaRepository {
       is_highlight?: boolean;
       search?: string;
     } = {}
-  ) {
+  ): Promise<PaginationResult<Berita>> {
     const {
       page = 1,
       limit = 10,
@@ -72,8 +59,8 @@ export class BeritaRepository {
       search,
     } = options;
 
-    let whereConditions: string[] = [];
-    let params: any[] = [];
+    const whereConditions: string[] = [];
+    const params: any[] = [];
 
     if (kategori_id) {
       whereConditions.push("b.kategori_id = ?");
@@ -82,12 +69,12 @@ export class BeritaRepository {
 
     if (is_published !== undefined) {
       whereConditions.push("b.is_published = ?");
-      params.push(is_published);
+      params.push(is_published ? 1 : 0);
     }
 
     if (is_highlight !== undefined) {
       whereConditions.push("b.is_highlight = ?");
-      params.push(is_highlight);
+      params.push(is_highlight ? 1 : 0);
     }
 
     if (search) {
@@ -100,7 +87,7 @@ export class BeritaRepository {
         ? "WHERE " + whereConditions.join(" AND ")
         : "";
 
-    const { offset, limitClause } = buildPagination(page, limit);
+    const { limitClause } = buildPagination(page, limit);
 
     const sql = `
       SELECT 
@@ -117,14 +104,15 @@ export class BeritaRepository {
       ${limitClause}
     `;
 
-    const results = await query<Berita>(sql, params);
+    const data = await query<Berita>(sql, params);
 
-    // Get total count
+    // total count
     const countSql = `SELECT COUNT(*) as total FROM berita b ${whereClause}`;
-    const [{ total }] = await query<any>(countSql, params);
+    const countRow = await queryOne<{ total: number }>(countSql, params);
+    const total = countRow?.total ?? 0;
 
     return {
-      data: results,
+      data,
       pagination: {
         page,
         limit,
@@ -135,7 +123,7 @@ export class BeritaRepository {
   }
 
   /**
-   * Get single berita by slug
+   * Get single berita by slug (hanya yang published)
    */
   static async findBySlug(slug: string): Promise<Berita | null> {
     const sql = `
@@ -178,6 +166,9 @@ export class BeritaRepository {
 
   /**
    * Create new berita
+   * - generate UUID untuk id
+   * - galeri (string[]) disimpan sebagai JSON string
+   * - is_highlight / is_published (boolean) -> 0/1
    */
   static async create(data: BeritaCreateInput): Promise<string> {
     const id = generateUUID();
@@ -200,8 +191,8 @@ export class BeritaRepository {
       galeriJson,
       data.kategori_id,
       data.author_id,
-      data.is_highlight || false,
-      data.is_published || false,
+      data.is_highlight ? 1 : 0,
+      data.is_published ? 1 : 0,
       data.published_at || null,
     ];
 
@@ -238,26 +229,36 @@ export class BeritaRepository {
     }
     if (data.galeri !== undefined) {
       updates.push("galeri = ?");
-      params.push(JSON.stringify(data.galeri));
+      const galeriJson =
+        data.galeri && data.galeri.length > 0
+          ? JSON.stringify(data.galeri)
+          : null;
+      params.push(galeriJson);
     }
     if (data.kategori_id !== undefined) {
       updates.push("kategori_id = ?");
       params.push(data.kategori_id);
     }
+    if (data.author_id !== undefined) {
+      updates.push("author_id = ?");
+      params.push(data.author_id);
+    }
     if (data.is_highlight !== undefined) {
       updates.push("is_highlight = ?");
-      params.push(data.is_highlight);
+      params.push(data.is_highlight ? 1 : 0);
     }
     if (data.is_published !== undefined) {
       updates.push("is_published = ?");
-      params.push(data.is_published);
+      params.push(data.is_published ? 1 : 0);
     }
     if (data.published_at !== undefined) {
       updates.push("published_at = ?");
       params.push(data.published_at);
     }
 
-    if (updates.length === 0) return false;
+    if (updates.length === 0) {
+      return false;
+    }
 
     params.push(id);
     const sql = `UPDATE berita SET ${updates.join(", ")} WHERE id = ?`;
@@ -284,7 +285,7 @@ export class BeritaRepository {
   }
 
   /**
-   * Get popular berita
+   * Get popular berita (berdasarkan views)
    */
   static async getPopular(limit: number = 5): Promise<Berita[]> {
     const sql = `
@@ -292,9 +293,11 @@ export class BeritaRepository {
         b.*,
         k.nama as kategori_nama,
         k.slug as kategori_slug,
-        k.color as kategori_color
+        k.color as kategori_color,
+        u.name as author_name
       FROM berita b
       INNER JOIN kategori k ON b.kategori_id = k.id
+      INNER JOIN users u ON b.author_id = u.id
       WHERE b.is_published = 1
       ORDER BY b.views DESC
       LIMIT ?
@@ -304,7 +307,7 @@ export class BeritaRepository {
   }
 
   /**
-   * Get related berita by kategori
+   * Get related berita by kategori (exclude satu id)
    */
   static async getRelated(
     kategori_id: string,
@@ -316,10 +319,14 @@ export class BeritaRepository {
         b.*,
         k.nama as kategori_nama,
         k.slug as kategori_slug,
-        k.color as kategori_color
+        k.color as kategori_color,
+        u.name as author_name
       FROM berita b
       INNER JOIN kategori k ON b.kategori_id = k.id
-      WHERE b.kategori_id = ? AND b.id != ? AND b.is_published = 1
+      INNER JOIN users u ON b.author_id = u.id
+      WHERE b.kategori_id = ?
+        AND b.id != ?
+        AND b.is_published = 1
       ORDER BY b.created_at DESC
       LIMIT ?
     `;

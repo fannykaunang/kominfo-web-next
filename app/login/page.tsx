@@ -1,106 +1,113 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Label } from "@/components/ui/label"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Loader2, Mail, Lock, ArrowLeft, Shield } from "lucide-react"
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Loader2, Mail, Lock, ArrowLeft, Shield } from "lucide-react";
 
 export default function LoginPage() {
-  const router = useRouter()
-  const [step, setStep] = useState<"credentials" | "otp">("credentials")
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState("")
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [otp, setOtp] = useState("")
+  const router = useRouter();
+  const [step, setStep] = useState<"credentials" | "otp">("credentials");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [otp, setOtp] = useState("");
 
   // Step 1: Submit credentials
   const handleCredentialsSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError("")
-    setLoading(true)
+    e.preventDefault();
+    setError("");
+    setLoading(true);
 
     try {
       const res = await fetch("/api/auth/login-request", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
-      })
+      });
 
-      const data = await res.json()
+      const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.error || "Login failed")
+        throw new Error(data.error || "Login failed");
       }
 
       // If credentials are valid, move to OTP step
-      setStep("otp")
+      setStep("otp");
     } catch (err: any) {
-      setError(err.message)
+      setError(err.message);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   // Step 2: Verify OTP
   const handleOtpSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError("")
-    setLoading(true)
+    e.preventDefault();
+    setError("");
+    setLoading(true);
 
     try {
       const res = await fetch("/api/auth/verify-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, otp }),
-      })
+      });
 
-      const data = await res.json()
+      const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.error || "OTP verification failed")
+        throw new Error(data.error || "OTP verification failed");
       }
 
       // Redirect to admin dashboard
-      router.push("/admin")
-      router.refresh()
+      router.push("/backend/dashboard");
+      router.refresh();
     } catch (err: any) {
-      setError(err.message)
+      setError(err.message);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   // Resend OTP
   const handleResendOtp = async () => {
-    setError("")
-    setLoading(true)
+    setError("");
+    setLoading(true);
 
     try {
       const res = await fetch("/api/auth/resend-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
-      })
+      });
 
-      const data = await res.json()
+      const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.error || "Failed to resend OTP")
+        throw new Error(data.error || "Failed to resend OTP");
       }
 
-      alert("Kode OTP baru telah dikirim ke email Anda")
+      alert("Kode OTP baru telah dikirim ke email Anda");
     } catch (err: any) {
-      setError(err.message)
+      setError(err.message);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-hero p-4">
@@ -108,8 +115,7 @@ export default function LoginPage() {
         {/* Back to Home */}
         <Link
           href="/"
-          className="inline-flex items-center gap-2 text-white/80 hover:text-white mb-6 transition-colors"
-        >
+          className="inline-flex items-center gap-2 text-white/80 hover:text-white mb-6 transition-colors">
           <ArrowLeft className="h-4 w-4" />
           <span>Kembali ke Beranda</span>
         </Link>
@@ -210,7 +216,9 @@ export default function LoginPage() {
                     type="text"
                     placeholder="123456"
                     value={otp}
-                    onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                    onChange={(e) =>
+                      setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))
+                    }
                     maxLength={6}
                     className="text-center text-2xl tracking-widest"
                     required
@@ -218,7 +226,10 @@ export default function LoginPage() {
                   />
                 </div>
 
-                <Button type="submit" className="w-full" disabled={loading || otp.length !== 6}>
+                <Button
+                  type="submit"
+                  className="w-full"
+                  disabled={loading || otp.length !== 6}>
                   {loading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -234,9 +245,9 @@ export default function LoginPage() {
                     type="button"
                     onClick={handleResendOtp}
                     disabled={loading}
-                    className="text-sm text-muted-foreground hover:text-primary transition-colors disabled:opacity-50"
-                  >
-                    Tidak menerima kode? <span className="underline">Kirim ulang</span>
+                    className="text-sm text-muted-foreground hover:text-primary transition-colors disabled:opacity-50">
+                    Tidak menerima kode?{" "}
+                    <span className="underline">Kirim ulang</span>
                   </button>
                 </div>
 
@@ -245,12 +256,11 @@ export default function LoginPage() {
                   variant="outline"
                   className="w-full"
                   onClick={() => {
-                    setStep("credentials")
-                    setOtp("")
-                    setError("")
+                    setStep("credentials");
+                    setOtp("");
+                    setError("");
                   }}
-                  disabled={loading}
-                >
+                  disabled={loading}>
                   Kembali
                 </Button>
               </form>
@@ -265,5 +275,5 @@ export default function LoginPage() {
         </Card>
       </div>
     </div>
-  )
+  );
 }

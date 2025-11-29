@@ -16,6 +16,7 @@ const loginSchema = z.object({
 declare module "next-auth" {
   interface Session {
     user: {
+      id: string;
       role: string;
     } & DefaultSession["user"];
   }
@@ -29,7 +30,9 @@ declare module "next-auth" {
 declare module "@auth/core/jwt" {
   // ✅ Path untuk NextAuth v5
   interface JWT {
-    role: string;
+    role?: string;
+    id?: string; // ⬅️ tambahkan id di JWT
+    email?: string;
   }
 }
 
@@ -55,16 +58,18 @@ export const authConfig: NextAuthConfig = {
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
-        token.role = (user as any).role;
-        token.email = user.email;
+        token.role = user.role;
+        token.email = user.email || undefined;
       }
       return token;
     },
     async session({ session, token }) {
       if (token && session.user) {
-        session.user.id = token.id as string;
-        session.user.role = token.role as string;
-        session.user.email = token.email as string;
+        const idFromToken = (token as any).id ?? (token as any).sub ?? "";
+
+        session.user.id = idFromToken as string;
+        session.user.role = (token as any).role ?? session.user.role;
+        session.user.email = (token as any).email ?? session.user.email;
       }
       return session;
     },

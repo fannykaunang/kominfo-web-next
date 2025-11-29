@@ -121,11 +121,16 @@ export async function POST(request: NextRequest) {
         { status: 403 }
       );
     }
-
+    // Verify password
+    console.log("🔐 VERIFYING PASSWORD...");
+    console.log("Plain password length:", password.length);
+    console.log("Hash from DB length:", user.password.length);
     // Verify password
     const passwordMatch = await bcrypt.compare(password, user.password);
+    console.log("✅ PASSWORD MATCH:", passwordMatch);
 
     if (!passwordMatch) {
+      console.log("❌ INVALID PASSWORD for:", email);
       await logLoginAttempt({
         email,
         ipAddress,
