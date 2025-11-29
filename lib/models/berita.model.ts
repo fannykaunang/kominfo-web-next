@@ -8,11 +8,10 @@ import {
   buildPagination,
 } from "../db-helpers";
 import { Berita, PaginationResult } from "../types";
+import { createLogWithData } from "./log.model";
 
 /**
  * Input untuk membuat berita (app-level)
- * - galeri: array of string, nanti disimpan sebagai JSON string di DB
- * - is_highlight / is_published: boolean, nanti dikonversi ke 0/1
  */
 export interface BeritaCreateInput {
   judul: string;
@@ -34,7 +33,7 @@ export interface BeritaCreateInput {
 export interface BeritaUpdateInput extends Partial<BeritaCreateInput> {}
 
 /**
- * Repository untuk tabel `berita`
+ * Repository untuk tabel berita dengan logging
  */
 export class BeritaRepository {
   /**
@@ -48,6 +47,8 @@ export class BeritaRepository {
       is_published?: boolean;
       is_highlight?: boolean;
       search?: string;
+      dateFrom?: string;
+      dateTo?: string;
     } = {}
   ): Promise<PaginationResult<Berita>> {
     const {
@@ -57,6 +58,8 @@ export class BeritaRepository {
       is_published,
       is_highlight,
       search,
+      dateFrom,
+      dateTo,
     } = options;
 
     const whereConditions: string[] = [];
@@ -80,6 +83,16 @@ export class BeritaRepository {
     if (search) {
       whereConditions.push("(b.judul LIKE ? OR b.excerpt LIKE ?)");
       params.push(`%${search}%`, `%${search}%`);
+    }
+
+    if (dateFrom) {
+      whereConditions.push("DATE(b.created_at) >= ?");
+      params.push(dateFrom);
+    }
+
+    if (dateTo) {
+      whereConditions.push("DATE(b.created_at) <= ?");
+      params.push(dateTo);
     }
 
     const whereClause =
@@ -106,9 +119,8 @@ export class BeritaRepository {
 
     const data = await query<Berita>(sql, params);
 
-    // total count
     const countSql = `SELECT COUNT(*) as total FROM berita b ${whereClause}`;
-    const countRow = await queryOne<{ total: number }>(countSql, params);
+    const countRow = await queryOne<any>(countSql, params);
     const total = countRow?.total ?? 0;
 
     return {
@@ -123,7 +135,28 @@ export class BeritaRepository {
   }
 
   /**
-   * Get single berita by slug (hanya yang published)
+   * Get berita statistics
+   */
+  static async getStats() {
+    const sql = `
+      SELECT 
+        COUNT(*) as total,
+        SUM(CASE WHEN is_published = 1 THEN 1 ELSE 0 END) as published,
+        SUM(CASE WHEN is_published = 0 THEN 1 ELSE 0 END) as unpublished
+      FROM berita
+    `;
+
+    const result = await queryOne<any>(sql);
+
+    return {
+      total: result?.total || 0,
+      published: result?.published || 0,
+      unpublished: result?.unpublished || 0,
+    };
+  }
+
+  /**
+   * Get single berita by slug (published)
    */
   static async findBySlug(slug: string): Promise<Berita | null> {
     const sql = `
@@ -165,12 +198,14 @@ export class BeritaRepository {
   }
 
   /**
-   * Create new berita
-   * - generate UUID untuk id
-   * - galeri (string[]) disimpan sebagai JSON string
-   * - is_highlight / is_published (boolean) -> 0/1
+   * Create new berita with logging
    */
-  static async create(data: BeritaCreateInput): Promise<string> {
+  static async create(
+    data: BeritaCreateInput,
+    userId: string,
+    ipAddress?: string,
+    userAgent?: string
+  ): Promise<string> {
     const id = generateUUID();
     const galeriJson = data.galeri ? JSON.stringify(data.galeri) : null;
 
@@ -197,13 +232,37 @@ export class BeritaRepository {
     ];
 
     await execute(sql, params);
+
+    // Log aktivitas
+    await createLogWithData({
+      user_id: userId,
+      aksi: "Create",
+      modul: "Berita",
+      detail_aksi: `Membuat berita baru: ${data.judul}`,
+      data_sebelum: null,
+      data_sesudah: { id, ...data },
+      ip_address: ipAddress,
+      user_agent: userAgent,
+      endpoint: "/api/berita",
+      method: "POST",
+    });
+
     return id;
   }
 
   /**
-   * Update berita
+   * Update berita with logging
    */
-  static async update(id: string, data: BeritaUpdateInput): Promise<boolean> {
+  static async update(
+    id: string,
+    data: BeritaUpdateInput,
+    userId: string,
+    ipAddress?: string,
+    userAgent?: string
+  ): Promise<boolean> {
+    // Get data before update for logging
+    const dataBefore = await this.findById(id);
+
     const updates: string[] = [];
     const params: any[] = [];
 
@@ -225,7 +284,8 @@ export class BeritaRepository {
     }
     if (data.featured_image !== undefined) {
       updates.push("featured_image = ?");
-      params.push(data.featured_image);
+      // Convert undefined to null for MySQL
+      params.push(data.featured_image || null);
     }
     if (data.galeri !== undefined) {
       updates.push("galeri = ?");
@@ -253,7 +313,8 @@ export class BeritaRepository {
     }
     if (data.published_at !== undefined) {
       updates.push("published_at = ?");
-      params.push(data.published_at);
+      // Convert undefined to null for MySQL
+      params.push(data.published_at || null);
     }
 
     if (updates.length === 0) {
@@ -264,15 +325,55 @@ export class BeritaRepository {
     const sql = `UPDATE berita SET ${updates.join(", ")} WHERE id = ?`;
 
     const result = await execute(sql, params);
+
+    if (result.affectedRows > 0) {
+      // Log aktivitas
+      await createLogWithData({
+        user_id: userId,
+        aksi: "Update",
+        modul: "Berita",
+        detail_aksi: `Mengupdate berita: ${dataBefore?.judul || id}`,
+        data_sebelum: dataBefore,
+        data_sesudah: { id, ...data },
+        ip_address: ipAddress,
+        user_agent: userAgent,
+        endpoint: `/api/berita/${id}`,
+        method: "PUT",
+      });
+    }
+
     return result.affectedRows > 0;
   }
 
   /**
-   * Delete berita
+   * Delete berita with logging
    */
-  static async delete(id: string): Promise<boolean> {
+  static async delete(
+    id: string,
+    userId: string,
+    ipAddress?: string,
+    userAgent?: string
+  ): Promise<boolean> {
+    const dataBefore = await this.findById(id);
+
     const sql = "DELETE FROM berita WHERE id = ?";
     const result = await execute(sql, [id]);
+
+    if (result.affectedRows > 0 && dataBefore) {
+      await createLogWithData({
+        user_id: userId,
+        aksi: "Delete",
+        modul: "Berita",
+        detail_aksi: `Menghapus berita: ${dataBefore.judul}`,
+        data_sebelum: dataBefore,
+        data_sesudah: null,
+        ip_address: ipAddress,
+        user_agent: userAgent,
+        endpoint: `/api/berita/${id}`,
+        method: "DELETE",
+      });
+    }
+
     return result.affectedRows > 0;
   }
 
@@ -285,7 +386,7 @@ export class BeritaRepository {
   }
 
   /**
-   * Get popular berita (berdasarkan views)
+   * Get popular berita
    */
   static async getPopular(limit: number = 5): Promise<Berita[]> {
     const sql = `
@@ -307,7 +408,7 @@ export class BeritaRepository {
   }
 
   /**
-   * Get related berita by kategori (exclude satu id)
+   * Get related berita
    */
   static async getRelated(
     kategori_id: string,

@@ -1,4 +1,3 @@
-// app/page.tsx
 import { Suspense } from "react";
 import { NewsHero, NewsHeroSkeleton } from "@/components/berita/news-hero";
 import { NewsCard, NewsCardSkeleton } from "@/components/berita/news-card";
@@ -13,99 +12,44 @@ import {
 import { Button } from "@/components/ui/button";
 import { ArrowRight, TrendingUp } from "lucide-react";
 import Link from "next/link";
+import { BeritaRepository } from "@/lib/models/berita.model";
+import { getAllKategori } from "@/lib/models/kategori.model";
 
-// Mock data - In production, fetch from API/database
-const mockMainNews = {
-  id: "1",
-  judul: "Pembangunan Jalan Trans Papua Merauke Dipercepat",
-  slug: "pembangunan-jalan-trans-papua-merauke-dipercepat",
-  excerpt:
-    "Pemerintah Kabupaten Merauke mempercepat pembangunan infrastruktur jalan Trans Papua untuk meningkatkan konektivitas dan aksesibilitas wilayah.",
-  featuredImage: "/images/news-1.jpg",
-  kategori: {
-    nama: "Pembangunan",
-    slug: "pembangunan",
-    color: "#f59e0b",
-  },
-  publishedAt: new Date().toISOString(),
-  views: 1250,
-};
+// Fetch real data from database
+async function getHomeData() {
+  try {
+    // Get berita highlight (untuk hero)
+    const highlightResult = await BeritaRepository.findAll({
+      is_published: true,
+      is_highlight: true,
+      limit: 3,
+    });
 
-const mockSideNews = [
-  {
-    id: "2",
-    judul: "Bupati Merauke Resmikan Pasar Modern di Kelapa Lima",
-    slug: "bupati-merauke-resmikan-pasar-modern",
-    excerpt:
-      "Pasar modern dengan fasilitas lengkap untuk mendukung ekonomi masyarakat",
-    featuredImage: "/images/news-2.jpg",
-    kategori: { nama: "Ekonomi", slug: "ekonomi", color: "#10b981" },
-    publishedAt: new Date().toISOString(),
-    views: 850,
-  },
-  {
-    id: "3",
-    judul: "Festival Budaya Merauke 2024 Digelar Meriah",
-    slug: "festival-budaya-merauke-2024",
-    excerpt: "Menampilkan berbagai kesenian dan budaya khas Papua Selatan",
-    featuredImage: "/images/news-3.jpg",
-    kategori: { nama: "Budaya", slug: "budaya", color: "#8b5cf6" },
-    publishedAt: new Date().toISOString(),
-    views: 720,
-  },
-];
+    // Get latest berita (untuk berita terkini)
+    const latestResult = await BeritaRepository.findAll({
+      is_published: true,
+      limit: 4,
+    });
 
-const mockLatestNews = [
-  {
-    id: "4",
-    judul: "Program Bantuan Sosial untuk Masyarakat Terdampak Banjir",
-    slug: "program-bantuan-sosial-banjir",
-    excerpt:
-      "Pemkab Merauke menyalurkan bantuan sosial kepada masyarakat yang terdampak banjir di beberapa wilayah.",
-    featuredImage: "/images/news-4.jpg",
-    kategori: { nama: "Sosial", slug: "sosial", color: "#ec4899" },
-    author: { name: "Admin Portal" },
-    publishedAt: new Date().toISOString(),
-    views: 980,
-  },
-  {
-    id: "5",
-    judul: "Peningkatan Kualitas Pendidikan di Kabupaten Merauke",
-    slug: "peningkatan-kualitas-pendidikan",
-    excerpt:
-      "Pemerintah daerah fokus pada peningkatan kualitas pendidikan melalui berbagai program strategis.",
-    featuredImage: "/images/news-5.jpg",
-    kategori: { nama: "Pendidikan", slug: "pendidikan", color: "#3b82f6" },
-    author: { name: "Redaksi" },
-    publishedAt: new Date().toISOString(),
-    views: 1120,
-  },
-  {
-    id: "6",
-    judul: "Puskesmas Baru Dibangun di Distrik Terpencil",
-    slug: "puskesmas-baru-distrik-terpencil",
-    excerpt:
-      "Upaya meningkatkan akses layanan kesehatan bagi masyarakat di daerah terpencil.",
-    featuredImage: "/images/news-6.jpg",
-    kategori: { nama: "Kesehatan", slug: "kesehatan", color: "#14b8a6" },
-    author: { name: "Admin Portal" },
-    publishedAt: new Date().toISOString(),
-    views: 890,
-  },
-  {
-    id: "7",
-    judul: "UMKM Merauke Raih Penghargaan Nasional",
-    slug: "umkm-merauke-penghargaan-nasional",
-    excerpt:
-      "Produk UMKM dari Merauke berhasil meraih penghargaan di tingkat nasional.",
-    featuredImage: "/images/news-7.jpg",
-    kategori: { nama: "UMKM", slug: "umkm", color: "#f59e0b" },
-    author: { name: "Redaksi" },
-    publishedAt: new Date().toISOString(),
-    views: 760,
-  },
-];
+    // Get all categories
+    const categories = await getAllKategori();
 
+    return {
+      highlightNews: highlightResult.data,
+      latestNews: latestResult.data,
+      categories,
+    };
+  } catch (error) {
+    console.error("Error fetching home data:", error);
+    return {
+      highlightNews: [],
+      latestNews: [],
+      categories: [],
+    };
+  }
+}
+
+// Mock stats - replace with real data when available
 const mockStats = [
   {
     id: "1",
@@ -141,85 +85,102 @@ const mockStats = [
   },
 ];
 
-const mockCategories = [
-  {
-    id: "1",
-    nama: "Pemerintahan",
-    slug: "pemerintahan",
-    icon: "building",
-    color: "#3b82f6",
-    _count: { berita: 45 },
-  },
-  {
-    id: "2",
-    nama: "Pembangunan",
-    slug: "pembangunan",
-    icon: "hammer",
-    color: "#f59e0b",
-    _count: { berita: 38 },
-  },
-  {
-    id: "3",
-    nama: "Pendidikan",
-    slug: "pendidikan",
-    icon: "graduation",
-    color: "#8b5cf6",
-    _count: { berita: 32 },
-  },
-  {
-    id: "4",
-    nama: "Kesehatan",
-    slug: "kesehatan",
-    icon: "heart",
-    color: "#14b8a6",
-    _count: { berita: 28 },
-  },
-  {
-    id: "5",
-    nama: "UMKM",
-    slug: "umkm",
-    icon: "store",
-    color: "#10b981",
-    _count: { berita: 24 },
-  },
-  {
-    id: "6",
-    nama: "Pariwisata",
-    slug: "pariwisata",
-    icon: "palmtree",
-    color: "#06b6d4",
-    _count: { berita: 21 },
-  },
-  {
-    id: "7",
-    nama: "Budaya",
-    slug: "budaya",
-    icon: "music",
-    color: "#ec4899",
-    _count: { berita: 19 },
-  },
-  {
-    id: "8",
-    nama: "Sosial",
-    slug: "sosial",
-    icon: "heart",
-    color: "#ef4444",
-    _count: { berita: 16 },
-  },
-];
+export default async function HomePage() {
+  const { highlightNews, latestNews, categories } = await getHomeData();
 
-export default function HomePage() {
+  // Prepare data for NewsHero component
+  const mainNews = highlightNews[0] || null;
+  const sideNews = highlightNews.slice(1, 3).map((berita) => ({
+    id: berita.id,
+    judul: berita.judul,
+    slug: berita.slug,
+    excerpt: berita.excerpt,
+    featuredImage: berita.featured_image || "/images/placeholder.jpg",
+    kategori: {
+      nama: berita.kategori_nama || "Umum",
+      slug: berita.kategori_slug || "umum",
+      color: berita.kategori_color || "#3b82f6",
+    },
+    publishedAt: berita.published_at
+      ? new Date(berita.published_at).toISOString()
+      : new Date(berita.created_at).toISOString(),
+    views: berita.views || 0,
+  }));
+
+  // Transform mainNews for NewsHero
+  const transformedMainNews = mainNews
+    ? {
+        id: mainNews.id,
+        judul: mainNews.judul,
+        slug: mainNews.slug,
+        excerpt: mainNews.excerpt,
+        featuredImage: mainNews.featured_image || "/images/placeholder.jpg",
+        kategori: {
+          nama: mainNews.kategori_nama || "Umum",
+          slug: mainNews.kategori_slug || "umum",
+          color: mainNews.kategori_color || "#3b82f6",
+        },
+        publishedAt: mainNews.published_at
+          ? new Date(mainNews.published_at).toISOString()
+          : new Date(mainNews.created_at).toISOString(),
+        views: mainNews.views || 0,
+      }
+    : null;
+
+  // Transform latest news for NewsCard
+  const transformedLatestNews = latestNews.map((berita) => ({
+    id: berita.id,
+    judul: berita.judul,
+    slug: berita.slug,
+    excerpt: berita.excerpt,
+    featuredImage: berita.featured_image || "/images/placeholder.jpg",
+    kategori: {
+      nama: berita.kategori_nama || "Umum",
+      slug: berita.kategori_slug || "umum",
+      color: berita.kategori_color || "#3b82f6",
+    },
+    author: {
+      name: berita.author_name || "Admin",
+    },
+    publishedAt: berita.published_at
+      ? new Date(berita.published_at).toISOString()
+      : new Date(berita.created_at).toISOString(),
+    views: berita.views || 0,
+  }));
+
+  // Transform categories for CategorySection
+  const transformedCategories = categories.map((kategori) => ({
+    id: kategori.id,
+    nama: kategori.nama,
+    slug: kategori.slug,
+    icon: kategori.icon || "folder",
+    color: kategori.color || "#3b82f6",
+    _count: { berita: kategori.berita_count || 0 },
+  }));
+
+  // Check if we have highlight news
+  const hasHighlightNews = transformedMainNews !== null;
+
   return (
     <main className="min-h-screen" suppressHydrationWarning>
       {/* Hero Section with Main News */}
-      <Suspense fallback={<NewsHeroSkeleton />}>
-        <NewsHero mainNews={mockMainNews} sideNews={mockSideNews} />
-      </Suspense>
+      {hasHighlightNews ? (
+        <Suspense fallback={<NewsHeroSkeleton />}>
+          <NewsHero mainNews={transformedMainNews} sideNews={sideNews} />
+        </Suspense>
+      ) : (
+        <section className="container py-16">
+          <div className="text-center py-12 bg-muted rounded-lg">
+            <p className="text-muted-foreground text-lg">
+              Belum ada berita unggulan. Tandai berita sebagai highlight untuk
+              menampilkannya di sini.
+            </p>
+          </div>
+        </section>
+      )}
 
       {/* Stats Section */}
-      <Suspense fallback={<StatsSectionSkeleton />}>
-        <StatsSection stats={mockStats} />
-      </Suspense>
+      <StatsSection stats={mockStats} />
 
       {/* Latest News Section */}
       <section className="py-16">
@@ -253,9 +214,15 @@ export default function HomePage() {
                   ))}
                 </>
               }>
-              {mockLatestNews.map((news) => (
-                <NewsCard key={news.id} {...news} />
-              ))}
+              {transformedLatestNews.length > 0 ? (
+                transformedLatestNews.map((news) => (
+                  <NewsCard key={news.id} {...news} />
+                ))
+              ) : (
+                <div className="col-span-4 text-center py-12 text-muted-foreground">
+                  Belum ada berita tersedia
+                </div>
+              )}
             </Suspense>
           </div>
 
@@ -273,7 +240,9 @@ export default function HomePage() {
 
       {/* Category Section */}
       <Suspense fallback={<CategorySectionSkeleton />}>
-        <CategorySection categories={mockCategories} />
+        {transformedCategories.length > 0 && (
+          <CategorySection categories={transformedCategories} />
+        )}
       </Suspense>
 
       {/* Call to Action */}
