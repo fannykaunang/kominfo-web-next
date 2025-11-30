@@ -29,7 +29,7 @@ export function StatsSection({ stats }: StatsSectionProps) {
   };
 
   return (
-    <section className="py-12 bg-gradient-to-br from-merauke-50 to-blue-50 dark:from-slate-900 dark:to-slate-800 max-w-7xl mx-auto">
+    <section className="py-12 bg-linear-to-br from-merauke-50 to-blue-50 dark:from-slate-900 dark:to-slate-800 max-w-7xl mx-auto">
       <div className="container">
         <div className="text-center mb-10">
           <h2 className="text-3xl font-bold mb-3">
@@ -147,7 +147,7 @@ export function AnimatedCounter({
 // Loading Skeleton
 export function StatsSectionSkeleton() {
   return (
-    <section className="py-12 bg-gradient-to-br from-merauke-50 to-blue-50 dark:from-slate-900 dark:to-slate-800">
+    <section className="py-12 bg-linear-to-br from-merauke-50 to-blue-50 dark:from-slate-900 dark:to-slate-800">
       <div className="container">
         <div className="text-center mb-10">
           <div className="h-8 w-64 mx-auto skeleton mb-3" />

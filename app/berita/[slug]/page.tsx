@@ -1,5 +1,3 @@
-// app/berita/[slug]/page.tsx
-
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -13,6 +11,7 @@ import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { NewsCardCompact } from "@/components/berita/news-card";
 import { BeritaRepository } from "@/lib/models/berita.model";
+import GalleryLightbox from "@/components/berita/gallery-lightbox";
 
 interface NewsDetailPageProps {
   params: Promise<{
@@ -49,7 +48,7 @@ export default async function NewsDetailPage({ params }: NewsDetailPageProps) {
   );
 
   // Fetch popular news
-  const popularNews = await BeritaRepository.getPopular(5);
+  const popularNews = await BeritaRepository.getPopular(3);
 
   // Calculate reading time
   const readingTime = calculateReadingTime(berita.konten);
@@ -63,8 +62,8 @@ export default async function NewsDetailPage({ params }: NewsDetailPageProps) {
   const galeri = berita.galeri ? JSON.parse(berita.galeri as any) : [];
 
   return (
-    <main className="py-8 px-4 sm:px-8">
-      <div className="container max-w-7xl mx-auto">
+    <main className="py-8 px-8 sm:px-8">
+      <div className="container">
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <article className="lg:col-span-2">
@@ -124,7 +123,6 @@ export default async function NewsDetailPage({ params }: NewsDetailPageProps) {
                   src={berita.featured_image}
                   alt={berita.judul}
                   fill
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                   className="object-cover"
                   priority
                 />
@@ -203,24 +201,7 @@ export default async function NewsDetailPage({ params }: NewsDetailPageProps) {
 
             {/* Gallery */}
             {galeri.length > 0 && (
-              <div className="mt-8 pt-8 border-t">
-                <h2 className="text-2xl font-bold mb-4">Galeri</h2>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  {galeri.map((image: string, index: number) => (
-                    <div
-                      key={index}
-                      className="relative aspect-square rounded-lg overflow-hidden">
-                      <Image
-                        src={image}
-                        alt={`${berita.judul} - Gambar ${index + 1}`}
-                        fill
-                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                        className="object-cover hover:scale-110 transition-transform duration-300"
-                      />
-                    </div>
-                  ))}
-                </div>
-              </div>
+              <GalleryLightbox images={galeri} title={berita.judul} />
             )}
           </article>
 
@@ -239,7 +220,7 @@ export default async function NewsDetailPage({ params }: NewsDetailPageProps) {
                       judul={news.judul}
                       slug={news.slug}
                       featuredImage={
-                        news.featured_image || "/images/placeholder.png"
+                        news.featured_image || "/images/placeholder.jpg"
                       }
                       kategori={{
                         nama: news.kategori_nama || "Umum",
@@ -270,7 +251,7 @@ export default async function NewsDetailPage({ params }: NewsDetailPageProps) {
                       judul={news.judul}
                       slug={news.slug}
                       featuredImage={
-                        news.featured_image || "/images/placeholder.png"
+                        news.featured_image || "/images/placeholder.jpg"
                       }
                       kategori={{
                         nama: news.kategori_nama || "Umum",

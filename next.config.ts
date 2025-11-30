@@ -13,7 +13,6 @@ const nextConfig: NextConfig = {
       },
     ],
     qualities: [70, 75],
-    domains: ["localhost"],
   },
   // Suppress hydration warnings in development
   onDemandEntries: {
