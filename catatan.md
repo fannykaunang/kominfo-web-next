@@ -7,3 +7,4 @@
 
 # 30-11-2025
 1. masih error saat mau edit berita
+2. perbaiki margin di halaman app/berita/[slug]/page.tsx

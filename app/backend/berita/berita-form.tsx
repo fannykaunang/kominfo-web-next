@@ -44,6 +44,13 @@ export default function BeritaForm({ berita, kategoriList }: BeritaFormProps) {
   const [judul, setJudul] = useState("");
   const [slug, setSlug] = useState("");
   const [excerpt, setExcerpt] = useState("");
+
+  // ADD THESE LINES ↓
+  const [galeriFiles, setGaleriFiles] = useState<File[]>([]);
+  const [galeriPreviews, setGaleriPreviews] = useState<string[]>([]);
+  const [galeriUrls, setGaleriUrls] = useState<string[]>([]);
+  const [uploadingGaleri, setUploadingGaleri] = useState(false);
+
   const [konten, setKonten] = useState("");
   const [featuredImage, setFeaturedImage] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -86,6 +93,21 @@ export default function BeritaForm({ berita, kategoriList }: BeritaFormProps) {
           ? new Date(berita.published_at).toISOString().split("T")[0]
           : ""
       );
+
+      if (berita.galeri) {
+        try {
+          const galeriArray =
+            typeof berita.galeri === "string"
+              ? JSON.parse(berita.galeri)
+              : berita.galeri;
+          if (Array.isArray(galeriArray)) {
+            setGaleriUrls(galeriArray);
+            setGaleriPreviews(galeriArray);
+          }
+        } catch (e) {
+          console.error("Failed to parse galeri:", e);
+        }
+      }
     }
   }, [berita, kategoriList]);
 
@@ -177,6 +199,120 @@ export default function BeritaForm({ berita, kategoriList }: BeritaFormProps) {
     setFeaturedImage("");
   };
 
+  // Handle galeri file selection
+  const handleGaleriChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+
+    // Validate: max 5 images total
+    const totalImages = galeriPreviews.length + files.length;
+    if (totalImages > 5) {
+      setError(
+        `Maksimal 5 gambar untuk galeri. Anda sudah memiliki ${galeriPreviews.length} gambar.`
+      );
+      return;
+    }
+
+    // Validate each file
+    const allowedTypes = [
+      "image/jpeg",
+      "image/jpg",
+      "image/png",
+      "image/gif",
+      "image/webp",
+    ];
+    for (const file of files) {
+      if (!allowedTypes.includes(file.type)) {
+        setError(
+          "Format file tidak valid. Hanya JPEG, PNG, GIF, dan WebP yang diperbolehkan."
+        );
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        setError("Ukuran file terlalu besar. Maksimal 5MB per gambar.");
+        return;
+      }
+    }
+
+    // Create previews
+    let loadedCount = 0;
+    const newPreviews: string[] = [];
+
+    files.forEach((file, index) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        newPreviews[index] = e.target?.result as string;
+        loadedCount++;
+
+        if (loadedCount === files.length) {
+          setGaleriPreviews([...galeriPreviews, ...newPreviews]);
+        }
+      };
+      reader.onerror = () => {
+        setError("Gagal membaca file gambar");
+      };
+      reader.readAsDataURL(file);
+    });
+
+    setGaleriFiles([...galeriFiles, ...files]);
+    setError("");
+  };
+
+  // Remove galeri image
+  const handleRemoveGaleriImage = (index: number) => {
+    // Determine if this is an uploaded image or new file
+    const isUploadedImage = index < galeriUrls.length;
+
+    if (isUploadedImage) {
+      // Remove from uploaded URLs
+      const newUrls = galeriUrls.filter((_, i) => i !== index);
+      setGaleriUrls(newUrls);
+    } else {
+      // Remove from new files
+      const fileIndex = index - galeriUrls.length;
+      const newFiles = galeriFiles.filter((_, i) => i !== fileIndex);
+      setGaleriFiles(newFiles);
+    }
+
+    // Remove from previews
+    const newPreviews = galeriPreviews.filter((_, i) => i !== index);
+    setGaleriPreviews(newPreviews);
+  };
+
+  // Upload all galeri images
+  const uploadGaleriImages = async (): Promise<string[]> => {
+    if (galeriFiles.length === 0) {
+      return galeriUrls;
+    }
+
+    setUploadingGaleri(true);
+    const uploadedUrls: string[] = [...galeriUrls];
+
+    try {
+      for (const file of galeriFiles) {
+        const formData = new FormData();
+        formData.append("file", file);
+
+        const response = await fetch("/api/upload", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          uploadedUrls.push(data.url);
+        } else {
+          console.error("Failed to upload galeri image");
+        }
+      }
+    } catch (error) {
+      console.error("Error uploading galeri:", error);
+    } finally {
+      setUploadingGaleri(false);
+    }
+
+    return uploadedUrls;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -196,12 +332,16 @@ export default function BeritaForm({ berita, kategoriList }: BeritaFormProps) {
       // Get content from TinyMCE
       const editorContent = editorRef.current?.getContent() || konten;
 
+      // Upload galeri images
+      const galeriImageUrls = await uploadGaleriImages();
+
       const payload = {
         judul,
         slug,
         excerpt,
         konten: editorContent,
         featured_image: imageUrl || undefined,
+        galeri: galeriImageUrls, // ← ADD THIS LINE
         kategori_id: kategoriId,
         is_highlight: isHighlight,
         is_published: isPublished,
@@ -377,7 +517,7 @@ export default function BeritaForm({ berita, kategoriList }: BeritaFormProps) {
 
           {/* Featured Image */}
           <div className="space-y-2">
-            <Label htmlFor="featured_image">Featured Image</Label>
+            <Label htmlFor="featured_image">Thumbnail Gambar</Label>
             <div className="space-y-3">
               {/* File Input */}
               <div className="flex items-center gap-2">
@@ -415,6 +555,61 @@ export default function BeritaForm({ berita, kategoriList }: BeritaFormProps) {
                 </div>
               )}
             </div>
+          </div>
+
+          {/* Galeri */}
+          <div className="space-y-2">
+            <Label htmlFor="galeri">
+              Galeri{" "}
+              <span className="text-sm text-muted-foreground">
+                (Opsional, maksimal 5 gambar)
+              </span>
+            </Label>
+
+            {/* Upload Input - Only show if less than 5 images */}
+            {galeriPreviews.length < 5 && (
+              <Input
+                id="galeri"
+                type="file"
+                accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+                multiple
+                onChange={handleGaleriChange}
+                disabled={uploadingGaleri}
+                className="cursor-pointer"
+              />
+            )}
+
+            {/* Preview Grid */}
+            {galeriPreviews.length > 0 && (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mt-4">
+                {galeriPreviews.map((preview, index) => (
+                  <div key={index} className="relative group">
+                    <img
+                      src={preview}
+                      alt={`Galeri ${index + 1}`}
+                      className="w-full h-32 object-cover rounded-lg border border-gray-200 dark:border-gray-700"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveGaleriImage(index)}
+                      className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
+                      title="Hapus gambar">
+                      <X className="h-4 w-4" />
+                    </button>
+                    <div className="absolute bottom-2 left-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">
+                      {index + 1}/5
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Info Text */}
+            <p className="text-sm text-muted-foreground">
+              {galeriPreviews.length}/5 gambar. Format: JPEG, PNG, GIF, WebP.
+              Maksimal 5MB per gambar.
+              {uploadingGaleri && " Sedang mengupload..."}
+            </p>
           </div>
 
           {/* Published Date */}
@@ -476,10 +671,25 @@ export default function BeritaForm({ berita, kategoriList }: BeritaFormProps) {
           <ArrowLeft className="h-4 w-4 mr-2" />
           Kembali
         </Button>
-        <Button type="submit" disabled={loading}>
-          {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          <Save className="h-4 w-4 mr-2" />
-          {isEdit ? "Update Berita" : "Simpan Berita"}
+        <Button
+          type="submit"
+          className="w-full md:w-auto"
+          disabled={loading || uploadingImage || uploadingGaleri}>
+          {loading || uploadingImage || uploadingGaleri ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              {uploadingImage || uploadingGaleri
+                ? "Mengupload..."
+                : isEdit
+                ? "Updating..."
+                : "Creating..."}
+            </>
+          ) : (
+            <>
+              <Save className="mr-2 h-4 w-4" />
+              {isEdit ? "Update Berita" : "Simpan Berita"}
+            </>
+          )}
         </Button>
       </div>
     </form>

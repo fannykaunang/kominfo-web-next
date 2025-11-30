@@ -40,7 +40,7 @@ export function StatsSection({ stats }: StatsSectionProps) {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 px-8">
           {stats.map((stat, index) => {
             const Icon = getIcon(stat.icon);
 

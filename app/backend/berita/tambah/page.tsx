@@ -1,3 +1,5 @@
+// app/backend/berita/tambah/page.ts
+
 import { getAllKategori } from "@/lib/models/kategori.model";
 import BeritaForm from "../berita-form";
 

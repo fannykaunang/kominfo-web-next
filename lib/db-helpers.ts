@@ -26,9 +26,6 @@ export async function query<T = any>(
   params?: any[]
 ): Promise<T[]> {
   try {
-    console.log("🔍 DB Query:", sql);
-    console.log("📋 Params before sanitize:", params);
-
     // Handle params properly
     let sanitizedParams: any[] | undefined;
     if (params === undefined || params === null) {
@@ -39,8 +36,6 @@ export async function query<T = any>(
       sanitizedParams = undefined;
     }
 
-    console.log("✅ Params after sanitize:", sanitizedParams);
-
     const [rows] = await pool.execute<RowDataPacket[]>(
       sql,
       sanitizedParams || []
@@ -48,8 +43,6 @@ export async function query<T = any>(
     return rows as T[];
   } catch (error) {
     console.error("❌ Database query error:", error);
-    console.error("SQL:", sql);
-    console.error("Params:", params);
     throw error;
   }
 }
@@ -65,9 +58,6 @@ export async function queryOne<T = any>(
   params?: any[]
 ): Promise<T | null> {
   try {
-    console.log("🔍 DB QueryOne:", sql);
-    console.log("📋 Params before sanitize:", params);
-
     // Handle params properly
     let sanitizedParams: any[] | undefined;
     if (params === undefined || params === null) {
@@ -78,8 +68,6 @@ export async function queryOne<T = any>(
       sanitizedParams = undefined;
     }
 
-    console.log("✅ Params after sanitize:", sanitizedParams);
-
     const [rows] = await pool.execute<RowDataPacket[]>(
       sql,
       sanitizedParams || []
@@ -88,8 +76,6 @@ export async function queryOne<T = any>(
     return typedRows[0] || null;
   } catch (error) {
     console.error("❌ Database query error:", error);
-    console.error("SQL:", sql);
-    console.error("Params:", params);
     throw error;
   }
 }
@@ -105,9 +91,6 @@ export async function execute(
   params?: any[]
 ): Promise<ResultSetHeader> {
   try {
-    console.log("🔍 DB Execute:", query);
-    console.log("📋 Params before sanitize:", params);
-
     // Handle params properly
     let sanitizedParams: any[] | undefined;
     if (params === undefined || params === null) {
@@ -118,8 +101,6 @@ export async function execute(
       sanitizedParams = undefined;
     }
 
-    console.log("✅ Params after sanitize:", sanitizedParams);
-
     const [result] = await pool.execute<ResultSetHeader>(
       query,
       sanitizedParams || []
@@ -127,8 +108,6 @@ export async function execute(
     return result;
   } catch (error) {
     console.error("❌ Database execute error:", error);
-    console.error("SQL:", query);
-    console.error("Params:", params);
     throw error;
   }
 }
@@ -141,9 +120,6 @@ export async function executeInsert(
   params?: any[]
 ): Promise<number> {
   try {
-    console.log("🔍 DB ExecuteInsert:", query);
-    console.log("📋 Params before sanitize:", params);
-
     // Handle params properly
     let sanitizedParams: any[] | undefined;
     if (params === undefined || params === null) {
@@ -154,8 +130,6 @@ export async function executeInsert(
       sanitizedParams = undefined;
     }
 
-    console.log("✅ Params after sanitize:", sanitizedParams);
-
     const [result] = await pool.execute<ResultSetHeader>(
       query,
       sanitizedParams || []
@@ -163,8 +137,6 @@ export async function executeInsert(
     return result.insertId;
   } catch (error) {
     console.error("❌ Database insert error:", error);
-    console.error("SQL:", query);
-    console.error("Params:", params);
     throw error;
   }
 }

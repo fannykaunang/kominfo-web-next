@@ -39,9 +39,10 @@ export function NewsCard({
         {/* Image */}
         <div className="relative aspect-[16/9] overflow-hidden">
           <Image
-            src={featuredImage || "/placeholder.jpg"}
+            src={featuredImage || "/images/placeholder.png"}
             alt={judul}
             fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             className="object-cover transition-transform duration-500 group-hover:scale-110"
           />
 
@@ -116,9 +117,10 @@ export function NewsCardCompact({
       <div className="flex gap-3 hover:bg-accent/50 rounded-lg p-2 transition-colors">
         <div className="relative w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden">
           <Image
-            src={featuredImage || "/placeholder.jpg"}
+            src={featuredImage || "/images/placeholder.png"}
             alt={judul}
             fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             className="object-cover transition-transform duration-300 group-hover:scale-110"
           />
         </div>
@@ -173,9 +175,10 @@ export function NewsCardHorizontal({
           {/* Image */}
           <div className="relative w-full md:w-64 aspect-video md:aspect-[4/3] flex-shrink-0 rounded-lg overflow-hidden">
             <Image
-              src={featuredImage || "/placeholder.jpg"}
+              src={featuredImage || "/images/placeholder.png"}
               alt={judul}
               fill
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
               className="object-cover transition-transform duration-500 group-hover:scale-110"
             />
             <div className="absolute top-3 left-3">

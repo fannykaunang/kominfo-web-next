@@ -95,7 +95,7 @@ export default async function HomePage() {
     judul: berita.judul,
     slug: berita.slug,
     excerpt: berita.excerpt,
-    featuredImage: berita.featured_image || "/images/placeholder.jpg",
+    featuredImage: berita.featured_image || "/images/placeholder.png",
     kategori: {
       nama: berita.kategori_nama || "Umum",
       slug: berita.kategori_slug || "umum",
@@ -114,7 +114,7 @@ export default async function HomePage() {
         judul: mainNews.judul,
         slug: mainNews.slug,
         excerpt: mainNews.excerpt,
-        featuredImage: mainNews.featured_image || "/images/placeholder.jpg",
+        featuredImage: mainNews.featured_image || "/images/placeholder.png",
         kategori: {
           nama: mainNews.kategori_nama || "Umum",
           slug: mainNews.kategori_slug || "umum",
@@ -133,7 +133,7 @@ export default async function HomePage() {
     judul: berita.judul,
     slug: berita.slug,
     excerpt: berita.excerpt,
-    featuredImage: berita.featured_image || "/images/placeholder.jpg",
+    featuredImage: berita.featured_image || "/images/placeholder.png",
     kategori: {
       nama: berita.kategori_nama || "Umum",
       slug: berita.kategori_slug || "umum",

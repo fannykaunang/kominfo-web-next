@@ -40,12 +40,14 @@ export function NewsHero({ mainNews, sideNews }: NewsHeroProps) {
           <Link href={`/berita/${mainNews.slug}`}>
             <div className="relative aspect-[16/9] overflow-hidden">
               <Image
-                src={mainNews.featuredImage || "/placeholder.jpg"}
+                src={mainNews.featuredImage || "/images/placeholder.png"}
                 alt={mainNews.judul}
                 fill
+                priority={true}
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                 className="object-cover transition-transform duration-500 group-hover:scale-110"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+              <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/40 to-transparent" />
 
               {/* Content Overlay */}
               <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
@@ -96,11 +98,12 @@ export function NewsHero({ mainNews, sideNews }: NewsHeroProps) {
               className="group overflow-hidden hover-lift border-0 shadow-lg">
               <Link href={`/berita/${news.slug}`}>
                 <div className="flex gap-4 p-4">
-                  <div className="relative w-28 h-20 flex-shrink-0 rounded-lg overflow-hidden">
+                  <div className="relative w-28 h-20 shrink-0 rounded-lg overflow-hidden">
                     <Image
-                      src={news.featuredImage || "/placeholder.jpg"}
+                      src={news.featuredImage || "/images/placeholder.png"}
                       alt={news.judul}
                       fill
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                       className="object-cover transition-transform duration-300 group-hover:scale-110"
                     />
                   </div>

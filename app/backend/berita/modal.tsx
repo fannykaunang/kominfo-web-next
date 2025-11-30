@@ -263,7 +263,7 @@ export default function BeritaModal({
                     alt="Preview"
                     className="w-full h-48 object-cover rounded-lg"
                     onError={(e) => {
-                      e.currentTarget.src = "/placeholder.png";
+                      e.currentTarget.src = "/images/placeholder.png";
                     }}
                   />
                 </div>

@@ -12,6 +12,7 @@ const nextConfig: NextConfig = {
         hostname: "**",
       },
     ],
+    qualities: [70, 75],
     domains: ["localhost"],
   },
   // Suppress hydration warnings in development
@@ -20,3 +21,4 @@ const nextConfig: NextConfig = {
     pagesBufferLength: 2,
   },
 };
+export default nextConfig;
