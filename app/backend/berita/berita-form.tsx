@@ -55,6 +55,7 @@ export default function BeritaForm({ berita, kategoriList }: BeritaFormProps) {
   const [publishedAt, setPublishedAt] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [selectKey, setSelectKey] = useState(0); // Force re-render
 
   const isEdit = !!berita;
 
@@ -67,7 +68,17 @@ export default function BeritaForm({ berita, kategoriList }: BeritaFormProps) {
       setKonten(berita.konten);
       setFeaturedImage(berita.featured_image || "");
       setImagePreview(berita.featured_image || "");
-      setKategoriId(berita.kategori_id);
+
+      // Ensure kategori_id is string and exists in list
+      const kategoriIdStr = String(berita.kategori_id);
+      const kategoriExists = kategoriList.some(
+        (k) => String(k.id) === kategoriIdStr
+      );
+
+      setKategoriId(kategoriIdStr);
+      // Force Select to re-render
+      setSelectKey((prev) => prev + 1);
+
       setIsHighlight(!!berita.is_highlight);
       setIsPublished(!!berita.is_published);
       setPublishedAt(
@@ -76,7 +87,7 @@ export default function BeritaForm({ berita, kategoriList }: BeritaFormProps) {
           : ""
       );
     }
-  }, [berita]);
+  }, [berita, kategoriList]);
 
   // Auto-generate slug from judul
   const handleJudulChange = (value: string) => {
@@ -275,7 +286,11 @@ export default function BeritaForm({ berita, kategoriList }: BeritaFormProps) {
             <Label htmlFor="kategori">
               Kategori <span className="text-red-500">*</span>
             </Label>
-            <Select value={kategoriId} onValueChange={setKategoriId} required>
+            <Select
+              key={selectKey}
+              value={kategoriId}
+              onValueChange={setKategoriId}
+              required>
               <SelectTrigger>
                 <SelectValue placeholder="Pilih kategori" />
               </SelectTrigger>

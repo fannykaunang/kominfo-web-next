@@ -4,3 +4,6 @@
 # 29-11-2025
 1. mau login tp gagal. tanya claude di link https://claude.ai/chat/4d90ad38-965f-4cf8-b639-2b7904ed482c
 2. suruh AI bikin halaman website
+
+# 30-11-2025
+1. masih error saat mau edit berita

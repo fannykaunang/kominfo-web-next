@@ -241,8 +241,8 @@ export class BeritaRepository {
       detail_aksi: `Membuat berita baru: ${data.judul}`,
       data_sebelum: null,
       data_sesudah: { id, ...data },
-      ip_address: ipAddress,
-      user_agent: userAgent,
+      ip_address: ipAddress || null,
+      user_agent: userAgent || null,
       endpoint: "/api/berita",
       method: "POST",
     });
@@ -335,8 +335,8 @@ export class BeritaRepository {
         detail_aksi: `Mengupdate berita: ${dataBefore?.judul || id}`,
         data_sebelum: dataBefore,
         data_sesudah: { id, ...data },
-        ip_address: ipAddress,
-        user_agent: userAgent,
+        ip_address: ipAddress || null,
+        user_agent: userAgent || null,
         endpoint: `/api/berita/${id}`,
         method: "PUT",
       });
@@ -401,10 +401,10 @@ export class BeritaRepository {
       INNER JOIN users u ON b.author_id = u.id
       WHERE b.is_published = 1
       ORDER BY b.views DESC
-      LIMIT ?
+      LIMIT ${parseInt(String(limit))}
     `;
 
-    return await query<Berita>(sql, [limit]);
+    return await query<Berita>(sql, []);
   }
 
   /**
@@ -429,9 +429,9 @@ export class BeritaRepository {
         AND b.id != ?
         AND b.is_published = 1
       ORDER BY b.created_at DESC
-      LIMIT ?
+      LIMIT ${parseInt(String(limit))}
     `;
 
-    return await query<Berita>(sql, [kategori_id, excludeId, limit]);
+    return await query<Berita>(sql, [kategori_id, excludeId]);
   }
 }

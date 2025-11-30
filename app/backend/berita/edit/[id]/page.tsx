@@ -4,14 +4,23 @@ import { BeritaRepository } from "@/lib/models/berita.model";
 import { getAllKategori } from "@/lib/models/kategori.model";
 import { redirect } from "next/navigation";
 import BeritaForm from "../../berita-form";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Edit Berita | Web Portal",
+  description: "Edit Berita",
+};
 
 export default async function EditBeritaPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
+  // Await params in Next.js 15
+  const { id } = await params;
+
   const [berita, kategoriList] = await Promise.all([
-    BeritaRepository.findById(params.id),
+    BeritaRepository.findById(id),
     getAllKategori(),
   ]);
 

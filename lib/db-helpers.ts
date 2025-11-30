@@ -1,6 +1,19 @@
-// lib/db-helpers.ts
-import pool from "./db";
+import mysql from "mysql2/promise";
 import { RowDataPacket, ResultSetHeader } from "mysql2/promise";
+
+// Database connection pool
+const pool = mysql.createPool({
+  host: process.env.DB_HOST || "localhost",
+  port: parseInt(process.env.DB_PORT || "3307"),
+  user: process.env.DB_USER || "root80",
+  password: process.env.DB_PASSWORD || "localhost@fanny87",
+  database: process.env.DB_NAME || "kominfo_web",
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0,
+  enableKeepAlive: true,
+  keepAliveInitialDelay: 0,
+});
 
 /**
  * Execute a SELECT query (generic)
@@ -13,10 +26,30 @@ export async function query<T = any>(
   params?: any[]
 ): Promise<T[]> {
   try {
-    const [rows] = await pool.execute<RowDataPacket[]>(sql, params);
+    console.log("🔍 DB Query:", sql);
+    console.log("📋 Params before sanitize:", params);
+
+    // Handle params properly
+    let sanitizedParams: any[] | undefined;
+    if (params === undefined || params === null) {
+      sanitizedParams = undefined;
+    } else if (Array.isArray(params)) {
+      sanitizedParams = params.map((p) => (p === undefined ? null : p));
+    } else {
+      sanitizedParams = undefined;
+    }
+
+    console.log("✅ Params after sanitize:", sanitizedParams);
+
+    const [rows] = await pool.execute<RowDataPacket[]>(
+      sql,
+      sanitizedParams || []
+    );
     return rows as T[];
   } catch (error) {
-    console.error("Database query error:", error);
+    console.error("❌ Database query error:", error);
+    console.error("SQL:", sql);
+    console.error("Params:", params);
     throw error;
   }
 }
@@ -32,25 +65,33 @@ export async function queryOne<T = any>(
   params?: any[]
 ): Promise<T | null> {
   try {
-    const [rows] = await pool.execute<RowDataPacket[]>(sql, params);
+    console.log("🔍 DB QueryOne:", sql);
+    console.log("📋 Params before sanitize:", params);
+
+    // Handle params properly
+    let sanitizedParams: any[] | undefined;
+    if (params === undefined || params === null) {
+      sanitizedParams = undefined;
+    } else if (Array.isArray(params)) {
+      sanitizedParams = params.map((p) => (p === undefined ? null : p));
+    } else {
+      sanitizedParams = undefined;
+    }
+
+    console.log("✅ Params after sanitize:", sanitizedParams);
+
+    const [rows] = await pool.execute<RowDataPacket[]>(
+      sql,
+      sanitizedParams || []
+    );
     const typedRows = rows as T[];
     return typedRows[0] || null;
   } catch (error) {
-    console.error("Database query error:", error);
+    console.error("❌ Database query error:", error);
+    console.error("SQL:", sql);
+    console.error("Params:", params);
     throw error;
   }
-}
-
-/**
- * Alias lebih “jelas nama” untuk SELECT multiple rows
- * Dipakai di model-model (misal: executeQuery<LogAktivitas>(...))
- */
-export async function executeQuery<T = any>(
-  sql: string,
-  params?: any[]
-): Promise<T[]> {
-  // sekarang aman, `query` di sini jelas merujuk ke fungsi query()
-  return await query<T>(sql, params);
 }
 
 /**
@@ -64,10 +105,30 @@ export async function execute(
   params?: any[]
 ): Promise<ResultSetHeader> {
   try {
-    const [result] = await pool.execute<ResultSetHeader>(query, params);
+    console.log("🔍 DB Execute:", query);
+    console.log("📋 Params before sanitize:", params);
+
+    // Handle params properly
+    let sanitizedParams: any[] | undefined;
+    if (params === undefined || params === null) {
+      sanitizedParams = undefined;
+    } else if (Array.isArray(params)) {
+      sanitizedParams = params.map((p) => (p === undefined ? null : p));
+    } else {
+      sanitizedParams = undefined;
+    }
+
+    console.log("✅ Params after sanitize:", sanitizedParams);
+
+    const [result] = await pool.execute<ResultSetHeader>(
+      query,
+      sanitizedParams || []
+    );
     return result;
   } catch (error) {
-    console.error("Database execute error:", error);
+    console.error("❌ Database execute error:", error);
+    console.error("SQL:", query);
+    console.error("Params:", params);
     throw error;
   }
 }
@@ -80,10 +141,30 @@ export async function executeInsert(
   params?: any[]
 ): Promise<number> {
   try {
-    const [result] = await pool.execute<ResultSetHeader>(query, params);
+    console.log("🔍 DB ExecuteInsert:", query);
+    console.log("📋 Params before sanitize:", params);
+
+    // Handle params properly
+    let sanitizedParams: any[] | undefined;
+    if (params === undefined || params === null) {
+      sanitizedParams = undefined;
+    } else if (Array.isArray(params)) {
+      sanitizedParams = params.map((p) => (p === undefined ? null : p));
+    } else {
+      sanitizedParams = undefined;
+    }
+
+    console.log("✅ Params after sanitize:", sanitizedParams);
+
+    const [result] = await pool.execute<ResultSetHeader>(
+      query,
+      sanitizedParams || []
+    );
     return result.insertId;
   } catch (error) {
-    console.error("Database insert error:", error);
+    console.error("❌ Database insert error:", error);
+    console.error("SQL:", query);
+    console.error("Params:", params);
     throw error;
   }
 }
@@ -103,7 +184,20 @@ export async function transaction(
 
     const results: any[] = [];
     for (const { query, params } of queries) {
-      const [result] = await connection.execute(query, params);
+      console.log("🔍 Transaction Query:", query);
+      console.log("📋 Transaction Params:", params);
+
+      // Handle params properly
+      let sanitizedParams: any[] | undefined;
+      if (params === undefined || params === null) {
+        sanitizedParams = undefined;
+      } else if (Array.isArray(params)) {
+        sanitizedParams = params.map((p) => (p === undefined ? null : p));
+      } else {
+        sanitizedParams = undefined;
+      }
+
+      const [result] = await connection.execute(query, sanitizedParams || []);
       results.push(result);
     }
 
@@ -111,7 +205,7 @@ export async function transaction(
     return results;
   } catch (error) {
     await connection.rollback();
-    console.error("Transaction error:", error);
+    console.error("❌ Transaction error:", error);
     throw error;
   } finally {
     connection.release();
@@ -119,64 +213,22 @@ export async function transaction(
 }
 
 /**
- * Generate UUID v4
+ * Generate UUID v4 (for primary keys)
  */
 export function generateUUID(): string {
-  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
-    const r = (Math.random() * 16) | 0;
-    const v = c === "x" ? r : (r & 0x3) | 0x8;
-    return v.toString(16);
-  });
+  return crypto.randomUUID();
 }
 
 /**
- * Build WHERE clause from filters
- * @param filters Object with column: value pairs
- * @returns {whereClause, values}
- */
-export function buildWhereClause(filters: Record<string, any>) {
-  const conditions: string[] = [];
-  const values: any[] = [];
-
-  for (const [key, value] of Object.entries(filters)) {
-    if (value !== undefined && value !== null) {
-      conditions.push(`${key} = ?`);
-      values.push(value);
-    }
-  }
-
-  const whereClause =
-    conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
-
-  return { whereClause, values };
-}
-
-/**
- * Build pagination clause
- * @param page Page number (1-indexed)
- * @param limit Items per page
- * @returns {offset, limitClause}
+ * Build pagination clauses
  */
 export function buildPagination(page: number = 1, limit: number = 10) {
   const offset = (page - 1) * limit;
-  const limitClause = `LIMIT ${limit} OFFSET ${offset}`;
-
-  return { offset, limit, limitClause };
+  return {
+    limitClause: `LIMIT ${limit} OFFSET ${offset}`,
+    offset,
+    limit,
+  };
 }
 
-/**
- * Escape LIKE pattern
- */
-export function escapeLike(value: string): string {
-  return value.replace(/[%_]/g, "\\$&");
-}
-
-/**
- * Format date for MySQL
- */
-export function formatDateForDB(date: Date): string {
-  return date.toISOString().slice(0, 19).replace("T", " ");
-}
-
-// Export pool for advanced usage
-export { pool };
+export default pool;

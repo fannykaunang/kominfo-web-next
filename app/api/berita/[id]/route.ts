@@ -16,7 +16,7 @@ function getClientInfo(request: NextRequest) {
 // GET /api/berita/[id] - Get single berita
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth();
@@ -24,7 +24,9 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const berita = await BeritaRepository.findById(params.id);
+    // Await params in Next.js 15
+    const { id } = await params;
+    const berita = await BeritaRepository.findById(id);
 
     if (!berita) {
       return NextResponse.json(
@@ -46,7 +48,7 @@ export async function GET(
 // PUT /api/berita/[id] - Update berita
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth();
@@ -59,8 +61,11 @@ export async function PUT(
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
+    // Await params in Next.js 15
+    const { id } = await params;
+
     // Check if berita exists
-    const existing = await BeritaRepository.findById(params.id);
+    const existing = await BeritaRepository.findById(id);
     if (!existing) {
       return NextResponse.json(
         { error: "Berita tidak ditemukan" },
@@ -102,7 +107,7 @@ export async function PUT(
 
     // Update berita
     const success = await BeritaRepository.update(
-      params.id,
+      id,
       {
         ...data,
         published_at: data.published_at ? new Date(data.published_at) : null,
@@ -132,7 +137,7 @@ export async function PUT(
 // DELETE /api/berita/[id] - Delete berita
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth();
@@ -145,8 +150,11 @@ export async function DELETE(
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
+    // Await params in Next.js 15
+    const { id } = await params;
+
     // Check if berita exists
-    const existing = await BeritaRepository.findById(params.id);
+    const existing = await BeritaRepository.findById(id);
     if (!existing) {
       return NextResponse.json(
         { error: "Berita tidak ditemukan" },
@@ -158,7 +166,7 @@ export async function DELETE(
 
     // Delete berita
     const success = await BeritaRepository.delete(
-      params.id,
+      id,
       session.user.id,
       ipAddress,
       userAgent
