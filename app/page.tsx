@@ -1,3 +1,5 @@
+// app/page.tsx
+
 import { Suspense } from "react";
 import { NewsHero, NewsHeroSkeleton } from "@/components/berita/news-hero";
 import { NewsCard, NewsCardSkeleton } from "@/components/berita/news-card";
@@ -22,7 +24,7 @@ async function getHomeData() {
     const highlightResult = await BeritaRepository.findAll({
       is_published: true,
       is_highlight: true,
-      limit: 3,
+      limit: 4,
     });
 
     // Get latest berita (untuk berita terkini)
@@ -90,7 +92,7 @@ export default async function HomePage() {
 
   // Prepare data for NewsHero component
   const mainNews = highlightNews[0] || null;
-  const sideNews = highlightNews.slice(1, 3).map((berita) => ({
+  const sideNews = highlightNews.slice(1, 4).map((berita) => ({
     id: berita.id,
     judul: berita.judul,
     slug: berita.slug,
@@ -246,7 +248,7 @@ export default async function HomePage() {
       </Suspense>
 
       {/* Call to Action */}
-      <section className="py-16 bg-gradient-hero text-white max-w-7xl mx-auto">
+      <section className="py-16 bg-gradient-hero text-white max-w-7xl mx-auto px-4 sm:px-0">
         <div className="container text-center">
           <h2 className="text-3xl font-bold mb-4">
             Ikuti Perkembangan Kabupaten Merauke

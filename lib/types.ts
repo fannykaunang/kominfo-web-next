@@ -65,6 +65,46 @@ export interface Kategori extends RowDataPacket {
 }
 
 /**
+ * Menu Model
+ */
+export interface Menu extends RowDataPacket {
+  id: string;
+  nama: string;
+  slug: string;
+  icon: string | null;
+  urutan: number;
+  is_published: number;
+  deskripsi: string | null;
+  created_at: Date;
+  updated_at: Date;
+  halaman_count?: number; // From JOIN query
+}
+
+/**
+ * Halaman Model
+ */
+export interface Halaman extends RowDataPacket {
+  id: string;
+  menu_id: string;
+  judul: string;
+  slug: string;
+  konten: string;
+  excerpt: string | null;
+  urutan: number;
+  is_published: number;
+  views: number;
+  meta_title: string | null;
+  meta_description: string | null;
+  author_id: string | null;
+  created_at: Date;
+  updated_at: Date;
+  // Joined fields
+  menu_nama?: string;
+  menu_slug?: string;
+  author_name?: string | null;
+}
+
+/**
  * Berita Model (row dari database)
  */
 export interface Berita extends RowDataPacket {
@@ -213,6 +253,62 @@ export interface UserUpdateInput {
   role?: "ADMIN" | "EDITOR" | "AUTHOR";
   avatar?: string | null;
   is_active?: number;
+}
+
+/**
+ * Menu Create Input
+ */
+export interface MenuCreateInput {
+  nama: string;
+  slug: string;
+  icon?: string | null;
+  urutan?: number;
+  is_published?: number;
+  deskripsi?: string | null;
+}
+
+/**
+ * Menu Update Input
+ */
+export interface MenuUpdateInput {
+  nama?: string;
+  slug?: string;
+  icon?: string | null;
+  urutan?: number;
+  is_published?: number;
+  deskripsi?: string | null;
+}
+
+/**
+ * Halaman Create Input
+ */
+export interface HalamanCreateInput {
+  menu_id: string;
+  judul: string;
+  slug: string;
+  konten: string;
+  excerpt?: string | null;
+  urutan?: number;
+  is_published?: number;
+  meta_title?: string | null;
+  meta_description?: string | null;
+  author_id?: string | null;
+}
+
+/**
+ * Halaman Update Input
+ */
+export interface HalamanUpdateInput {
+  menu_id?: string;
+  judul?: string;
+  slug?: string;
+  konten?: string;
+  excerpt?: string | null;
+  urutan?: number;
+  is_published?: number;
+  meta_title?: string | null;
+  meta_description?: string | null;
+  author_id?: string | null;
 }
 
 /**

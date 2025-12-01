@@ -33,7 +33,7 @@ interface NewsHeroProps {
 
 export function NewsHero({ mainNews, sideNews }: NewsHeroProps) {
   return (
-    <section className="container py-8 max-w-7xl mx-auto">
+    <section className="container py-8 max-w-7xl mx-auto px-4 sm:px-0">
       <div className="grid lg:grid-cols-3 gap-6">
         {/* Main Featured News */}
         <Card className="lg:col-span-2 group overflow-hidden border-0 shadow-xl hover-lift">
@@ -91,14 +91,14 @@ export function NewsHero({ mainNews, sideNews }: NewsHeroProps) {
         </Card>
 
         {/* Side News */}
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4 px-4 sm:px-0">
           {sideNews.map((news) => (
             <Card
               key={news.id}
               className="group overflow-hidden hover-lift border-0 shadow-lg">
               <Link href={`/berita/${news.slug}`}>
-                <div className="flex gap-4 p-4">
-                  <div className="relative w-28 h-20 shrink-0 rounded-lg overflow-hidden">
+                <div className="flex gap-4 p-2">
+                  <div className="relative w-28 h-25 shrink-0 rounded-lg overflow-hidden">
                     <Image
                       src={news.featuredImage || "/images/placeholder.png"}
                       alt={news.judul}

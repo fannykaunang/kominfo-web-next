@@ -5,7 +5,15 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useTheme } from "next-themes";
-import { Search, Menu, Moon, Sun, MapPin, Calendar } from "lucide-react";
+import {
+  Search,
+  Menu as MenuIcon,
+  Moon,
+  Sun,
+  MapPin,
+  ChevronDown,
+} from "lucide-react";
+import * as LucideIcons from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -14,20 +22,74 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
-const navItems = [
-  { name: "Beranda", href: "/" },
-  { name: "Berita", href: "/berita" },
-  { name: "Pemerintahan", href: "/pemerintahan" },
-  { name: "Pembangunan", href: "/pembangunan" },
-  { name: "Pariwisata", href: "/pariwisata" },
-  { name: "Tentang", href: "/tentang" },
-  { name: "Kontak", href: "/kontak" },
+// Types
+interface Halaman {
+  id: string;
+  judul: string;
+  slug: string;
+  urutan: number;
+}
+
+interface MenuItem {
+  id: string;
+  nama: string;
+  slug: string;
+  icon: string | null;
+  urutan: number;
+  halaman: Halaman[];
+}
+
+interface NavItem {
+  name: string;
+  href: string;
+  icon?: string | null; // optional, bisa null
+  hasDropdown: boolean;
+  halaman: Halaman[]; // untuk menu biasa: []
+}
+
+// Static nav items (always shown)
+const staticNavItems: NavItem[] = [
+  {
+    name: "Beranda",
+    href: "/",
+    icon: null, // atau misalnya "Home"
+    hasDropdown: false,
+    halaman: [],
+  },
+  {
+    name: "Berita",
+    href: "",
+    icon: null, // atau "Newspaper"
+    hasDropdown: true,
+    halaman: [
+      {
+        id: "berita-terbaru",
+        judul: "Semua Berita",
+        slug: "berita", // hasil URL: /berita/terbaru
+        urutan: 1,
+      },
+      {
+        id: "kategori-berita",
+        judul: "Kategori Berita",
+        slug: "kategori", // hasil URL: /berita/kategori
+        urutan: 2,
+      },
+    ],
+  },
 ];
 
 export function Header() {
   const [mounted, setMounted] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
+  const [loading, setLoading] = useState(true);
   const { theme, setTheme } = useTheme();
 
   useEffect(() => {
@@ -40,6 +102,32 @@ export function Header() {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // Fetch menu from database
+  useEffect(() => {
+    const fetchMenu = async () => {
+      try {
+        const response = await fetch("/api/menu/published");
+        if (response.ok) {
+          const data = await response.json();
+          setMenuItems(data);
+        }
+      } catch (error) {
+        console.error("Error fetching menu:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMenu();
+  }, []);
+
+  // Get icon component from lucide-react
+  const getIcon = (iconName: string | null) => {
+    if (!iconName) return null;
+    const IconComponent = (LucideIcons as any)[iconName];
+    return IconComponent ? <IconComponent className="h-4 w-4 mr-1.5" /> : null;
+  };
 
   if (!mounted) {
     return (
@@ -67,6 +155,18 @@ export function Header() {
     );
   }
 
+  // Combine static and dynamic nav items
+  const allNavItems: NavItem[] = [
+    ...staticNavItems,
+    ...menuItems.map<NavItem>((menu) => ({
+      name: menu.nama,
+      href: `/${menu.slug}`,
+      icon: menu.icon,
+      hasDropdown: menu.halaman.length > 0,
+      halaman: menu.halaman,
+    })),
+  ];
+
   return (
     <header
       className={`sticky top-0 z-50 w-full transition-all duration-300 ${
@@ -78,7 +178,7 @@ export function Header() {
       <div className="container mx-auto px-4">
         <div className="max-w-7xl mx-auto flex h-16 items-center justify-between gap-4">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-3 shrink-0">
+          <Link href="/" className="flex items-center gap-3 flex-shrink-0">
             <div className="h-12 w-12 rounded-xl bg-gradient-primary flex items-center justify-center text-white font-bold text-xl shadow-lg">
               M
             </div>
@@ -94,14 +194,44 @@ export function Header() {
 
           {/* Desktop Navigation */}
           <nav className="hidden lg:flex items-center gap-1">
-            {navItems.map((item) => (
-              <Link
-                key={item.name}
-                href={item.href}
-                className="px-3 py-2 rounded-md text-sm font-medium text-foreground/80 hover:text-foreground hover:bg-accent transition-colors">
-                {item.name}
-              </Link>
-            ))}
+            {allNavItems.map((item) => {
+              // If menu has sub-pages (halaman), show dropdown
+              if ("hasDropdown" in item && item.hasDropdown) {
+                return (
+                  <DropdownMenu key={item.name}>
+                    <DropdownMenuTrigger asChild>
+                      <button className="px-3 py-2 rounded-md text-sm font-medium text-foreground/80 hover:text-foreground hover:bg-accent transition-colors flex items-center gap-1">
+                        {item.icon && getIcon(item.icon)}
+                        {item.name}
+                        <ChevronDown className="h-3 w-3 ml-0.5" />
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="start" className="w-56">
+                      {item.halaman.map((halaman) => (
+                        <DropdownMenuItem key={halaman.id} asChild>
+                          <Link
+                            href={`${item.href}/${halaman.slug}`}
+                            className="cursor-pointer">
+                            {halaman.judul}
+                          </Link>
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                );
+              }
+
+              // Regular link (no dropdown)
+              return (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className="px-3 py-2 rounded-md text-sm font-medium text-foreground/80 hover:text-foreground hover:bg-accent transition-colors flex items-center">
+                  {"icon" in item && item.icon && getIcon(item.icon)}
+                  {item.name}
+                </Link>
+              );
+            })}
           </nav>
 
           {/* Right Actions */}
@@ -137,21 +267,37 @@ export function Header() {
                   size="icon"
                   className="h-9 w-9 lg:hidden"
                   aria-label="Menu">
-                  <Menu className="h-5 w-5" />
+                  <MenuIcon className="h-5 w-5" />
                 </Button>
               </SheetTrigger>
               <SheetContent side="right" className="w-[300px] sm:w-[400px]">
                 <SheetHeader>
                   <SheetTitle>Menu</SheetTitle>
                 </SheetHeader>
-                <nav className="flex flex-col gap-4 mt-8">
-                  {navItems.map((item) => (
-                    <Link
-                      key={item.name}
-                      href={item.href}
-                      className="px-4 py-2 rounded-md text-base font-medium hover:bg-accent transition-colors">
-                      {item.name}
-                    </Link>
+                <nav className="flex flex-col gap-2 mt-8">
+                  {allNavItems.map((item) => (
+                    <div key={item.name}>
+                      <Link
+                        href={item.href}
+                        className="px-4 py-2 rounded-md text-base font-medium hover:bg-accent transition-colors flex items-center">
+                        {"icon" in item && item.icon && getIcon(item.icon)}
+                        {item.name}
+                      </Link>
+
+                      {/* Show sub-pages in mobile */}
+                      {"halaman" in item && item.halaman.length > 0 && (
+                        <div className="ml-6 mt-1 space-y-1">
+                          {item.halaman.map((halaman) => (
+                            <Link
+                              key={halaman.id}
+                              href={`${item.href}/${halaman.slug}`}
+                              className="block px-4 py-1.5 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors">
+                              {halaman.judul}
+                            </Link>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   ))}
                 </nav>
               </SheetContent>
