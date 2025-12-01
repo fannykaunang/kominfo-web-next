@@ -1,3 +1,5 @@
+// components/berita/news-card.tsx
+
 import Image from "next/image";
 import Link from "next/link";
 import { Calendar, Eye, User } from "lucide-react";

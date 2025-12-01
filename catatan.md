@@ -11,3 +11,4 @@
 
 # 01-12-2025
 1. lihat hasil kelola halaman dan menu di claude https://claude.ai/chat/4d90ad38-965f-4cf8-b639-2b7904ed482c
+2. ganti hero news jadi slider carousel, bikin tabel slider
