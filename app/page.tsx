@@ -2,6 +2,7 @@
 
 import { Suspense } from "react";
 import { NewsHero, NewsHeroSkeleton } from "@/components/berita/news-hero";
+import { HomeSlider } from "@/components/home/home-slider";
 import {
   NewsCard,
   NewsCardCompact,
@@ -20,6 +21,7 @@ import { ArrowRight, Eye, TrendingUp } from "lucide-react";
 import Link from "next/link";
 import { BeritaRepository } from "@/lib/models/berita.model";
 import { getAllKategori, getKategoriBySlug } from "@/lib/models/kategori.model";
+import { SliderRepository } from "@/lib/models/slider.model";
 
 // Fetch real data from database
 async function getHomeData() {
@@ -45,24 +47,29 @@ async function getHomeData() {
       getKategoriBySlug("informasi-masyarakat"),
     ]);
 
-    const [infoPentingNewsResult, infoMasyarakatNewsResult, categories] =
-      await Promise.all([
-        infoPentingKategori
-          ? BeritaRepository.findAll({
-              kategori_id: infoPentingKategori.id,
-              is_published: true,
-              limit: 5,
-            })
-          : Promise.resolve({ data: [] }),
-        infoMasyarakatKategori
-          ? BeritaRepository.findAll({
-              kategori_id: infoMasyarakatKategori.id,
-              is_published: true,
-              limit: 5,
-            })
-          : Promise.resolve({ data: [] }),
-        getAllKategori(),
-      ]);
+    const [
+      infoPentingNewsResult,
+      infoMasyarakatNewsResult,
+      categories,
+      sliders,
+    ] = await Promise.all([
+      infoPentingKategori
+        ? BeritaRepository.findAll({
+            kategori_id: infoPentingKategori.id,
+            is_published: true,
+            limit: 5,
+          })
+        : Promise.resolve({ data: [] }),
+      infoMasyarakatKategori
+        ? BeritaRepository.findAll({
+            kategori_id: infoMasyarakatKategori.id,
+            is_published: true,
+            limit: 5,
+          })
+        : Promise.resolve({ data: [] }),
+      getAllKategori(),
+      SliderRepository.findAll({ is_published: true }),
+    ]);
 
     return {
       highlightNews: highlightResult.data,
@@ -71,6 +78,7 @@ async function getHomeData() {
       infoPentingNews: infoPentingNewsResult.data,
       infoMasyarakatNews: infoMasyarakatNewsResult.data,
       categories,
+      sliders,
     };
   } catch (error) {
     console.error("Error fetching home data:", error);
@@ -81,6 +89,7 @@ async function getHomeData() {
       infoPentingNews: [],
       infoMasyarakatNews: [],
       categories: [],
+      sliders: [],
     };
   }
 }
@@ -129,6 +138,7 @@ export default async function HomePage() {
     infoPentingNews,
     infoMasyarakatNews,
     categories,
+    sliders,
   } = await getHomeData();
 
   // Prepare data for NewsHero component
@@ -151,24 +161,12 @@ export default async function HomePage() {
   }));
 
   // Transform mainNews for NewsHero
-  const transformedMainNews = mainNews
-    ? {
-        id: mainNews.id,
-        judul: mainNews.judul,
-        slug: mainNews.slug,
-        excerpt: mainNews.excerpt,
-        featuredImage: mainNews.featured_image || "/images/placeholder.png",
-        kategori: {
-          nama: mainNews.kategori_nama || "Umum",
-          slug: mainNews.kategori_slug || "umum",
-          color: mainNews.kategori_color || "#3b82f6",
-        },
-        publishedAt: mainNews.published_at
-          ? new Date(mainNews.published_at).toISOString()
-          : new Date(mainNews.created_at).toISOString(),
-        views: mainNews.views || 0,
-      }
-    : null;
+  const transformedSliders = sliders?.map((slider) => ({
+    id: slider.id,
+    judul: slider.judul,
+    deskripsi: slider.deskripsi,
+    image: slider.image || "/images/placeholder.png",
+  }));
 
   // Transform latest news for NewsCard
   const transformedLatestNews = latestNews.map((berita) => ({
@@ -237,26 +235,12 @@ export default async function HomePage() {
     _count: { berita: kategori.berita_count || 0 },
   }));
 
-  // Check if we have highlight news
-  const hasHighlightNews = transformedMainNews !== null;
-
   return (
     <main className="min-h-screen" suppressHydrationWarning>
       {/* Hero Section with Main News */}
-      {hasHighlightNews ? (
-        <Suspense fallback={<NewsHeroSkeleton />}>
-          <NewsHero mainNews={transformedMainNews} sideNews={sideNews} />
-        </Suspense>
-      ) : (
-        <section className="container py-16">
-          <div className="text-center py-12 bg-muted rounded-lg">
-            <p className="text-muted-foreground text-lg">
-              Belum ada berita unggulan. Tandai berita sebagai highlight untuk
-              menampilkannya di sini.
-            </p>
-          </div>
-        </section>
-      )}
+      <Suspense fallback={<NewsHeroSkeleton />}>
+        <HomeSlider sliders={transformedSliders} sideNews={sideNews} />
+      </Suspense>
 
       {/* Stats Section */}
       <StatsSection stats={mockStats} />

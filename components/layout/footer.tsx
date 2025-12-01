@@ -1,13 +1,7 @@
 import Link from "next/link";
-import {
-  Facebook,
-  Instagram,
-  Twitter,
-  Youtube,
-  Mail,
-  Phone,
-  MapPin,
-} from "lucide-react";
+import { Mail, Phone, MapPin } from "lucide-react";
+import { SiFacebook, SiInstagram, SiX, SiYoutube } from "react-icons/si";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
@@ -172,7 +166,7 @@ export function Footer() {
                 className="h-9 w-9 rounded-full hover:bg-slate-800 hover:text-merauke-400"
                 asChild>
                 <Link href="https://facebook.com" target="_blank">
-                  <Facebook className="h-4 w-4" />
+                  <SiFacebook className="h-4 w-4" />
                 </Link>
               </Button>
               <Button
@@ -181,7 +175,7 @@ export function Footer() {
                 className="h-9 w-9 rounded-full hover:bg-slate-800 hover:text-merauke-400"
                 asChild>
                 <Link href="https://instagram.com" target="_blank">
-                  <Instagram className="h-4 w-4" />
+                  <SiInstagram className="h-4 w-4" />
                 </Link>
               </Button>
               <Button
@@ -190,7 +184,7 @@ export function Footer() {
                 className="h-9 w-9 rounded-full hover:bg-slate-800 hover:text-merauke-400"
                 asChild>
                 <Link href="https://twitter.com" target="_blank">
-                  <Twitter className="h-4 w-4" />
+                  <SiX className="h-4 w-4" />
                 </Link>
               </Button>
               <Button
@@ -199,7 +193,7 @@ export function Footer() {
                 className="h-9 w-9 rounded-full hover:bg-slate-800 hover:text-merauke-400"
                 asChild>
                 <Link href="https://youtube.com" target="_blank">
-                  <Youtube className="h-4 w-4" />
+                  <SiYoutube className="h-4 w-4" />
                 </Link>
               </Button>
             </div>

@@ -205,6 +205,18 @@ export interface Galeri extends RowDataPacket {
 }
 
 /**
+ * Slider Model
+ */
+export interface Slider extends RowDataPacket {
+  id: string;
+  judul: string;
+  deskripsi: string | null;
+  image: string;
+  is_published: number;
+  created_at: Date;
+}
+
+/**
  * Settings Model
  */
 export interface Settings extends RowDataPacket {

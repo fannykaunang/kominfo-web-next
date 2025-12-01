@@ -1,3 +1,5 @@
+// components/home/stats-section.tsx
+
 import { Card, CardContent } from "@/components/ui/card";
 import { Users, Building2, Briefcase, TrendingUp } from "lucide-react";
 import { LucideIcon } from "lucide-react";

@@ -1,3 +1,5 @@
+// components/berita/gallery-lightbox.tsx
+
 "use client";
 
 import { useState } from "react";
@@ -39,7 +41,8 @@ export default function GalleryLightbox({
       <div className="mt-8 pt-8 border-t">
         <h2 className="text-2xl font-bold mb-2">Galeri Foto</h2>
         <p className="text-sm text-muted-foreground mb-4">
-          {images.length} foto dalam galeri. Klik untuk melihat ukuran penuh.
+          {images.length} foto dalam galeri berita ini. Klik untuk melihat
+          ukuran penuh.
         </p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
