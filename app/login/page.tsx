@@ -197,7 +197,7 @@ export default function LoginPage() {
               <form onSubmit={handleOtpSubmit} className="space-y-4">
                 <div className="bg-blue-50 dark:bg-blue-950 p-4 rounded-lg border border-blue-200 dark:border-blue-800 mb-4">
                   <div className="flex items-start gap-3">
-                    <Shield className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+                    <Shield className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5 shrink-0" />
                     <div className="text-sm">
                       <p className="font-medium text-blue-900 dark:text-blue-100 mb-1">
                         Kode OTP telah dikirim

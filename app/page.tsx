@@ -142,7 +142,6 @@ export default async function HomePage() {
   } = await getHomeData();
 
   // Prepare data for NewsHero component
-  const mainNews = highlightNews[0] || null;
   const sideNews = highlightNews.slice(1, 4).map((berita) => ({
     id: berita.id,
     judul: berita.judul,

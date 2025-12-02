@@ -38,7 +38,7 @@ export default function AdminTopbar({ user, onMenuClick }: AdminTopbarProps) {
           variant="ghost"
           size="icon"
           onClick={onMenuClick}
-          className="lg:hidden flex-shrink-0">
+          className="lg:hidden shrink-0">
           <Menu className="h-5 w-5" />
         </Button>
 
@@ -87,7 +87,7 @@ export default function AdminTopbar({ user, onMenuClick }: AdminTopbarProps) {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="sm" className="gap-2">
-              <div className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center text-white font-semibold text-xs">
+              <div className="h-8 w-8 rounded-full bg-linear-to-br from-blue-600 to-purple-600 flex items-center justify-center text-white font-semibold text-xs">
                 {user.name?.charAt(0).toUpperCase() || "A"}
               </div>
               <div className="hidden lg:block text-left">

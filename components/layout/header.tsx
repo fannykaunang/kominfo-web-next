@@ -178,7 +178,7 @@ export function Header() {
       <div className="container mx-auto px-4">
         <div className="max-w-7xl mx-auto flex h-16 items-center justify-between gap-4">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-3 flex-shrink-0">
+          <Link href="/" className="flex items-center gap-3 shrink-0">
             <div className="h-12 w-12 rounded-xl bg-gradient-primary flex items-center justify-center text-white font-bold text-xl shadow-lg">
               M
             </div>

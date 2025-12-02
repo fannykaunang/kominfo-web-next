@@ -82,18 +82,18 @@ export function Footer() {
               {/* Contact Info */}
               <div className="space-y-3">
                 <div className="flex items-start gap-3">
-                  <MapPin className="h-5 w-5 text-merauke-400 mt-0.5 flex-shrink-0" />
+                  <MapPin className="h-5 w-5 text-merauke-400 mt-0.5 shrink-0" />
                   <div className="text-sm text-slate-400">
                     Jl. Raya Mandala No. 1<br />
                     Merauke, Papua Selatan 99611
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <Phone className="h-5 w-5 text-merauke-400 flex-shrink-0" />
+                  <Phone className="h-5 w-5 text-merauke-400 shrink-0" />
                   <span className="text-sm text-slate-400">(0971) 321234</span>
                 </div>
                 <div className="flex items-center gap-3">
-                  <Mail className="h-5 w-5 text-merauke-400 flex-shrink-0" />
+                  <Mail className="h-5 w-5 text-merauke-400 shrink-0" />
                   <span className="text-sm text-slate-400">
                     info@meraukekab.go.id
                   </span>

@@ -117,7 +117,7 @@ export function NewsCardCompact({
   return (
     <Link href={`/berita/${slug}`} className="group">
       <div className="flex gap-3 hover:bg-accent/50 rounded-lg p-2 transition-colors">
-        <div className="relative w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden">
+        <div className="relative w-20 h-20 shrink-0 rounded-lg overflow-hidden">
           <Image
             src={featuredImage || "/images/placeholder.png"}
             alt={judul}
@@ -175,7 +175,7 @@ export function NewsCardHorizontal({
       <Link href={`/berita/${slug}`}>
         <div className="flex flex-col md:flex-row gap-4 p-4">
           {/* Image */}
-          <div className="relative w-full md:w-64 aspect-video md:aspect-[4/3] flex-shrink-0 rounded-lg overflow-hidden">
+          <div className="relative w-full md:w-64 aspect-video md:aspect-4/3 shrink-0 rounded-lg overflow-hidden">
             <Image
               src={featuredImage || "/images/placeholder.png"}
               alt={judul}

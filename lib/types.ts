@@ -394,3 +394,55 @@ export interface CreateLogWithDataInput extends CreateLogInput {
   data_sebelum: any;
   data_sesudah: any;
 }
+
+// Galeri Model
+export interface Galeri extends RowDataPacket {
+  id: string;
+  judul: string;
+  deskripsi: string | null;
+  media_type: "image" | "video";
+  media_url: string; // JSON string for images: '["url1","url2"]' OR YouTube URL for video
+  thumbnail: string | null;
+  kategori: string | null;
+  is_published: number;
+  urutan: number;
+  views: number;
+  created_at: Date;
+  updated_at: Date;
+}
+
+// Helper type for parsed images
+export interface GaleriWithParsedImages extends Omit<Galeri, "media_url"> {
+  media_url: string | string[]; // string[] for images, string for video
+}
+
+// Input Types
+export interface GaleriCreateInput {
+  judul: string;
+  deskripsi?: string;
+  media_type: "image" | "video";
+  media_url: string | string[]; // Array of URLs for images OR single YouTube URL for video
+  thumbnail?: string;
+  kategori: string;
+  is_published?: number;
+  urutan?: number;
+}
+
+export interface GaleriUpdateInput {
+  judul?: string;
+  deskripsi?: string;
+  media_type?: "image" | "video";
+  media_url?: string | string[]; // Array of URLs for images OR single YouTube URL for video
+  thumbnail?: string;
+  kategori?: string;
+  is_published?: number;
+  urutan?: number;
+}
+
+// Filter Options
+export interface GaleriFilterOptions {
+  search?: string;
+  kategori?: string;
+  media_type?: "image" | "video";
+  is_published?: string;
+}

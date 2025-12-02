@@ -162,9 +162,9 @@ export default function AdminSidebar({
           isMobile && !isOpen && "-translate-x-full"
         )}>
         {/* Logo Header */}
-        <div className="h-16 flex items-center justify-between px-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
+        <div className="h-16 flex items-center justify-between px-4 border-b border-gray-200 dark:border-gray-700 shrink-0">
           <Link href="/backend/dashboard" className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center text-white font-bold text-lg shadow-lg flex-shrink-0">
+            <div className="h-10 w-10 rounded-lg bg-linear-to-br from-blue-600 to-blue-800 flex items-center justify-center text-white font-bold text-lg shadow-lg shrink-0">
               M
             </div>
             {isOpen && (
@@ -235,7 +235,7 @@ export default function AdminSidebar({
                             : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50"
                         )}
                         title={!isOpen ? item.title : undefined}>
-                        <Icon className="h-5 w-5 flex-shrink-0" />
+                        <Icon className="h-5 w-5 shrink-0" />
                         {isOpen && <span>{item.title}</span>}
 
                         {/* Tooltip for collapsed state */}
@@ -255,9 +255,9 @@ export default function AdminSidebar({
 
         {/* User Profile Section */}
         {isOpen && (
-          <div className="p-4 border-t border-gray-200 dark:border-gray-700 flex-shrink-0">
+          <div className="p-4 border-t border-gray-200 dark:border-gray-700 shrink-0">
             <div className="flex items-center gap-3 px-2 py-2 rounded-lg bg-gray-50 dark:bg-gray-700/50">
-              <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center text-white font-semibold text-sm flex-shrink-0">
+              <div className="h-10 w-10 rounded-full bg-linear-to-br from-blue-600 to-purple-600 flex items-center justify-center text-white font-semibold text-sm shrink-0">
                 {user.name?.charAt(0).toUpperCase() || "A"}
               </div>
               <div className="flex-1 min-w-0">
