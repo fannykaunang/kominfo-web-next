@@ -16,6 +16,8 @@ import {
   X,
   ChevronLeft,
   ChevronRight,
+  Menu,
+  FileCode,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -31,52 +33,83 @@ interface AdminSidebarProps {
   };
 }
 
-const menuItems = [
+// Menu items grouped by category
+const menuCategories = [
   {
-    title: "Dashboard",
-    href: "/backend/dashboard",
-    icon: LayoutDashboard,
+    label: "Main",
+    items: [
+      {
+        title: "Dashboard",
+        href: "/backend/dashboard",
+        icon: LayoutDashboard,
+      },
+    ],
   },
   {
-    title: "Berita",
-    href: "/backend/berita",
-    icon: FileText,
+    label: "Content",
+    items: [
+      {
+        title: "Berita",
+        href: "/backend/berita",
+        icon: FileText,
+      },
+      {
+        title: "Kategori",
+        href: "/backend/kategori",
+        icon: FolderOpen,
+      },
+      {
+        title: "Tags",
+        href: "/backend/tags",
+        icon: Tags,
+      },
+      {
+        title: "Komentar",
+        href: "/backend/komentar",
+        icon: MessageSquare,
+      },
+      {
+        title: "Galeri",
+        href: "/backend/galeri",
+        icon: Image,
+      },
+    ],
   },
   {
-    title: "Kategori",
-    href: "/backend/kategori",
-    icon: FolderOpen,
+    label: "Pages",
+    items: [
+      {
+        title: "Menu",
+        href: "/backend/menu",
+        icon: Menu,
+      },
+      {
+        title: "Halaman",
+        href: "/backend/halaman",
+        icon: FileCode,
+      },
+    ],
   },
   {
-    title: "Tags",
-    href: "/backend/tags",
-    icon: Tags,
-  },
-  {
-    title: "Komentar",
-    href: "/backend/komentar",
-    icon: MessageSquare,
-  },
-  {
-    title: "Galeri",
-    href: "/backend/galeri",
-    icon: Image,
-  },
-  {
-    title: "Statistik",
-    href: "/backend/statistik",
-    icon: BarChart3,
-  },
-  {
-    title: "Users",
-    href: "/backend/users",
-    icon: Users,
-    adminOnly: true,
-  },
-  {
-    title: "Pengaturan",
-    href: "/backend/pengaturan",
-    icon: Settings,
+    label: "System",
+    items: [
+      {
+        title: "Statistik",
+        href: "/backend/statistik",
+        icon: BarChart3,
+      },
+      {
+        title: "Users",
+        href: "/backend/users",
+        icon: Users,
+        adminOnly: true,
+      },
+      {
+        title: "Pengaturan",
+        href: "/backend/pengaturan",
+        icon: Settings,
+      },
+    ],
   },
 ];
 
@@ -160,41 +193,63 @@ export default function AdminSidebar({
 
         {/* Navigation Menu */}
         <nav className="flex-1 overflow-y-auto py-4 px-3">
-          <div className="space-y-1">
-            {menuItems.map((item) => {
-              // Hide admin-only items for non-admins
-              if (item.adminOnly && user.role !== "ADMIN") {
-                return null;
-              }
+          <div className="space-y-6">
+            {menuCategories.map((category, categoryIndex) => (
+              <div key={category.label}>
+                {/* Category Label */}
+                {isOpen && (
+                  <div className="px-4 mb-2">
+                    <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+                      {category.label}
+                    </h3>
+                  </div>
+                )}
 
-              const isActive =
-                pathname === item.href || pathname?.startsWith(item.href + "/");
-              const Icon = item.icon;
+                {/* Category Divider (collapsed state) */}
+                {!isOpen && categoryIndex > 0 && (
+                  <div className="my-3 mx-auto w-8 border-t border-gray-300 dark:border-gray-600" />
+                )}
 
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  onClick={handleMenuClick}
-                  className={cn(
-                    "flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 group relative",
-                    isActive
-                      ? "bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 shadow-sm"
-                      : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50"
-                  )}
-                  title={!isOpen ? item.title : undefined}>
-                  <Icon className="h-5 w-5 flex-shrink-0" />
-                  {isOpen && <span>{item.title}</span>}
+                {/* Menu Items */}
+                <div className="space-y-1">
+                  {category.items.map((item) => {
+                    // Hide admin-only items for non-admins
+                    if (item.adminOnly && user.role !== "ADMIN") {
+                      return null;
+                    }
 
-                  {/* Tooltip for collapsed state */}
-                  {!isOpen && (
-                    <span className="absolute left-full ml-2 px-2 py-1 bg-gray-900 dark:bg-gray-700 text-white text-xs rounded opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap z-50">
-                      {item.title}
-                    </span>
-                  )}
-                </Link>
-              );
-            })}
+                    const isActive =
+                      pathname === item.href ||
+                      pathname?.startsWith(item.href + "/");
+                    const Icon = item.icon;
+
+                    return (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        onClick={handleMenuClick}
+                        className={cn(
+                          "flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 group relative",
+                          isActive
+                            ? "bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 shadow-sm"
+                            : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50"
+                        )}
+                        title={!isOpen ? item.title : undefined}>
+                        <Icon className="h-5 w-5 flex-shrink-0" />
+                        {isOpen && <span>{item.title}</span>}
+
+                        {/* Tooltip for collapsed state */}
+                        {!isOpen && (
+                          <span className="absolute left-full ml-2 px-2 py-1 bg-gray-900 dark:bg-gray-700 text-white text-xs rounded opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap z-50">
+                            {item.title}
+                          </span>
+                        )}
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
           </div>
         </nav>
 
