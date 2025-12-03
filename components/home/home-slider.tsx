@@ -10,6 +10,7 @@ import { Card } from "../ui/card";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { Slider } from "@/lib/types";
+import { NewsImage } from "../../components/berita/news-image";
 
 interface SideNewsItem {
   id: string;
@@ -74,9 +75,9 @@ export function HomeSlider({ sliders, sideNews }: HomeSliderProps) {
                   style={{ transform: `translateX(-${activeIndex * 100}%)` }}>
                   {safeSlides.map((slide) => (
                     <div key={slide.id} className="relative min-w-full h-full">
-                      <Image
-                        src={slide.image || "/images/placeholder.png"}
-                        alt={slide.judul || "Slider"}
+                      <NewsImage
+                        src={slide.image}
+                        alt={slide.judul}
                         fill
                         priority
                         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
@@ -136,11 +137,10 @@ export function HomeSlider({ sliders, sideNews }: HomeSliderProps) {
                         key={slide.id}
                         type="button"
                         onClick={() => setActiveIndex(index)}
-                        className={`h-2 rounded-full transition-all ${
-                          index === activeIndex
+                        className={`h-2 rounded-full transition-all ${index === activeIndex
                             ? "w-8 bg-primary"
                             : "w-2 bg-white/70 hover:bg-white"
-                        }`}
+                          }`}
                         aria-label={`Pilih slider ${index + 1}`}
                       />
                     ))}

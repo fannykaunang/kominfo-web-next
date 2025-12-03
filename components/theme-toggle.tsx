@@ -1,38 +1,51 @@
-"use client";
+"use client"
 
-import * as React from "react";
-import { Moon, Sun } from "lucide-react";
-import { useTheme } from "next-themes";
-import { Button } from "@/components/ui/button";
+import * as React from "react"
+import { Moon, Sun } from "lucide-react"
+import { useTheme } from "next-themes"
+import { Button } from "@/components/ui/button"
 
 export function ThemeToggle() {
-  const { theme, setTheme } = useTheme();
-  const [mounted, setMounted] = React.useState(false);
+  const { theme, setTheme } = useTheme()
+  const [mounted, setMounted] = React.useState(false)
 
+  // useEffect only runs on the client, so now we can safely show the UI
   React.useEffect(() => {
-    setMounted(true);
-  }, []);
+    setMounted(true)
+  }, [])
 
   if (!mounted) {
+    // Return a placeholder button with same size to prevent layout shift
     return (
-      <Button variant="ghost" size="icon" className="h-9 w-9">
-        <Sun className="h-4 w-4" />
+      <Button
+        variant="ghost"
+        size="icon"
+        className="relative"
+        disabled
+      >
+        <Sun className="h-5 w-5" />
       </Button>
-    );
+    )
+  }
+
+  const toggleTheme = () => {
+    setTheme(theme === "dark" ? "light" : "dark")
   }
 
   return (
     <Button
       variant="ghost"
       size="icon"
-      className="h-9 w-9"
-      onClick={() => setTheme(theme === "dark" ? "light" : "dark")}>
+      onClick={toggleTheme}
+      className="relative hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+      title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+    >
       {theme === "dark" ? (
-        <Sun className="h-4 w-4 text-gray-200" />
+        <Moon className="h-5 w-5 text-gray-700 dark:text-gray-300 transition-transform rotate-0 scale-100" />
       ) : (
-        <Moon className="h-4 w-4 text-slate-700" />
+        <Sun className="h-5 w-5 text-gray-700 dark:text-gray-300 transition-transform rotate-0 scale-100" />
       )}
       <span className="sr-only">Toggle theme</span>
     </Button>
-  );
+  )
 }

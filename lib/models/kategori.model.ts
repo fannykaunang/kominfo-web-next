@@ -1,14 +1,6 @@
-// lib/models/kategori.model.ts
-
-import { query, queryOne, execute } from "../db-helpers";
-import { Kategori } from "../types";
-import { v4 as uuidv4 } from "uuid";
-
-type KategoriStatsRow = {
-  total: number;
-  used: number;
-  unused: number;
-};
+import { query, queryOne, execute } from "../db-helpers"
+import { Kategori } from "../types"
+import { v4 as uuidv4 } from "uuid"
 
 /**
  * Get all categories with optional search
@@ -17,72 +9,75 @@ export async function getAllKategori(search?: string): Promise<Kategori[]> {
   let sql = `
     SELECT 
       k.*,
-      COUNT(DISTINCT bt.berita_id) as berita_count
+      COUNT(b.id) as berita_count
     FROM kategori k
-    LEFT JOIN berita_tags bt ON k.id = bt.tag_id
-  `;
-  const params: any[] = [];
+    LEFT JOIN berita b ON k.id = b.kategori_id
+  `
+  const params: any[] = []
 
   if (search) {
-    sql += ` WHERE k.nama LIKE ? OR k.slug LIKE ? OR k.deskripsi LIKE ?`;
-    params.push(`%${search}%`, `%${search}%`, `%${search}%`);
+    sql += ` WHERE k.nama LIKE ? OR k.slug LIKE ? OR k.deskripsi LIKE ?`
+    params.push(`%${search}%`, `%${search}%`, `%${search}%`)
   }
 
-  sql += ` GROUP BY k.id ORDER BY k.created_at DESC`;
+  sql += ` GROUP BY k.id ORDER BY k.created_at DESC`
 
-  // Kategori di types.ts sudah punya berita_count? (optional), jadi ini aman
-  return query<Kategori>(sql, params);
+  return query<Kategori>(sql, params)
 }
 
 /**
  * Get category by ID
  */
 export async function getKategoriById(id: string): Promise<Kategori | null> {
-  return queryOne<Kategori>(`SELECT * FROM kategori WHERE id = ?`, [id]);
+  return queryOne<Kategori>(
+    `SELECT * FROM kategori WHERE id = ?`,
+    [id]
+  )
 }
 
 /**
  * Get category by slug
  */
-export async function getKategoriBySlug(
-  slug: string
-): Promise<Kategori | null> {
-  return queryOne<Kategori>(`SELECT * FROM kategori WHERE slug = ?`, [slug]);
+export async function getKategoriBySlug(slug: string): Promise<Kategori | null> {
+  return queryOne<Kategori>(
+    `SELECT * FROM kategori WHERE slug = ?`,
+    [slug]
+  )
 }
 
 /**
  * Get category statistics
  */
 export async function getKategoriStats() {
-  const stats = await queryOne<KategoriStatsRow>(
+  const stats = await queryOne<any>(
     `
     SELECT 
       COUNT(DISTINCT k.id) as total,
-      COUNT(DISTINCT CASE WHEN bt.berita_id IS NOT NULL THEN k.id END) as used,
-      COUNT(DISTINCT CASE WHEN bt.berita_id IS NULL THEN k.id END) as unused
+      COUNT(DISTINCT CASE WHEN b.id IS NOT NULL THEN k.id END) as used,
+      COUNT(DISTINCT CASE WHEN b.id IS NULL THEN k.id END) as unused
     FROM kategori k
-    LEFT JOIN berita_tags bt ON k.id = bt.tag_id
+    LEFT JOIN berita b ON k.id = b.kategori_id
     `
-  );
+  )
 
   return {
-    total: stats?.total ?? 0,
-    used: stats?.used ?? 0,
-    unused: stats?.unused ?? 0,
-  };
+    total: stats?.total || 0,
+    used: stats?.used || 0,
+    unused: stats?.unused || 0,
+  }
 }
 
 /**
  * Create new category
  */
 export async function createKategori(data: {
-  nama: string;
-  slug: string;
-  deskripsi?: string;
-  icon?: string;
-  color?: string;
+  nama: string
+  slug: string
+  deskripsi?: string
+  icon?: string
+  color?: string
 }): Promise<string> {
-  const id = uuidv4();
+  const id = uuidv4()
 
   await execute(
     `
@@ -97,9 +92,9 @@ export async function createKategori(data: {
       data.icon || null,
       data.color || "#3b82f6",
     ]
-  );
+  )
 
-  return id;
+  return id
 }
 
 /**
@@ -108,67 +103,68 @@ export async function createKategori(data: {
 export async function updateKategori(
   id: string,
   data: {
-    nama?: string;
-    slug?: string;
-    deskripsi?: string;
-    icon?: string;
-    color?: string;
+    nama?: string
+    slug?: string
+    deskripsi?: string
+    icon?: string
+    color?: string
   }
 ): Promise<void> {
-  const fields: string[] = [];
-  const values: any[] = [];
+  const fields: string[] = []
+  const values: any[] = []
 
   if (data.nama !== undefined) {
-    fields.push("nama = ?");
-    values.push(data.nama);
+    fields.push("nama = ?")
+    values.push(data.nama)
   }
   if (data.slug !== undefined) {
-    fields.push("slug = ?");
-    values.push(data.slug);
+    fields.push("slug = ?")
+    values.push(data.slug)
   }
   if (data.deskripsi !== undefined) {
-    fields.push("deskripsi = ?");
-    values.push(data.deskripsi);
+    fields.push("deskripsi = ?")
+    values.push(data.deskripsi)
   }
   if (data.icon !== undefined) {
-    fields.push("icon = ?");
-    values.push(data.icon);
+    fields.push("icon = ?")
+    values.push(data.icon)
   }
   if (data.color !== undefined) {
-    fields.push("color = ?");
-    values.push(data.color);
+    fields.push("color = ?")
+    values.push(data.color)
   }
 
   if (fields.length === 0) {
-    throw new Error("No fields to update");
+    throw new Error("No fields to update")
   }
 
-  values.push(id);
+  values.push(id)
 
   await execute(
     `UPDATE kategori SET ${fields.join(", ")} WHERE id = ?`,
     values
-  );
+  )
 }
 
 /**
  * Delete category
  */
 export async function deleteKategori(id: string): Promise<void> {
-  const result = await queryOne<{ count: number }>(
-    `SELECT COUNT(*) as count FROM berita_tags WHERE tag_id = ?`,
+  // Check if category is being used
+  const result = await queryOne<any>(
+    `SELECT COUNT(*) as count FROM berita WHERE kategori_id = ?`,
     [id]
-  );
+  )
 
-  const count = result?.count ?? 0;
+  const count = result?.count || 0
 
   if (count > 0) {
     throw new Error(
       `Kategori tidak dapat dihapus karena sedang digunakan oleh ${count} berita`
-    );
+    )
   }
 
-  await execute(`DELETE FROM kategori WHERE id = ?`, [id]);
+  await execute(`DELETE FROM kategori WHERE id = ?`, [id])
 }
 
 /**
@@ -178,14 +174,14 @@ export async function isSlugExists(
   slug: string,
   excludeId?: string
 ): Promise<boolean> {
-  let sql = `SELECT COUNT(*) as count FROM kategori WHERE slug = ?`;
-  const params: any[] = [slug];
+  let sql = `SELECT COUNT(*) as count FROM kategori WHERE slug = ?`
+  const params: any[] = [slug]
 
   if (excludeId) {
-    sql += ` AND id != ?`;
-    params.push(excludeId);
+    sql += ` AND id != ?`
+    params.push(excludeId)
   }
 
-  const result = await queryOne<{ count: number }>(sql, params);
-  return (result?.count ?? 0) > 0;
+  const result = await queryOne<any>(sql, params)
+  return (result?.count || 0) > 0
 }

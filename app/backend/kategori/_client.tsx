@@ -22,7 +22,9 @@ import {
   Tag,
   CheckCircle2,
   XCircle,
+type LucideIcon,
 } from "lucide-react";
+import * as Icons from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import KategoriModal from "./kategori-modal";
 import DeleteKategoriDialog from "./delete-kategori-dialog";
@@ -37,6 +39,34 @@ interface KategoriClientProps {
     unused: number;
   };
 }
+
+const isLucideIcon = (value: unknown): value is LucideIcon =>
+  typeof value === "function" ||
+  (typeof value === "object" && value !== null && "render" in value);
+
+const iconsMap: Record<string, LucideIcon> = Object.fromEntries(
+  Object.entries(Icons).filter(([, value]) => isLucideIcon(value))
+) as Record<string, LucideIcon>;
+
+const resolveIcon = (icon?: string | null): LucideIcon | null => {
+  if (!icon) return null;
+
+  const normalized = icon.trim();
+  if (!normalized) return null;
+
+  // Try direct match (e.g. "FolderOpen")
+  if (iconsMap[normalized]) {
+    return iconsMap[normalized];
+  }
+
+  // Try converting kebab/space cases to PascalCase (e.g. "folder-open" -> "FolderOpen")
+  const pascalCase = normalized
+    .split(/[\s-_]+/)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join("");
+
+  return iconsMap[pascalCase] || null;
+};
 
 export default function KategoriClient({
   initialKategori,
@@ -238,11 +268,19 @@ export default function KategoriClient({
                           <div
                             className="h-10 w-10 rounded-lg flex items-center justify-center text-white"
                             style={{ backgroundColor: k.color || undefined }}>
-                            {k.icon ? (
-                              <span className="text-sm">{k.icon}</span>
-                            ) : (
-                              <FolderOpen className="h-5 w-5" />
-                            )}
+                        {(() => {
+                              const IconComponent = resolveIcon(k.icon);
+
+                              if (IconComponent) {
+                                return <IconComponent className="h-5 w-5" />;
+                              }
+
+                              if (k.icon) {
+                                return <span className="text-lg">{k.icon}</span>;
+                              }
+
+                              return <FolderOpen className="h-5 w-5" />;
+                            })()}
                           </div>
                           <div>
                             <div className="font-medium">{k.nama}</div>

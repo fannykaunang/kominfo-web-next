@@ -69,7 +69,7 @@ export default function AdminTopbar({ user, onMenuClick }: AdminTopbarProps) {
         {/* Notifications */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="relative">
+            <Button variant="ghost" size="icon" className="relative hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
               <Bell className="h-5 w-5" />
               <span className="absolute top-1.5 right-1.5 h-2 w-2 bg-red-500 rounded-full ring-2 ring-white dark:ring-gray-800" />
             </Button>

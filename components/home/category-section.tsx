@@ -13,8 +13,9 @@ import {
   Music,
   Newspaper,
   ArrowRight,
+  type LucideIcon,
 } from "lucide-react";
-import { LucideIcon } from "lucide-react";
+import * as Icons from "lucide-react";
 
 interface Category {
   id: string;
@@ -32,24 +33,34 @@ interface CategorySectionProps {
   categories: Category[];
 }
 
-const iconMap: Record<string, LucideIcon> = {
-  building: Building2,
-  hammer: Hammer,
-  graduation: GraduationCap,
-  heart: Heart,
-  store: Store,
-  palmtree: Palmtree,
-  music: Music,
-  newspaper: Newspaper,
+const isLucideIcon = (value: unknown): value is LucideIcon =>
+  typeof value === "function" ||
+  (typeof value === "object" && value !== null && "render" in value);
+
+const iconsMap: Record<string, LucideIcon> = Object.fromEntries(
+  Object.entries(Icons).filter(([, value]) => isLucideIcon(value))
+) as Record<string, LucideIcon>;
+
+const resolveIcon = (icon?: string): LucideIcon => {
+  const fallback = Newspaper;
+  if (!icon) return fallback;
+
+  const normalized = icon.trim();
+  if (!normalized) return fallback;
+
+  if (iconsMap[normalized]) {
+    return iconsMap[normalized];
+  }
+
+  const pascalCase = normalized
+    .split(/[\s-_]+/)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join("");
+
+  return iconsMap[pascalCase] || fallback;
 };
 
 export function CategorySection({ categories }: CategorySectionProps) {
-  const getIcon = (iconName?: string) => {
-    if (!iconName) return Newspaper;
-    const Icon = iconMap[iconName] || Newspaper;
-    return Icon;
-  };
-
   return (
     <section className="py-16">
       <div className="container mx-auto px-4">
@@ -72,7 +83,7 @@ export function CategorySection({ categories }: CategorySectionProps) {
         {/* Categories Grid */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {categories.map((category, index) => {
-            const Icon = getIcon(category.icon);
+         const Icon = resolveIcon(category.icon || undefined);
 
             return (
               <Link
@@ -142,7 +153,7 @@ export function CategoryPills({ categories }: CategorySectionProps) {
   return (
     <div className="flex flex-wrap gap-2">
       {categories.map((category) => {
-        const Icon = iconMap[category.icon || "newspaper"] || Newspaper;
+       const Icon = resolveIcon(category.icon || undefined);
 
         return (
           <Link key={category.id} href={`/kategori/${category.slug}`}>
@@ -174,7 +185,7 @@ export function CategoryScrollable({ categories }: CategorySectionProps) {
     <div className="overflow-x-auto custom-scrollbar pb-4">
       <div className="flex gap-4 min-w-max">
         {categories.map((category) => {
-          const Icon = iconMap[category.icon || "newspaper"] || Newspaper;
+           const Icon = resolveIcon(category.icon || undefined);
 
           return (
             <Link

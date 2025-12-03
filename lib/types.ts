@@ -268,6 +268,17 @@ export interface UserUpdateInput {
 }
 
 /**
+ * User Filter Options
+ * Add this interface to your lib/types.ts file
+ */
+export interface UserFilterOptions {
+  search?: string;
+  role?: "ADMIN" | "EDITOR" | "AUTHOR";
+  is_active?: string;
+  email_verified?: string;
+}
+
+/**
  * Menu Create Input
  */
 export interface MenuCreateInput {
