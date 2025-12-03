@@ -112,8 +112,8 @@ export function UserFormDialog({ open, onClose, user }: UserFormDialogProps) {
 
     try {
       const url = user
-        ? `/api/backend/users/${user.id}`
-        : "/api/backend/users"
+        ? `/api/users/${user.id}`
+        : "/api/users"
       const method = user ? "PUT" : "POST"
 
       const payload: any = {

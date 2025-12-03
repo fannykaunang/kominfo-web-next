@@ -37,7 +37,7 @@ export async function GET(request: NextRequest, props: Props) {
 
     return NextResponse.json(user)
   } catch (error: any) {
-    console.error("GET /api/backend/users/[id] error:", error)
+    console.error("GET /api/users/[id] error:", error)
     return NextResponse.json(
       { error: error.message || "Failed to fetch user" },
       { status: 500 }
@@ -133,7 +133,7 @@ export async function PUT(request: NextRequest, props: Props) {
 
     return NextResponse.json({ message: "User updated successfully" })
   } catch (error: any) {
-    console.error("PUT /api/backend/users/[id] error:", error)
+    console.error("PUT /api/users/[id] error:", error)
     return NextResponse.json(
       { error: error.message || "Failed to update user" },
       { status: 500 }
@@ -174,7 +174,7 @@ export async function DELETE(request: NextRequest, props: Props) {
 
     return NextResponse.json({ message: "User deleted successfully" })
   } catch (error: any) {
-    console.error("DELETE /api/backend/users/[id] error:", error)
+    console.error("DELETE /api/users/[id] error:", error)
     return NextResponse.json(
       { error: error.message || "Failed to delete user" },
       { status: 500 }
@@ -226,7 +226,7 @@ export async function PATCH(request: NextRequest, props: Props) {
 
     return NextResponse.json({ error: "Invalid action" }, { status: 400 })
   } catch (error: any) {
-    console.error("PATCH /api/backend/users/[id] error:", error)
+    console.error("PATCH /api/users/[id] error:", error)
     return NextResponse.json(
       { error: error.message || "Failed to update user" },
       { status: 500 }
