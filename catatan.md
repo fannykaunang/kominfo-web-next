@@ -20,3 +20,6 @@
 # 03-12-2025
 1. cari tahu kenapa berita http://localhost:3000/backend/berita cuma nampilin 5 data saja
 2. lihat hasil dari pembuatan halaman kelola users di claude
+
+# 04-12-2025
+1. ganti avatar url ke file upload di halaman http://localhost:3000/backend/users
