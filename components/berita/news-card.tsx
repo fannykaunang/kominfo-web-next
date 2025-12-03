@@ -1,11 +1,11 @@
 // components/berita/news-card.tsx
 
-import Image from "next/image";
 import Link from "next/link";
-import { Calendar, Eye, User } from "lucide-react";
+import { Calendar, Eye } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { NewsImage, NewsImageCompact, NewsImageHorizontal } from "./news-image";
 
 interface NewsCardProps {
   id: string;
@@ -39,9 +39,9 @@ export function NewsCard({
     <Card className="group overflow-hidden border-0 shadow-lg hover-lift">
       <Link href={`/berita/${slug}`}>
         {/* Image */}
-        <div className="relative aspect-[16/9] overflow-hidden">
-          <Image
-            src={featuredImage || "/images/placeholder.png"}
+        <div className="relative aspect-video overflow-hidden bg-muted">
+          <NewsImage
+            src={featuredImage}
             alt={judul}
             fill
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
@@ -90,7 +90,6 @@ export function NewsCard({
                   {new Date(publishedAt).toLocaleDateString("id-ID", {
                     day: "numeric",
                     month: "short",
-                    timeZone: "UTC",
                   })}
                 </span>
               </div>
@@ -117,12 +116,12 @@ export function NewsCardCompact({
   return (
     <Link href={`/berita/${slug}`} className="group">
       <div className="flex gap-3 hover:bg-accent/50 rounded-lg p-2 transition-colors">
-        <div className="relative w-20 h-20 shrink-0 rounded-lg overflow-hidden">
-          <Image
-            src={featuredImage || "/images/placeholder.png"}
+        <div className="relative w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden bg-muted">
+          <NewsImageCompact
+            src={featuredImage || "/placeholder.jpg"}
             alt={judul}
             fill
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            sizes="80px"
             className="object-cover transition-transform duration-300 group-hover:scale-110"
           />
         </div>
@@ -149,7 +148,6 @@ export function NewsCardCompact({
                 day: "numeric",
                 month: "short",
                 year: "numeric",
-                timeZone: "UTC",
               })}
             </span>
           </div>
@@ -175,12 +173,12 @@ export function NewsCardHorizontal({
       <Link href={`/berita/${slug}`}>
         <div className="flex flex-col md:flex-row gap-4 p-4">
           {/* Image */}
-          <div className="relative w-full md:w-64 aspect-video md:aspect-4/3 shrink-0 rounded-lg overflow-hidden">
-            <Image
-              src={featuredImage || "/images/placeholder.png"}
+          <div className="relative w-full md:w-64 aspect-video md:aspect-[4/3] flex-shrink-0 rounded-lg overflow-hidden bg-muted">
+            <NewsImageHorizontal
+              src={featuredImage || "/placeholder.jpg"}
               alt={judul}
               fill
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              sizes="(max-width: 768px) 100vw, 256px"
               className="object-cover transition-transform duration-500 group-hover:scale-110"
             />
             <div className="absolute top-3 left-3">
@@ -217,7 +215,6 @@ export function NewsCardHorizontal({
                         day: "numeric",
                         month: "long",
                         year: "numeric",
-                        timeZone: "UTC",
                       })}
                     </span>
                   </div>
@@ -240,7 +237,7 @@ export function NewsCardHorizontal({
 export function NewsCardSkeleton() {
   return (
     <Card className="overflow-hidden border-0 shadow-lg">
-      <div className="aspect-[16/9] skeleton" />
+      <div className="aspect-video skeleton" />
       <CardContent className="p-5 space-y-3">
         <div className="h-6 w-3/4 skeleton" />
         <div className="h-4 w-full skeleton" />

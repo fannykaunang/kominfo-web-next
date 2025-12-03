@@ -16,3 +16,6 @@
 # 02-12-2025
 1. tambah package framer-motion
 2. lihat hasil di claude untuk struktur tabel galeri dan kelola halaman galeri https://claude.ai/chat/4d90ad38-965f-4cf8-b639-2b7904ed482c
+
+# 03-12-2025
+1. cari tahu kenapa berita http://localhost:3000/backend/berita cuma nampilin 5 data saja

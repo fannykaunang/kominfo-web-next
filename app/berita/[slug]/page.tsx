@@ -12,6 +12,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { NewsCardCompact } from "@/components/berita/news-card";
 import { BeritaRepository } from "@/lib/models/berita.model";
 import GalleryLightbox from "@/components/berita/gallery-lightbox";
+import { NewsImage } from "../../../components/berita/news-image";
 
 interface NewsDetailPageProps {
   params: Promise<{
@@ -55,7 +56,7 @@ export default async function NewsDetailPage({ params }: NewsDetailPageProps) {
 
   // Current URL for sharing
   const currentUrl = `${
-    process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
+    process.env.NEXT_PUBLIC_SITE_URL || "https://portal.merauke.go.id"
   }/berita/${slug}`;
 
   // Parse galeri if exists
@@ -119,12 +120,13 @@ export default async function NewsDetailPage({ params }: NewsDetailPageProps) {
             {/* Featured Image */}
             {berita.featured_image && (
               <div className="relative aspect-video mb-8 rounded-xl overflow-hidden">
-                <Image
+                <NewsImage
                   src={berita.featured_image}
                   alt={berita.judul}
                   fill
-                  className="object-cover"
                   priority
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  className="object-cover transition-transform duration-500 group-hover:scale-110"
                 />
               </div>
             )}

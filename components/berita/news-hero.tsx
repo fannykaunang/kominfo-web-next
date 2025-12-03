@@ -38,7 +38,7 @@ export function NewsHero({ mainNews, sideNews }: NewsHeroProps) {
         {/* Main Featured News */}
         <Card className="lg:col-span-2 group overflow-hidden border-0 shadow-xl hover-lift">
           <Link href={`/berita/${mainNews.slug}`}>
-            <div className="relative aspect-[16/9] overflow-hidden">
+            <div className="relative aspect-video overflow-hidden">
               <Image
                 src={mainNews.featuredImage || "/images/placeholder.png"}
                 alt={mainNews.judul}
@@ -161,7 +161,7 @@ export function NewsHeroSkeleton() {
     <section className="container py-8">
       <div className="grid lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
-          <div className="aspect-[16/9] rounded-xl skeleton" />
+          <div className="aspect-video rounded-xl skeleton" />
         </div>
         <div className="flex flex-col gap-4">
           {[1, 2, 3].map((i) => (

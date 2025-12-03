@@ -22,6 +22,7 @@ import Link from "next/link";
 import { BeritaRepository } from "@/lib/models/berita.model";
 import { getAllKategori, getKategoriBySlug } from "@/lib/models/kategori.model";
 import { SliderRepository } from "@/lib/models/slider.model";
+import { StatistikRepository } from "@/lib/models/statistik.model";
 
 // Fetch real data from database
 async function getHomeData() {
@@ -43,7 +44,7 @@ async function getHomeData() {
     const popularResult = await BeritaRepository.getPopular(5);
 
     const [infoPentingKategori, infoMasyarakatKategori] = await Promise.all([
-      getKategoriBySlug("informasi-penting"),
+      getKategoriBySlug("info-penting"),
       getKategoriBySlug("informasi-masyarakat"),
     ]);
 
@@ -52,6 +53,7 @@ async function getHomeData() {
       infoMasyarakatNewsResult,
       categories,
       sliders,
+      stats,
     ] = await Promise.all([
       infoPentingKategori
         ? BeritaRepository.findAll({
@@ -69,6 +71,7 @@ async function getHomeData() {
         : Promise.resolve({ data: [] }),
       getAllKategori(),
       SliderRepository.findAll({ is_published: true }),
+      StatistikRepository.findAll({ limit: 8 }),
     ]);
 
     return {
@@ -79,6 +82,7 @@ async function getHomeData() {
       infoMasyarakatNews: infoMasyarakatNewsResult.data,
       categories,
       sliders,
+      stats,
     };
   } catch (error) {
     console.error("Error fetching home data:", error);
@@ -90,45 +94,10 @@ async function getHomeData() {
       infoMasyarakatNews: [],
       categories: [],
       sliders: [],
+      stats: [],
     };
   }
 }
-
-// Mock stats - replace with real data when available
-const mockStats = [
-  {
-    id: "1",
-    judul: "Jumlah Penduduk",
-    nilai: "234,617",
-    satuan: "jiwa",
-    icon: "users",
-    kategori: "demografi",
-  },
-  {
-    id: "2",
-    judul: "Luas Wilayah",
-    nilai: "46,791",
-    satuan: "km²",
-    icon: "building",
-    kategori: "geografis",
-  },
-  {
-    id: "3",
-    judul: "UMKM Aktif",
-    nilai: "3,456",
-    satuan: "unit",
-    icon: "briefcase",
-    kategori: "ekonomi",
-  },
-  {
-    id: "4",
-    judul: "Pertumbuhan Ekonomi",
-    nilai: "5.2",
-    satuan: "%",
-    icon: "trending",
-    kategori: "ekonomi",
-  },
-];
 
 export default async function HomePage() {
   const {
@@ -139,6 +108,7 @@ export default async function HomePage() {
     infoMasyarakatNews,
     categories,
     sliders,
+    stats,
   } = await getHomeData();
 
   // Prepare data for NewsHero component
@@ -234,6 +204,15 @@ export default async function HomePage() {
     _count: { berita: kategori.berita_count || 0 },
   }));
 
+  const transformedStats = stats.map((stat) => ({
+    id: stat.id,
+    judul: stat.judul,
+    nilai: stat.nilai,
+    satuan: stat.satuan || undefined,
+    icon: stat.icon || "trending",
+    kategori: stat.kategori || "umum",
+  }));
+
   return (
     <main className="min-h-screen" suppressHydrationWarning>
       {/* Hero Section with Main News */}
@@ -242,7 +221,7 @@ export default async function HomePage() {
       </Suspense>
 
       {/* Stats Section */}
-      <StatsSection stats={mockStats} />
+      <StatsSection stats={transformedStats} />
 
       {/* Latest News Section */}
       <section className="py-16">
@@ -338,7 +317,7 @@ export default async function HomePage() {
                 <h4 className="text-lg font-semibold">Informasi Penting</h4>
                 <Button variant="outline" asChild>
                   <Link
-                    href="/kategori/informasi-penting"
+                    href="/kategori/info-penting"
                     className="text-sm text-primary inline-flex items-center gap-1">
                     Lihat semua
                     <ArrowRight className="h-4 w-4" />

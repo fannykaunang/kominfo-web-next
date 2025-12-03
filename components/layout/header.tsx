@@ -270,11 +270,13 @@ export function Header() {
                   <MenuIcon className="h-5 w-5" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="w-[300px] sm:w-[400px]">
+              <SheetContent
+                side="right"
+                className="w-[300px] sm:w-[400px] flex flex-col">
                 <SheetHeader>
                   <SheetTitle>Menu</SheetTitle>
                 </SheetHeader>
-                <nav className="flex flex-col gap-2 mt-8">
+                <nav className="flex flex-col gap-2 mt-8 overflow-y-auto max-h-[calc(100vh-160px)] pr-1">
                   {allNavItems.map((item) => (
                     <div key={item.name}>
                       <Link

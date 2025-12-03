@@ -1,3 +1,5 @@
+// app/backend/berita/page.tsx
+
 import { Suspense } from "react";
 import { BeritaRepository } from "@/lib/models/berita.model";
 import { getAllKategori } from "@/lib/models/kategori.model";

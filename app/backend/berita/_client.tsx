@@ -1,3 +1,5 @@
+// app/backend/berita/_client.tsx
+
 "use client";
 
 import { useState } from "react";
@@ -470,13 +472,21 @@ export default function BeritaClient({
 
           {/* Pagination */}
           {beritaData.pagination.totalPages > 1 && (
-            <div className="flex items-center justify-between mt-4">
+            <div className="flex items-center justify-between mt-4 flex-wrap gap-4">
               <div className="text-sm text-gray-600 dark:text-gray-400">
-                Halaman {beritaData.pagination.page} dari{" "}
-                {beritaData.pagination.totalPages} (
-                {beritaData.pagination.total} total berita)
+                Menampilkan{" "}
+                {(beritaData.pagination.page - 1) *
+                  beritaData.pagination.limit +
+                  1}{" "}
+                -{" "}
+                {Math.min(
+                  beritaData.pagination.page * beritaData.pagination.limit,
+                  beritaData.pagination.total
+                )}{" "}
+                dari {beritaData.pagination.total} berita
               </div>
-              <div className="flex gap-2">
+              <div className="flex gap-1">
+                {/* Previous Button */}
                 <Button
                   variant="outline"
                   size="sm"
@@ -484,6 +494,77 @@ export default function BeritaClient({
                   disabled={currentPage === 1 || isLoading}>
                   Previous
                 </Button>
+
+                {/* Page Numbers */}
+                {(() => {
+                  const totalPages = beritaData.pagination.totalPages;
+                  const current = currentPage;
+                  const pages: (number | string)[] = [];
+
+                  if (totalPages <= 7) {
+                    // Show all pages if total <= 7
+                    for (let i = 1; i <= totalPages; i++) {
+                      pages.push(i);
+                    }
+                  } else {
+                    // Always show first page
+                    pages.push(1);
+
+                    if (current <= 3) {
+                      // Near start: 1 [2] 3 4 ... Last
+                      pages.push(2, 3, 4, "...", totalPages);
+                    } else if (current >= totalPages - 2) {
+                      // Near end: 1 ... N-3 N-2 [N-1] N
+                      pages.push(
+                        "...",
+                        totalPages - 3,
+                        totalPages - 2,
+                        totalPages - 1,
+                        totalPages
+                      );
+                    } else {
+                      // Middle: 1 ... [N-1] N N+1 ... Last
+                      pages.push(
+                        "...",
+                        current - 1,
+                        current,
+                        current + 1,
+                        "...",
+                        totalPages
+                      );
+                    }
+                  }
+
+                  return pages.map((page, idx) => {
+                    if (page === "...") {
+                      return (
+                        <Button
+                          key={`ellipsis-${idx}`}
+                          variant="ghost"
+                          size="sm"
+                          disabled
+                          className="w-10">
+                          ...
+                        </Button>
+                      );
+                    }
+
+                    const pageNum = page as number;
+                    return (
+                      <Button
+                        key={pageNum}
+                        variant={current === pageNum ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => handlePageChange(pageNum)}
+                        disabled={isLoading}
+                        className="w-10">
+                        {pageNum}
+                      </Button>
+                    );
+                  });
+                })()}
+
+                {/* Next Button */}
                 <Button
                   variant="outline"
                   size="sm"

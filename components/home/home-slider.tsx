@@ -62,11 +62,11 @@ export function HomeSlider({ sliders, sideNews }: HomeSliderProps) {
       <div className="grid lg:grid-cols-3 gap-6">
         <Card className="lg:col-span-2 overflow-hidden border-0 shadow-xl relative">
           {showFallback ? (
-            <div className="aspect-[16/9] flex items-center justify-center bg-muted text-muted-foreground">
+            <div className="aspect-video flex items-center justify-center bg-muted text-muted-foreground">
               Belum ada slider yang tersedia
             </div>
           ) : (
-            <div className="relative aspect-[16/9] overflow-hidden">
+            <div className="relative aspect-video overflow-hidden">
               {/* Track gambar dengan efek slide halus */}
               <div className="absolute inset-0">
                 <div
