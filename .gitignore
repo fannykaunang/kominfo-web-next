@@ -41,8 +41,8 @@ prisma/*.db
 prisma/*.db-journal
 
 # uploads
-/public/uploads/*
-!/public/uploads/.gitkeep
+#/public/uploads/*
+#!/public/uploads/.gitkeep
 
 # IDE
 .vscode/*
