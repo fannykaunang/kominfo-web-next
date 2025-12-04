@@ -1,3 +1,5 @@
+// lib/models/session.model.ts
+
 import { execute, query, queryOne } from "@/lib/db-helpers";
 import { v4 as uuidv4 } from "uuid";
 import {
@@ -52,7 +54,10 @@ export async function getAllSessions(
   page: number = 1,
   limit: number = 20
 ): Promise<PaginationResult<SessionWithUser>> {
-  const offset = (page - 1) * limit;
+  // Ensure limit & offset are valid numbers for prepared statements
+  const safeLimit =
+    Number.isFinite(limit) && limit > 0 ? Math.floor(limit) : 20;
+  const offset = (page - 1) * safeLimit;
   let whereConditions: string[] = [];
   let params: any[] = [];
 
@@ -97,7 +102,7 @@ export async function getAllSessions(
 
   // Get sessions
   const sessions = await query<SessionWithUser>(
-    `SELECT 
+    `SELECT
       s.*,
       u.name as user_name,
       u.email as user_email,
@@ -107,8 +112,8 @@ export async function getAllSessions(
      JOIN users u ON s.user_id = u.id
      ${whereClause}
      ORDER BY s.last_activity_at DESC
-     LIMIT ? OFFSET ?`,
-    [...params, limit, offset]
+    LIMIT ${safeLimit} OFFSET ${offset}`,
+    params
   );
 
   return {

@@ -1,3 +1,5 @@
+// app/backend/sessions/_client.tsx
+
 "use client";
 
 import { useState, useEffect } from "react";

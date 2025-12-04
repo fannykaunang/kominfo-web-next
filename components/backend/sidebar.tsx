@@ -18,6 +18,10 @@ import {
   ChevronRight,
   Menu,
   FileCode,
+  SlidersHorizontal,
+  Mail,
+  History,
+  Timer,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -73,6 +77,16 @@ const menuCategories = [
         href: "/backend/galeri",
         icon: Image,
       },
+      {
+        title: "Slider",
+        href: "/backend/slider",
+        icon: SlidersHorizontal,
+      },
+      {
+        title: "Newsletter",
+        href: "/backend/newsletter",
+        icon: Mail,
+      },
     ],
   },
   {
@@ -108,6 +122,19 @@ const menuCategories = [
         title: "Pengaturan",
         href: "/backend/pengaturan",
         icon: Settings,
+        adminOnly: true,
+      },
+      {
+        title: "Log Aktivitas",
+        href: "/backend/log-aktivitas",
+        icon: History,
+        adminOnly: true, // aktifkan kalau mau khusus admin
+      },
+      {
+        title: "Session",
+        href: "/backend/sessions",
+        icon: Timer,
+        // adminOnly: true, // aktifkan kalau mau khusus admin
       },
     ],
   },
@@ -160,7 +187,8 @@ export default function AdminSidebar({
           "fixed left-0 top-0 h-screen bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col z-50 transition-all duration-300",
           isOpen ? "w-64" : "w-0 lg:w-20",
           isMobile && !isOpen && "-translate-x-full"
-        )}>
+        )}
+      >
         {/* Logo Header */}
         <div className="h-16 flex items-center justify-between px-4 border-b border-gray-200 dark:border-gray-700 shrink-0">
           <Link href="/backend/dashboard" className="flex items-center gap-3">
@@ -185,7 +213,8 @@ export default function AdminSidebar({
               variant="ghost"
               size="icon"
               onClick={() => setIsOpen(false)}
-              className="lg:hidden">
+              className="lg:hidden"
+            >
               <X className="h-5 w-5" />
             </Button>
           )}
@@ -234,7 +263,8 @@ export default function AdminSidebar({
                             ? "bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 shadow-sm"
                             : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50"
                         )}
-                        title={!isOpen ? item.title : undefined}>
+                        title={!isOpen ? item.title : undefined}
+                      >
                         <Icon className="h-5 w-5 shrink-0" />
                         {isOpen && <span>{item.title}</span>}
 
@@ -276,7 +306,8 @@ export default function AdminSidebar({
         {!isMobile && (
           <button
             onClick={() => setIsOpen(!isOpen)}
-            className="absolute -right-3 top-20 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full p-1.5 shadow-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors hidden lg:block">
+            className="absolute -right-3 top-20 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full p-1.5 shadow-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors hidden lg:block"
+          >
             {isOpen ? (
               <ChevronLeft className="h-4 w-4 text-gray-600 dark:text-gray-400" />
             ) : (

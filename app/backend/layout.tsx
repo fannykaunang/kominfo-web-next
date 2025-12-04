@@ -3,23 +3,59 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { BackendLayoutClient } from "@/components/backend/layout-client";
-import { Toaster } from "sonner";
+import { queryOne } from "@/lib/db-helpers";
+
+// Force dynamic rendering
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export default async function BackendLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  console.log("🔍 [Layout] Starting session check...");
+
   // Check authentication
   const session = await auth();
+  console.log(
+    "🔍 [Layout] Auth check:",
+    session ? "✅ Logged in" : "❌ Not logged in"
+  );
+
   if (!session?.user) {
+    console.log("🔍 [Layout] No session, redirecting to login");
     redirect("/login");
   }
 
+  // ✅ SIMPLE CHECK: Was this user kicked recently?
+  try {
+    const userId = session.user.id;
+    console.log("🔍 [Layout] Checking if user was kicked:", userId);
+
+    const kicked = await queryOne(
+      `SELECT id FROM user_kicks 
+       WHERE user_id = ? AND expires_at > NOW()
+       LIMIT 1`,
+      [userId]
+    );
+
+    console.log(
+      "🔍 [Layout] User kicked?",
+      kicked ? "❌ YES - Redirecting!" : "✅ No"
+    );
+
+    if (kicked) {
+      console.log("🔍 [Layout] REDIRECTING to login...");
+      redirect("/login?reason=session_revoked");
+    }
+  } catch (error) {
+    console.error("❌ [Layout] Error checking user kick:", error);
+    // Continue if check fails (don't block legitimate users)
+  }
+
+  console.log("✅ [Layout] Session check passed, rendering page");
   return (
-    <>
-      <BackendLayoutClient user={session.user}>{children}</BackendLayoutClient>
-      <Toaster position="top-right" richColors closeButton duration={4000} />
-    </>
+    <BackendLayoutClient user={session.user}>{children}</BackendLayoutClient>
   );
 }
