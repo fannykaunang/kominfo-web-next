@@ -457,3 +457,68 @@ export interface GaleriFilterOptions {
   media_type?: "image" | "video";
   is_published?: string;
 }
+
+/**
+ * Session Model
+ */
+export interface Session extends RowDataPacket {
+  id: string;
+  user_id: string;
+  token_hash: string;
+  ip_address: string;
+  user_agent: string | null;
+  device_info: string | null;
+  location: string | null;
+  login_at: Date;
+  last_activity_at: Date;
+  expires_at: Date;
+  is_active: number;
+  created_at: Date;
+  updated_at: Date;
+}
+
+/**
+ * Session with User Info
+ */
+export interface SessionWithUser extends Session {
+  user_name: string;
+  user_email: string;
+  user_role: string;
+  user_avatar: string | null;
+}
+
+/**
+ * Revoked Session Model
+ */
+export interface RevokedSession extends RowDataPacket {
+  id: string;
+  session_id: string;
+  token_hash: string;
+  user_id: string;
+  revoked_by: string | null;
+  reason: string | null;
+  revoked_at: Date;
+}
+
+/**
+ * Session Create Input
+ */
+export interface SessionCreateInput {
+  user_id: string;
+  token_hash: string;
+  ip_address: string;
+  user_agent?: string | null;
+  device_info?: string | null;
+  location?: string | null;
+  expires_at: Date;
+}
+
+/**
+ * Session Filter Options
+ */
+export interface SessionFilterOptions {
+  search?: string; // Search by user name/email
+  user_id?: string;
+  is_active?: string;
+  ip_address?: string;
+}

@@ -1,10 +1,10 @@
 // app/backend/users/_client.tsx
 
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -12,20 +12,20 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
+} from "@/components/ui/table";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@/components/ui/select";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -35,8 +35,9 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
-import { Badge } from "@/components/ui/badge"
+} from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import {
   Search,
   Plus,
@@ -53,153 +54,154 @@ import {
   Mail,
   Eye,
   EyeOff,
-} from "lucide-react"
-import { toast } from "sonner"
-import { UserFormDialog } from "./form-dialog"
-import { formatDistanceToNow } from "date-fns"
-import { id } from "date-fns/locale"
+} from "lucide-react";
+import { toast } from "sonner";
+import { UserFormDialog } from "./form-dialog";
+import { formatDistanceToNow } from "date-fns";
+import { id } from "date-fns/locale";
 
 interface User {
-  id: string
-  name: string
-  email: string
-  role: "ADMIN" | "EDITOR" | "AUTHOR"
-  avatar: string | null
-  is_active: number
-  email_verified: number
-  last_login_at: Date | null
-  created_at: Date
-  updated_at: Date
+  id: string;
+  name: string;
+  email: string;
+  role: "ADMIN" | "EDITOR" | "AUTHOR";
+  avatar: string | null;
+  is_active: number;
+  email_verified: number;
+  last_login_at: Date | null;
+  created_at: Date;
+  updated_at: Date;
 }
 
 interface Stats {
-  total: number
-  active: number
-  inactive: number
-  admin: number
-  editor: number
-  author: number
-  verified: number
-  unverified: number
+  total: number;
+  active: number;
+  inactive: number;
+  admin: number;
+  editor: number;
+  author: number;
+  verified: number;
+  unverified: number;
 }
 
 export default function UsersClient() {
-  const [users, setUsers] = useState<User[]>([])
-  const [stats, setStats] = useState<Stats | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [searchQuery, setSearchQuery] = useState("")
-  const [roleFilter, setRoleFilter] = useState<string>("all")
-  const [statusFilter, setStatusFilter] = useState<string>("all")
-  const [verifiedFilter, setVerifiedFilter] = useState<string>("all")
-  const [currentPage, setCurrentPage] = useState(1)
-  const [totalPages, setTotalPages] = useState(1)
-  const [total, setTotal] = useState(0)
-  const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const [editingUser, setEditingUser] = useState<User | null>(null)
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
-  const [userToDelete, setUserToDelete] = useState<User | null>(null)
-  const limit = 10
+  const [users, setUsers] = useState<User[]>([]);
+  const [stats, setStats] = useState<Stats | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [roleFilter, setRoleFilter] = useState<string>("all");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [verifiedFilter, setVerifiedFilter] = useState<string>("all");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [total, setTotal] = useState(0);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [userToDelete, setUserToDelete] = useState<User | null>(null);
+  const limit = 10;
 
   // Fetch stats
   const fetchStats = async () => {
     try {
-      const res = await fetch("/api/users?stats=true")
+      const res = await fetch("/api/users?stats=true");
       if (res.ok) {
-        const data = await res.json()
-        setStats(data)
+        const data = await res.json();
+        setStats(data);
       }
     } catch (error) {
-      console.error("Failed to fetch stats:", error)
+      console.error("Failed to fetch stats:", error);
     }
-  }
+  };
 
   // Fetch users
   const fetchUsers = async () => {
-    setLoading(true)
+    setLoading(true);
     try {
       const params = new URLSearchParams({
         page: currentPage.toString(),
         limit: limit.toString(),
-      })
+      });
 
-      if (searchQuery) params.append("search", searchQuery)
-      if (roleFilter !== "all") params.append("role", roleFilter)
-      if (statusFilter !== "all") params.append("is_active", statusFilter)
-      if (verifiedFilter !== "all") params.append("email_verified", verifiedFilter)
+      if (searchQuery) params.append("search", searchQuery);
+      if (roleFilter !== "all") params.append("role", roleFilter);
+      if (statusFilter !== "all") params.append("is_active", statusFilter);
+      if (verifiedFilter !== "all")
+        params.append("email_verified", verifiedFilter);
 
-      const res = await fetch(`/api/users?${params}`)
-      if (!res.ok) throw new Error("Failed to fetch users")
+      const res = await fetch(`/api/users?${params}`);
+      if (!res.ok) throw new Error("Failed to fetch users");
 
-      const data = await res.json()
-      setUsers(data.data)
-      setTotal(data.pagination.total)
-      setTotalPages(data.pagination.totalPages)
+      const data = await res.json();
+      setUsers(data.data);
+      setTotal(data.pagination.total);
+      setTotalPages(data.pagination.totalPages);
     } catch (error) {
-      console.error("Error fetching users:", error)
-      toast.error("Gagal memuat data users")
+      console.error("Error fetching users:", error);
+      toast.error("Gagal memuat data users");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
-    fetchStats()
-  }, [])
+    fetchStats();
+  }, []);
 
   useEffect(() => {
-    fetchUsers()
-  }, [currentPage, searchQuery, roleFilter, statusFilter, verifiedFilter])
+    fetchUsers();
+  }, [currentPage, searchQuery, roleFilter, statusFilter, verifiedFilter]);
 
   // Handle add user
   const handleAdd = () => {
-    setEditingUser(null)
-    setIsDialogOpen(true)
-  }
+    setEditingUser(null);
+    setIsDialogOpen(true);
+  };
 
   // Handle edit user
   const handleEdit = (user: User) => {
-    setEditingUser(user)
-    setIsDialogOpen(true)
-  }
+    setEditingUser(user);
+    setIsDialogOpen(true);
+  };
 
   // Handle dialog close
   const handleDialogClose = (refresh?: boolean) => {
-    setIsDialogOpen(false)
-    setEditingUser(null)
+    setIsDialogOpen(false);
+    setEditingUser(null);
     if (refresh) {
-      fetchUsers()
-      fetchStats()
+      fetchUsers();
+      fetchStats();
     }
-  }
+  };
 
   // Handle delete
   const handleDeleteClick = (user: User) => {
-    setUserToDelete(user)
-    setDeleteDialogOpen(true)
-  }
+    setUserToDelete(user);
+    setDeleteDialogOpen(true);
+  };
 
   const confirmDelete = async () => {
-    if (!userToDelete) return
+    if (!userToDelete) return;
 
     try {
       const res = await fetch(`/api/users/${userToDelete.id}`, {
         method: "DELETE",
-      })
+      });
 
       if (!res.ok) {
-        const error = await res.json()
-        throw new Error(error.error || "Failed to delete user")
+        const error = await res.json();
+        throw new Error(error.error || "Failed to delete user");
       }
 
-      toast.success("User berhasil dihapus")
-      setDeleteDialogOpen(false)
-      setUserToDelete(null)
-      fetchUsers()
-      fetchStats()
+      toast.success("User berhasil dihapus");
+      setDeleteDialogOpen(false);
+      setUserToDelete(null);
+      fetchUsers();
+      fetchStats();
     } catch (error: any) {
-      toast.error(error.message || "Gagal menghapus user")
+      toast.error(error.message || "Gagal menghapus user");
     }
-  }
+  };
 
   // Handle toggle active
   const handleToggleActive = async (user: User) => {
@@ -208,24 +210,24 @@ export default function UsersClient() {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "toggle_active" }),
-      })
+      });
 
       if (!res.ok) {
-        const error = await res.json()
-        throw new Error(error.error || "Failed to toggle status")
+        const error = await res.json();
+        throw new Error(error.error || "Failed to toggle status");
       }
 
       toast.success(
         user.is_active === 1
           ? "User berhasil dinonaktifkan"
           : "User berhasil diaktifkan"
-      )
-      fetchUsers()
-      fetchStats()
+      );
+      fetchUsers();
+      fetchStats();
     } catch (error: any) {
-      toast.error(error.message || "Gagal mengubah status user")
+      toast.error(error.message || "Gagal mengubah status user");
     }
-  }
+  };
 
   // Handle verify email
   const handleVerifyEmail = async (user: User) => {
@@ -234,74 +236,87 @@ export default function UsersClient() {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "verify_email" }),
-      })
+      });
 
       if (!res.ok) {
-        const error = await res.json()
-        throw new Error(error.error || "Failed to verify email")
+        const error = await res.json();
+        throw new Error(error.error || "Failed to verify email");
       }
 
-      toast.success("Email berhasil diverifikasi")
-      fetchUsers()
-      fetchStats()
+      toast.success("Email berhasil diverifikasi");
+      fetchUsers();
+      fetchStats();
     } catch (error: any) {
-      toast.error(error.message || "Gagal verifikasi email")
+      toast.error(error.message || "Gagal verifikasi email");
     }
-  }
+  };
 
   // Handle search
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value)
-    setCurrentPage(1)
-  }
+    setSearchQuery(e.target.value);
+    setCurrentPage(1);
+  };
 
   // Handle filter change
   const handleFilterChange = (
     type: "role" | "status" | "verified",
     value: string
   ) => {
-    if (type === "role") setRoleFilter(value)
-    if (type === "status") setStatusFilter(value)
-    if (type === "verified") setVerifiedFilter(value)
-    setCurrentPage(1)
-  }
+    if (type === "role") setRoleFilter(value);
+    if (type === "status") setStatusFilter(value);
+    if (type === "verified") setVerifiedFilter(value);
+    setCurrentPage(1);
+  };
 
   // Pagination
   const handlePageChange = (page: number) => {
-    setCurrentPage(page)
-    window.scrollTo({ top: 0, behavior: "smooth" })
-  }
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   const getPageNumbers = () => {
-    const pages = []
+    const pages = [];
     if (totalPages <= 7) {
-      for (let i = 1; i <= totalPages; i++) pages.push(i)
+      for (let i = 1; i <= totalPages; i++) pages.push(i);
     } else {
-      pages.push(1)
+      pages.push(1);
       if (currentPage <= 3) {
-        pages.push(2, 3, 4, "...", totalPages)
+        pages.push(2, 3, 4, "...", totalPages);
       } else if (currentPage >= totalPages - 2) {
-        pages.push("...", totalPages - 3, totalPages - 2, totalPages - 1, totalPages)
+        pages.push(
+          "...",
+          totalPages - 3,
+          totalPages - 2,
+          totalPages - 1,
+          totalPages
+        );
       } else {
-        pages.push("...", currentPage - 1, currentPage, currentPage + 1, "...", totalPages)
+        pages.push(
+          "...",
+          currentPage - 1,
+          currentPage,
+          currentPage + 1,
+          "...",
+          totalPages
+        );
       }
     }
-    return pages
-  }
+    return pages;
+  };
 
   // Role badge color
   const getRoleBadgeColor = (role: string) => {
     switch (role) {
       case "ADMIN":
-        return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
+        return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200";
       case "EDITOR":
-        return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
+        return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200";
       case "AUTHOR":
-        return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+        return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
       default:
-        return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200"
+        return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200";
     }
-  }
+  };
 
   return (
     <div className="space-y-6">
@@ -311,7 +326,9 @@ export default function UsersClient() {
           <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Total Users</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Total Users
+                </p>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">
                   {stats.total}
                 </p>
@@ -323,7 +340,9 @@ export default function UsersClient() {
           <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Active</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Active
+                </p>
                 <p className="text-2xl font-bold text-green-600 dark:text-green-400">
                   {stats.active}
                 </p>
@@ -335,7 +354,9 @@ export default function UsersClient() {
           <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Inactive</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Inactive
+                </p>
                 <p className="text-2xl font-bold text-red-600 dark:text-red-400">
                   {stats.inactive}
                 </p>
@@ -347,7 +368,9 @@ export default function UsersClient() {
           <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Email Verified</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Email Verified
+                </p>
                 <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">
                   {stats.verified}
                 </p>
@@ -373,7 +396,10 @@ export default function UsersClient() {
           </div>
 
           {/* Role Filter */}
-          <Select value={roleFilter} onValueChange={(v) => handleFilterChange("role", v)}>
+          <Select
+            value={roleFilter}
+            onValueChange={(v) => handleFilterChange("role", v)}
+          >
             <SelectTrigger className="w-full lg:w-40">
               <SelectValue placeholder="Role" />
             </SelectTrigger>
@@ -386,7 +412,10 @@ export default function UsersClient() {
           </Select>
 
           {/* Status Filter */}
-          <Select value={statusFilter} onValueChange={(v) => handleFilterChange("status", v)}>
+          <Select
+            value={statusFilter}
+            onValueChange={(v) => handleFilterChange("status", v)}
+          >
             <SelectTrigger className="w-full lg:w-40">
               <SelectValue placeholder="Status" />
             </SelectTrigger>
@@ -398,7 +427,10 @@ export default function UsersClient() {
           </Select>
 
           {/* Verified Filter */}
-          <Select value={verifiedFilter} onValueChange={(v) => handleFilterChange("verified", v)}>
+          <Select
+            value={verifiedFilter}
+            onValueChange={(v) => handleFilterChange("verified", v)}
+          >
             <SelectTrigger className="w-full lg:w-40">
               <SelectValue placeholder="Verified" />
             </SelectTrigger>
@@ -422,7 +454,9 @@ export default function UsersClient() {
         {loading ? (
           <div className="p-8 text-center">
             <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent"></div>
-            <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">Memuat data...</p>
+            <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+              Memuat data...
+            </p>
           </div>
         ) : users.length === 0 ? (
           <div className="p-8 text-center">
@@ -457,7 +491,15 @@ export default function UsersClient() {
                     <TableCell>
                       <div className="flex items-center gap-3">
                         <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center text-white font-semibold">
-                          {user.name.charAt(0).toUpperCase()}
+                          <Avatar className="h-10 w-10">
+                            <AvatarImage
+                              src={user.avatar || undefined}
+                              alt={user.name}
+                            />
+                            <AvatarFallback className="bg-gradient-to-br from-blue-600 to-purple-600 text-white font-semibold">
+                              {user.name?.charAt(0)?.toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
                         </div>
                         <div>
                           <div className="font-medium text-gray-900 dark:text-white">
@@ -509,7 +551,9 @@ export default function UsersClient() {
                           })}
                         </span>
                       ) : (
-                        <span className="text-sm text-gray-400">Belum pernah</span>
+                        <span className="text-sm text-gray-400">
+                          Belum pernah
+                        </span>
                       )}
                     </TableCell>
                     <TableCell className="text-right">
@@ -524,12 +568,16 @@ export default function UsersClient() {
                             <Pencil className="h-4 w-4 mr-2" />
                             Edit
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleToggleActive(user)}>
+                          <DropdownMenuItem
+                            onClick={() => handleToggleActive(user)}
+                          >
                             <Power className="h-4 w-4 mr-2" />
                             {user.is_active === 1 ? "Nonaktifkan" : "Aktifkan"}
                           </DropdownMenuItem>
                           {user.email_verified === 0 && (
-                            <DropdownMenuItem onClick={() => handleVerifyEmail(user)}>
+                            <DropdownMenuItem
+                              onClick={() => handleVerifyEmail(user)}
+                            >
                               <CheckCircle className="h-4 w-4 mr-2" />
                               Verifikasi Email
                             </DropdownMenuItem>
@@ -576,7 +624,13 @@ export default function UsersClient() {
                       {page}
                     </Button>
                   ) : (
-                    <Button key={index} variant="ghost" size="sm" disabled className="w-10">
+                    <Button
+                      key={index}
+                      variant="ghost"
+                      size="sm"
+                      disabled
+                      className="w-10"
+                    >
                       ...
                     </Button>
                   )
@@ -625,5 +679,5 @@ export default function UsersClient() {
         </AlertDialogContent>
       </AlertDialog>
     </div>
-  )
+  );
 }

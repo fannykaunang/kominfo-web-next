@@ -6,7 +6,6 @@ import { execute, queryOne } from "@/lib/db-helpers";
 import { User } from "@/lib/types";
 import { cookies } from "next/headers";
 import { encode } from "@auth/core/jwt";
-import { createSession, hashToken } from "@/lib/models/session.model";
 
 const otpSchema = z.object({
   email: z.string().email(),
@@ -84,23 +83,6 @@ export async function POST(request: NextRequest) {
       maxAge: 30 * 24 * 60 * 60, // 30 days
     });
 
-    // Hash token for storage
-    const tokenHash = hashToken(token);
-
-    // Create session record in database
-    const expiresAt = new Date();
-    expiresAt.setDate(expiresAt.getDate() + 30); // 30 days
-
-    await createSession({
-      user_id: user.id,
-      token_hash: tokenHash,
-      ip_address: ipAddress,
-      user_agent: userAgent,
-      device_info: extractDeviceInfo(userAgent),
-      location: null, // Could be added with IP geolocation service
-      expires_at: expiresAt,
-    });
-
     // Set session cookie
     const cookieStore = await cookies();
 
@@ -145,23 +127,4 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
-}
-
-// Helper function to extract device info from user agent
-function extractDeviceInfo(userAgent: string): string {
-  if (!userAgent) return "Unknown";
-
-  // Detect mobile
-  if (/mobile/i.test(userAgent)) {
-    if (/android/i.test(userAgent)) return "Android Mobile";
-    if (/iphone|ipad|ipod/i.test(userAgent)) return "iOS Mobile";
-    return "Mobile";
-  }
-
-  // Detect desktop OS
-  if (/windows/i.test(userAgent)) return "Windows Desktop";
-  if (/macintosh|mac os x/i.test(userAgent)) return "Mac Desktop";
-  if (/linux/i.test(userAgent)) return "Linux Desktop";
-
-  return "Unknown";
 }
