@@ -200,7 +200,7 @@ export async function createHalaman(
   if (userId) {
     await createLogWithData({
       user_id: userId,
-      aksi: "CREATE",
+      aksi: "Create",
       modul: "halaman",
       detail_aksi: `Membuat halaman baru: ${data.judul}`,
       data_sebelum: null,
@@ -281,7 +281,7 @@ export async function updateHalaman(
   if (userId && oldData) {
     await createLogWithData({
       user_id: userId,
-      aksi: "UPDATE",
+      aksi: "Update",
       modul: "halaman",
       detail_aksi: `Mengupdate halaman: ${oldData.judul}`,
       data_sebelum: oldData,
@@ -306,7 +306,7 @@ export async function deleteHalaman(
   if (userId && halaman) {
     await createLogWithData({
       user_id: userId,
-      aksi: "DELETE",
+      aksi: "Delete",
       modul: "halaman",
       detail_aksi: `Menghapus halaman: ${halaman.judul}`,
       data_sebelum: halaman,

@@ -152,7 +152,7 @@ export async function createGaleri(data: GaleriCreateInput, userId: string) {
   // Log activity
   await createLogWithData({
     user_id: userId,
-    aksi: "CREATE",
+    aksi: "Create",
     modul: "galeri",
     detail_aksi: `Membuat galeri baru: ${data.judul}`,
     data_sebelum: null,
@@ -234,7 +234,7 @@ export async function updateGaleri(
   // Log activity
   await createLogWithData({
     user_id: userId,
-    aksi: "UPDATE",
+    aksi: "Update",
     modul: "galeri",
     detail_aksi: `Mengupdate galeri: ${existing.judul}`,
     data_sebelum: existing,
@@ -256,7 +256,7 @@ export async function deleteGaleri(id: string, userId: string) {
   // Log activity
   await createLogWithData({
     user_id: userId,
-    aksi: "DELETE",
+    aksi: "Delete",
     modul: "galeri",
     detail_aksi: `Menghapus galeri: ${existing.judul}`,
     data_sebelum: existing,

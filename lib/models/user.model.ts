@@ -167,8 +167,8 @@ export async function createUser(
   // Log activity
   await createLogWithData({
     user_id: actorId,
-    aksi: "CREATE",
-    modul: "USERS",
+    aksi: "Create",
+    modul: "Users",
     detail_aksi: `Membuat user baru: ${data.name} (${data.email})`,
     data_sebelum: null,
     data_sesudah: { id, ...data, password: "[HIDDEN]" },
@@ -238,8 +238,8 @@ export async function updateUser(
   // Log activity
   await createLogWithData({
     user_id: actorId,
-    aksi: "UPDATE",
-    modul: "USERS",
+    aksi: "Update",
+    modul: "Users",
     detail_aksi: `Mengupdate user: ${existingUser.name}`,
     data_sebelum: existingUser,
     data_sesudah: {
@@ -269,8 +269,8 @@ export async function deleteUser(
   // Log activity
   await createLogWithData({
     user_id: actorId,
-    aksi: "DELETE",
-    modul: "USERS",
+    aksi: "Delete",
+    modul: "Users",
     detail_aksi: `Menghapus user: ${existingUser.name} (${existingUser.email})`,
     data_sebelum: existingUser,
     data_sesudah: null,
@@ -296,8 +296,8 @@ export async function toggleUserActive(
   // Log activity
   await createLogWithData({
     user_id: actorId,
-    aksi: "UPDATE",
-    modul: "USERS",
+    aksi: "Update",
+    modul: "Users",
     detail_aksi: `${newStatus === 1 ? "Mengaktifkan" : "Menonaktifkan"} user: ${
       user.name
     }`,
@@ -321,8 +321,8 @@ export async function verifyUserEmail(
   if (user) {
     await createLogWithData({
       user_id: actorId,
-      aksi: "UPDATE",
-      modul: "USERS",
+      aksi: "Update",
+      modul: "Users",
       detail_aksi: `Memverifikasi email user: ${user.name}`,
       data_sebelum: { email_verified: 0 },
       data_sesudah: { email_verified: 1 },

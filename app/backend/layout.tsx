@@ -28,30 +28,28 @@ export default async function BackendLayout({
     redirect("/login");
   }
 
-  // ✅ SIMPLE CHECK: Was this user kicked recently?
+  // ✅ Check if user was kicked
+  let kicked = null;
   try {
     const userId = session.user.id;
     console.log("🔍 [Layout] Checking if user was kicked:", userId);
 
-    const kicked = await queryOne(
+    kicked = await queryOne(
       `SELECT id FROM user_kicks 
        WHERE user_id = ? AND expires_at > NOW()
        LIMIT 1`,
       [userId]
     );
 
-    console.log(
-      "🔍 [Layout] User kicked?",
-      kicked ? "❌ YES - Redirecting!" : "✅ No"
-    );
-
-    if (kicked) {
-      console.log("🔍 [Layout] REDIRECTING to login...");
-      redirect("/login?reason=session_revoked");
-    }
+    console.log("🔍 [Layout] User kicked?", kicked ? "❌ YES" : "✅ No");
   } catch (error) {
     console.error("❌ [Layout] Error checking user kick:", error);
-    // Continue if check fails (don't block legitimate users)
+  }
+
+  // ✅ Redirect to logout route (route handler can modify cookies!)
+  if (kicked) {
+    console.log("🔍 [Layout] Redirecting to logout route...");
+    redirect("/api/auth/logout");
   }
 
   console.log("✅ [Layout] Session check passed, rendering page");

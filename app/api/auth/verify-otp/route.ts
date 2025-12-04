@@ -58,6 +58,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    try {
+      await execute(`DELETE FROM user_kicks WHERE user_id = ?`, [user.id]);
+      console.log("✅ [verify-otp] Cleared old user_kicks for:", user.id);
+    } catch (error) {
+      console.error("❌ [verify-otp] Error clearing user_kicks:", error);
+    }
+
     // Create session token manually
     const secret = process.env.NEXTAUTH_SECRET;
     if (!secret) {

@@ -24,11 +24,11 @@ export default auth(async (req) => {
       const token = req.cookies.get(cookieName)?.value;
 
       if (token) {
-        // Call API route to check if session is revoked
+        // Call API route to check if user was kicked
         // API runs in Node.js runtime, can access database
         const baseUrl =
           process.env.NEXTAUTH_URL ||
-          `http://localhost:${process.env.NEXT_PUBLIC_PORT || 3000}`;
+          `http://localhost:${process.env.PORT || 3000}`;
         const response = await fetch(`${baseUrl}/api/auth/check-session`, {
           method: "POST",
           headers: {
@@ -41,21 +41,15 @@ export default auth(async (req) => {
         if (response.ok) {
           const data = await response.json();
 
-          if (data.revoked) {
-            // Session has been revoked, force logout
-            const redirectResponse = NextResponse.redirect(
-              new URL("/login?reason=session_revoked", nextUrl)
-            );
-
-            // Clear the session cookie
-            redirectResponse.cookies.delete(cookieName);
-
-            return redirectResponse;
+          if (data.kicked) {
+            // User has been kicked, force logout
+            console.log("🔍 [Proxy] User kicked, redirecting to logout...");
+            return NextResponse.redirect(new URL("/api/auth/logout", nextUrl));
           }
         }
       }
     } catch (error) {
-      console.error("Error checking revoked session:", error);
+      console.error("Error checking kicked session:", error);
       // Continue if check fails (don't block legitimate users)
     }
   }

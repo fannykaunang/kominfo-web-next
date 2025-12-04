@@ -120,7 +120,7 @@ export async function createMenu(
   if (userId) {
     await createLogWithData({
       user_id: userId,
-      aksi: "CREATE",
+      aksi: "Create",
       modul: "menu",
       detail_aksi: `Membuat menu baru: ${data.nama}`,
       data_sebelum: null,
@@ -182,7 +182,7 @@ export async function updateMenu(
   if (userId && oldData) {
     await createLogWithData({
       user_id: userId,
-      aksi: "UPDATE",
+      aksi: "Update",
       modul: "menu",
       detail_aksi: `Mengupdate menu: ${oldData.nama}`,
       data_sebelum: oldData,
@@ -204,7 +204,7 @@ export async function deleteMenu(id: string, userId?: string): Promise<void> {
   if (userId && menu) {
     await createLogWithData({
       user_id: userId,
-      aksi: "DELETE",
+      aksi: "Delete",
       modul: "menu",
       detail_aksi: `Menghapus menu: ${menu.nama}`,
       data_sebelum: menu,

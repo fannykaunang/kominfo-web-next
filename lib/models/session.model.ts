@@ -211,8 +211,8 @@ export async function revokeSession(
   // Log activity
   await createLogWithData({
     user_id: revokedBy,
-    aksi: "REVOKE_SESSION",
-    modul: "SESSIONS",
+    aksi: "Revoke_Session",
+    modul: "sessions",
     detail_aksi: `Kicked session: ${sessionId}`,
     data_sebelum: session,
     data_sesudah: { ...session, is_active: 0 },
@@ -273,7 +273,7 @@ export async function revokeSessionAndBanUser(
   await createLogWithData({
     user_id: revokedBy,
     aksi: "BAN_USER",
-    modul: "SESSIONS",
+    modul: "sessions",
     detail_aksi: `Banned user and revoked all sessions: ${session.user_id}`,
     data_sebelum: { user_id: session.user_id, sessions: userSessions },
     data_sesudah: { user_id: session.user_id, is_active: 0 },
