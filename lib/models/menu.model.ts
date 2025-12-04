@@ -93,7 +93,9 @@ export async function getMenuStats() {
  */
 export async function createMenu(
   data: MenuCreateInput,
-  userId?: string
+  userId?: string,
+  ipAddress?: string,
+  userAgent?: string
 ): Promise<string> {
   const id = uuidv4();
 
@@ -125,6 +127,10 @@ export async function createMenu(
       detail_aksi: `Membuat menu baru: ${data.nama}`,
       data_sebelum: null,
       data_sesudah: data,
+      ip_address: ipAddress || null,
+      user_agent: userAgent || null,
+      endpoint: "/api/menu",
+      method: "POST",
     });
   }
 
@@ -137,7 +143,9 @@ export async function createMenu(
 export async function updateMenu(
   id: string,
   data: MenuUpdateInput,
-  userId?: string
+  userId?: string,
+  ipAddress?: string,
+  userAgent?: string
 ): Promise<void> {
   // Get old data for logging
   const oldData = await getMenuById(id);
@@ -187,6 +195,10 @@ export async function updateMenu(
       detail_aksi: `Mengupdate menu: ${oldData.nama}`,
       data_sebelum: oldData,
       data_sesudah: data,
+      ip_address: ipAddress || null,
+      user_agent: userAgent || null,
+      endpoint: "/api/menu",
+      method: "PUT",
     });
   }
 }
@@ -194,7 +206,12 @@ export async function updateMenu(
 /**
  * Delete menu (will cascade delete halaman)
  */
-export async function deleteMenu(id: string, userId?: string): Promise<void> {
+export async function deleteMenu(
+  id: string,
+  userId?: string,
+  ipAddress?: string,
+  userAgent?: string
+): Promise<void> {
   // Get data for logging
   const menu = await getMenuById(id);
 
@@ -209,6 +226,10 @@ export async function deleteMenu(id: string, userId?: string): Promise<void> {
       detail_aksi: `Menghapus menu: ${menu.nama}`,
       data_sebelum: menu,
       data_sesudah: null,
+      ip_address: ipAddress || null,
+      user_agent: userAgent || null,
+      endpoint: "/api/menu",
+      method: "DELETE",
     });
   }
 }
@@ -218,7 +239,9 @@ export async function deleteMenu(id: string, userId?: string): Promise<void> {
  */
 export async function togglePublishMenu(
   id: string,
-  userId?: string
+  userId?: string,
+  ipAddress?: string,
+  userAgent?: string
 ): Promise<void> {
   const menu = await getMenuById(id);
   if (!menu) throw new Error("Menu tidak ditemukan");

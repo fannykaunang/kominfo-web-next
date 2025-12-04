@@ -8,6 +8,16 @@ import {
   getHalamanStats,
 } from "@/lib/models/halaman.model";
 
+// Helper to get client info
+function getClientInfo(request: NextRequest) {
+  const ipAddress =
+    request.headers.get("x-forwarded-for") ||
+    request.headers.get("x-real-ip") ||
+    "unknown";
+  const userAgent = request.headers.get("user-agent") || "unknown";
+  return { ipAddress, userAgent };
+}
+
 // GET - List all halaman
 export async function GET(request: NextRequest) {
   try {
@@ -68,6 +78,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const { ipAddress, userAgent } = getClientInfo(request);
+
     const id = await createHalaman(
       {
         menu_id,
@@ -81,7 +93,9 @@ export async function POST(request: NextRequest) {
         meta_description: meta_description || null,
         author_id: session.user.id,
       },
-      session.user.id
+      session.user.id,
+      ipAddress,
+      userAgent
     );
 
     return NextResponse.json({ id, message: "Halaman berhasil dibuat" });

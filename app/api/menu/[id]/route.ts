@@ -4,6 +4,16 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { getMenuById, updateMenu, deleteMenu } from "@/lib/models/menu.model";
 
+// Helper to get client info
+function getClientInfo(request: NextRequest) {
+  const ipAddress =
+    request.headers.get("x-forwarded-for") ||
+    request.headers.get("x-real-ip") ||
+    "unknown";
+  const userAgent = request.headers.get("user-agent") || "unknown";
+  return { ipAddress, userAgent };
+}
+
 // GET - Get menu by ID
 export async function GET(
   request: NextRequest,
@@ -53,6 +63,8 @@ export async function PUT(
       return NextResponse.json({ error: "Menu not found" }, { status: 404 });
     }
 
+    const { ipAddress, userAgent } = getClientInfo(request);
+
     await updateMenu(
       id,
       {
@@ -63,7 +75,9 @@ export async function PUT(
         is_published,
         deskripsi,
       },
-      session.user.id
+      session.user.id,
+      ipAddress,
+      userAgent
     );
 
     return NextResponse.json({ message: "Menu berhasil diupdate" });
@@ -95,7 +109,9 @@ export async function DELETE(
       return NextResponse.json({ error: "Menu not found" }, { status: 404 });
     }
 
-    await deleteMenu(id, session.user.id);
+    const { ipAddress, userAgent } = getClientInfo(request);
+
+    await deleteMenu(id, session.user.id, ipAddress, userAgent);
 
     return NextResponse.json({ message: "Menu berhasil dihapus" });
   } catch (error: any) {

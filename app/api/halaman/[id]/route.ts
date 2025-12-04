@@ -8,6 +8,16 @@ import {
   deleteHalaman,
 } from "@/lib/models/halaman.model";
 
+// Helper to get client info
+function getClientInfo(request: NextRequest) {
+  const ipAddress =
+    request.headers.get("x-forwarded-for") ||
+    request.headers.get("x-real-ip") ||
+    "unknown";
+  const userAgent = request.headers.get("user-agent") || "unknown";
+  return { ipAddress, userAgent };
+}
+
 // GET - Get halaman by ID
 export async function GET(
   request: NextRequest,
@@ -67,6 +77,8 @@ export async function PUT(
       return NextResponse.json({ error: "Halaman not found" }, { status: 404 });
     }
 
+    const { ipAddress, userAgent } = getClientInfo(request);
+
     await updateHalaman(
       id,
       {
@@ -80,7 +92,9 @@ export async function PUT(
         meta_title,
         meta_description,
       },
-      session.user.id
+      session.user.id,
+      ipAddress,
+      userAgent
     );
 
     return NextResponse.json({ message: "Halaman berhasil diupdate" });
@@ -112,7 +126,9 @@ export async function DELETE(
       return NextResponse.json({ error: "Halaman not found" }, { status: 404 });
     }
 
-    await deleteHalaman(id, session.user.id);
+    const { ipAddress, userAgent } = getClientInfo(request);
+
+    await deleteHalaman(id, session.user.id, ipAddress, userAgent);
 
     return NextResponse.json({ message: "Halaman berhasil dihapus" });
   } catch (error: any) {

@@ -42,6 +42,7 @@ import {
 import { LogDetailDialog } from "./detail-dialog";
 
 interface LogAktivitas {
+  log_id?: string;
   id: string;
   user_id: string;
   user_name: string;
@@ -495,12 +496,16 @@ export function LogClient() {
                   </TableCell>
                 </TableRow>
               ) : (
-                logs.map((log) => {
+                logs.map((log, index) => {
                   const method = extractMethod(log.endpoint);
                   const path = extractPath(log.endpoint);
+                  const rowKey =
+                    log.log_id ??
+                    log.id ??
+                    `${log.user_id}-${log.created_at}-${index}`;
 
                   return (
-                    <TableRow key={log.id}>
+                    <TableRow key={rowKey}>
                       <TableCell className="text-sm text-gray-600 dark:text-gray-400">
                         {formatDate(log.created_at)}
                       </TableCell>
@@ -597,20 +602,25 @@ export function LogClient() {
                 Previous
               </Button>
 
-              {getPageNumbers().map((page, index) => (
-                <Button
-                  key={index}
-                  variant={page === currentPage ? "default" : "outline"}
-                  size="sm"
-                  onClick={() =>
-                    typeof page === "number" && setCurrentPage(page)
-                  }
-                  disabled={typeof page === "string"}
-                  className="min-w-[40px]"
-                >
-                  {page}
-                </Button>
-              ))}
+              {getPageNumbers().map((page, index) => {
+                const key =
+                  typeof page === "number" ? page : `ellipsis-${index}`;
+
+                return (
+                  <Button
+                    key={key}
+                    variant={page === currentPage ? "default" : "outline"}
+                    size="sm"
+                    onClick={() =>
+                      typeof page === "number" && setCurrentPage(page)
+                    }
+                    disabled={typeof page === "string"}
+                    className="min-w-[40px]"
+                  >
+                    {page}
+                  </Button>
+                );
+              })}
 
               <Button
                 variant="outline"

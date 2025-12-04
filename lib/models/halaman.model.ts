@@ -169,7 +169,9 @@ export async function getHalamanStats(menu_id?: string) {
  */
 export async function createHalaman(
   data: HalamanCreateInput,
-  userId?: string
+  userId?: string,
+  ipAddress?: string,
+  userAgent?: string
 ): Promise<string> {
   const id = uuidv4();
 
@@ -205,6 +207,10 @@ export async function createHalaman(
       detail_aksi: `Membuat halaman baru: ${data.judul}`,
       data_sebelum: null,
       data_sesudah: data,
+      ip_address: ipAddress || null,
+      user_agent: userAgent || null,
+      endpoint: "/api/halaman",
+      method: "POST",
     });
   }
 
@@ -217,7 +223,9 @@ export async function createHalaman(
 export async function updateHalaman(
   id: string,
   data: HalamanUpdateInput,
-  userId?: string
+  userId?: string,
+  ipAddress?: string,
+  userAgent?: string
 ): Promise<void> {
   // Get old data for logging
   const oldData = await getHalamanById(id);
@@ -286,6 +294,10 @@ export async function updateHalaman(
       detail_aksi: `Mengupdate halaman: ${oldData.judul}`,
       data_sebelum: oldData,
       data_sesudah: data,
+      ip_address: ipAddress || null,
+      user_agent: userAgent || null,
+      endpoint: "/api/halaman",
+      method: "UPDATE",
     });
   }
 }
@@ -295,7 +307,9 @@ export async function updateHalaman(
  */
 export async function deleteHalaman(
   id: string,
-  userId?: string
+  userId?: string,
+  ipAddress?: string,
+  userAgent?: string
 ): Promise<void> {
   // Get data for logging
   const halaman = await getHalamanById(id);
@@ -311,6 +325,10 @@ export async function deleteHalaman(
       detail_aksi: `Menghapus halaman: ${halaman.judul}`,
       data_sebelum: halaman,
       data_sesudah: null,
+      ip_address: ipAddress || null,
+      user_agent: userAgent || null,
+      endpoint: "/api/halaman",
+      method: "DELETE",
     });
   }
 }

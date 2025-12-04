@@ -4,6 +4,16 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { getAllMenu, createMenu, getMenuStats } from "@/lib/models/menu.model";
 
+// Helper to get client info
+function getClientInfo(request: NextRequest) {
+  const ipAddress =
+    request.headers.get("x-forwarded-for") ||
+    request.headers.get("x-real-ip") ||
+    "unknown";
+  const userAgent = request.headers.get("user-agent") || "unknown";
+  return { ipAddress, userAgent };
+}
+
 // GET - List all menu
 export async function GET(request: NextRequest) {
   try {
@@ -53,6 +63,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const { ipAddress, userAgent } = getClientInfo(request);
+
     const id = await createMenu(
       {
         nama,
@@ -62,7 +74,9 @@ export async function POST(request: NextRequest) {
         is_published: is_published !== undefined ? is_published : 1,
         deskripsi: deskripsi || null,
       },
-      session.user.id
+      session.user.id,
+      ipAddress,
+      userAgent
     );
 
     return NextResponse.json({ id, message: "Menu berhasil dibuat" });

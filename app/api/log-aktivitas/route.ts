@@ -1,3 +1,5 @@
+// app/api/log-aktivitas/route.ts
+
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { query } from "@/lib/db-helpers";
@@ -18,15 +20,16 @@ export async function GET(request: NextRequest) {
       );
 
       const [filteredResult] = await query<any>(
-        `SELECT COUNT(*) as total FROM log_aktivitas 
-         WHERE 1=1 
+        `SELECT COUNT(*) as total FROM log_aktivitas la
+         JOIN users u ON la.user_id = u.id
+         WHERE 1=1
          ${
            searchParams.get("search")
-             ? "AND (user_name LIKE ? OR detail_aksi LIKE ?)"
+             ? "AND (u.name LIKE ? OR la.detail_aksi LIKE ?)"
              : ""
          }
-         ${searchParams.get("modul") ? "AND modul = ?" : ""}
-         ${searchParams.get("aksi") ? "AND aksi = ?" : ""}`,
+      ${searchParams.get("modul") ? "AND la.modul = ?" : ""}
+         ${searchParams.get("aksi") ? "AND la.aksi = ?" : ""}`,
         [
           ...(searchParams.get("search")
             ? [
@@ -84,7 +87,7 @@ export async function GET(request: NextRequest) {
     const params: any[] = [];
 
     if (search) {
-      conditions.push("(la.user_name LIKE ? OR la.detail_aksi LIKE ?)");
+      conditions.push("(u.name LIKE ? OR la.detail_aksi LIKE ?)");
       params.push(`%${search}%`, `%${search}%`);
     }
 
@@ -103,7 +106,9 @@ export async function GET(request: NextRequest) {
 
     // Get total count
     const [countResult] = await query<any>(
-      `SELECT COUNT(*) as total FROM log_aktivitas la ${whereClause}`,
+      `SELECT COUNT(*) as total FROM log_aktivitas la
+      JOIN users u ON la.user_id = u.id
+      ${whereClause}`,
       params
     );
     const total = countResult.total || 0;
@@ -127,16 +132,26 @@ export async function GET(request: NextRequest) {
       FROM log_aktivitas la
       JOIN users u ON la.user_id = u.id
       ${whereClause}
-      ORDER BY la.created_at DESC
-      LIMIT ? OFFSET ?`,
-      [...params, limit, offset]
+     LIMIT ${limit} OFFSET ${offset}`,
+      params
     );
 
-    // Parse JSON fields
+    // Parse JSON fields safely in case values are already objects or invalid JSON strings
+    const parseJsonField = (value: any) => {
+      if (!value) return null;
+      if (typeof value !== "string") return value;
+
+      try {
+        return JSON.parse(value);
+      } catch {
+        return value;
+      }
+    };
+
     const parsedLogs = logs.map((log: any) => ({
       ...log,
-      data_sebelum: log.data_sebelum ? JSON.parse(log.data_sebelum) : null,
-      data_sesudah: log.data_sesudah ? JSON.parse(log.data_sesudah) : null,
+      data_sebelum: parseJsonField(log.data_sebelum),
+      data_sesudah: parseJsonField(log.data_sesudah),
     }));
 
     return NextResponse.json({
