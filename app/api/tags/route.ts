@@ -39,8 +39,11 @@ export async function GET(request: NextRequest) {
     }
 
     // Get tags list
-    const page = parseInt(searchParams.get("page") || "1");
-    const limit = parseInt(searchParams.get("limit") || "20");
+    const parsedPage = parseInt(searchParams.get("page") || "1");
+    const parsedLimit = parseInt(searchParams.get("limit") || "20");
+    const page = Number.isFinite(parsedPage) && parsedPage > 0 ? parsedPage : 1;
+    const limit =
+      Number.isFinite(parsedLimit) && parsedLimit > 0 ? parsedLimit : 20;
     const search = searchParams.get("search") || "";
     const startDate = searchParams.get("start_date") || "";
     const endDate = searchParams.get("end_date") || "";

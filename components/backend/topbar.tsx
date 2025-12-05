@@ -3,8 +3,8 @@
 import { Bell, Search, LogOut, Eye, Menu, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { signOut } from "next-auth/react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ThemeToggle } from "@/components/theme-toggle";
 import {
   DropdownMenu,
@@ -25,8 +25,12 @@ interface AdminTopbarProps {
 }
 
 export default function AdminTopbar({ user, onMenuClick }: AdminTopbarProps) {
-  const handleLogout = async () => {
-    await signOut({ callbackUrl: "/login" });
+  const router = useRouter();
+
+  const handleLogout = () => {
+    // ✅ Use unified logout route for consistency
+    // This ensures user_kicks is cleared along with cookie
+    router.push("/api/auth/logout");
   };
 
   return (

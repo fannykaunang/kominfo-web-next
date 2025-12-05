@@ -23,11 +23,21 @@ export async function getTags(params: {
 }): Promise<{ tags: Tag[]; total: number }> {
   const page = params.page || 1;
   const limit = params.limit || 20;
-  const offset = (page - 1) * limit;
   const search = params.search || "";
   const startDate = params.start_date || "";
   const endDate = params.end_date || "";
   const used = params.used || "all";
+
+  // Sanitize pagination inputs
+  const safePage =
+    Number.isFinite(Number(page)) && Number(page) > 0
+      ? Math.floor(Number(page))
+      : 1;
+  const safeLimit =
+    Number.isFinite(Number(limit)) && Number(limit) > 0
+      ? Math.floor(Number(limit))
+      : 20;
+  const offset = (safePage - 1) * safeLimit;
 
   const conditions: string[] = [];
   const queryParams: any[] = [];
@@ -51,9 +61,9 @@ export async function getTags(params: {
 
   // Used/unused filter
   if (used === "used") {
-    conditions.push("berita_count > 0");
+    conditions.push("COALESCE(bt.berita_count, 0) > 0");
   } else if (used === "unused") {
-    conditions.push("berita_count = 0");
+    conditions.push("COALESCE(bt.berita_count, 0) = 0");
   }
 
   const whereClause =
@@ -94,8 +104,8 @@ export async function getTags(params: {
     ) bt ON t.id = bt.tag_id
     ${whereClause}
     ORDER BY t.created_at DESC
-    LIMIT ? OFFSET ?`,
-    [...queryParams, limit, offset]
+    LIMIT ${safeLimit} OFFSET ${offset}`,
+    queryParams
   );
 
   return { tags, total };
