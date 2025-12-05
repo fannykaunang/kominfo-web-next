@@ -206,7 +206,7 @@ export async function tagSlugExists(
 // Create new tag
 export async function createTag(data: {
   nama: string;
-  userId: string;
+  userId?: string;
   userName: string;
   ipAddress?: string;
   userAgent?: string;
@@ -241,7 +241,7 @@ export async function createTag(data: {
       "Create",
       "Tags",
       `Membuat tag baru: ${data.nama}`,
-      "POST /api/backend/tags",
+      "POST /api/tags",
       data.ipAddress || null,
       data.userAgent || null,
       JSON.stringify({ id, nama: data.nama, slug: finalSlug }),
@@ -255,7 +255,7 @@ export async function createTag(data: {
     created_at: new Date().toISOString(),
     berita_count: 0,
     is_used: false,
-  };
+  } as Tag;
 }
 
 // Update tag
@@ -263,7 +263,7 @@ export async function updateTag(
   id: string,
   data: {
     nama: string;
-    userId: string;
+    userId?: string;
     userName: string;
     ipAddress?: string;
     userAgent?: string;
@@ -305,7 +305,7 @@ export async function updateTag(
       "Update",
       "Tags",
       `Mengubah tag: ${oldTag.nama} → ${data.nama}`,
-      "PUT /api/backend/tags/" + id,
+      "PUT /api/tags/" + id,
       data.ipAddress || null,
       data.userAgent || null,
       JSON.stringify({ nama: oldTag.nama, slug: oldTag.slug }),
@@ -320,14 +320,14 @@ export async function updateTag(
     created_at: oldTag.created_at,
     berita_count: oldTag.berita_count,
     is_used: oldTag.is_used,
-  };
+  } as Tag;
 }
 
 // Delete tag
 export async function deleteTag(
   id: string,
   data: {
-    userId: string;
+    userId?: string;
     userName: string;
     ipAddress?: string;
     userAgent?: string;
@@ -361,7 +361,7 @@ export async function deleteTag(
       "Delete",
       "Tags",
       `Menghapus tag: ${tag.nama}`,
-      "DELETE /api/backend/tags/" + id,
+      "DELETE /api/tags/" + id,
       data.ipAddress || null,
       data.userAgent || null,
       JSON.stringify({ id, nama: tag.nama, slug: tag.slug }),

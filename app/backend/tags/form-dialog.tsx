@@ -68,7 +68,7 @@ export function TagFormDialog({
     setLoading(true);
 
     try {
-      const url = isEdit ? `/api/backend/tags/${tag.id}` : "/api/backend/tags";
+      const url = isEdit ? `/api/tags/${tag.id}` : "/api/tags";
 
       const method = isEdit ? "PUT" : "POST";
 

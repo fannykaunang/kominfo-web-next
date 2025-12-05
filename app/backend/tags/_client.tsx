@@ -40,9 +40,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { TagFormDialog } from "./tag-form-dialog";
-import { TagDetailDialog } from "./tag-detail-dialog";
-import { Tag, TagStats } from "@/lib/types/tag.types";
+import { TagFormDialog } from "./form-dialog";
+import { TagDetailDialog } from "./detail-dialog";
+import { Tag, TagStats } from "@/lib/types";
 
 export function TagsClient() {
   const [tags, setTags] = useState<Tag[]>([]);
@@ -84,7 +84,7 @@ export function TagsClient() {
 
   const fetchStats = async () => {
     try {
-      const res = await fetch("/api/backend/tags?stats=true");
+      const res = await fetch("/api/tags?stats=true");
       if (res.ok) {
         const data = await res.json();
         setStats(data);
@@ -107,7 +107,7 @@ export function TagsClient() {
       if (endDate) params.append("end_date", endDate);
       if (usedFilter !== "all") params.append("used", usedFilter);
 
-      const res = await fetch(`/api/backend/tags?${params}`);
+      const res = await fetch(`/api/tags?${params}`);
       if (res.ok) {
         const data = await res.json();
         setTags(data.tags);
@@ -156,7 +156,7 @@ export function TagsClient() {
     if (!tagToDelete) return;
 
     try {
-      const res = await fetch(`/api/backend/tags/${tagToDelete.id}`, {
+      const res = await fetch(`/api/tags/${tagToDelete.id}`, {
         method: "DELETE",
       });
 

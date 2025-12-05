@@ -32,7 +32,7 @@ export function TagDetailDialog({ open, onClose, tag }: TagDetailDialogProps) {
 
     try {
       setLoading(true);
-      const res = await fetch(`/api/backend/tags/${tag.id}/berita`);
+      const res = await fetch(`/api/tags/${tag.id}/berita`);
       if (res.ok) {
         const data = await res.json();
         setBerita(data.berita);
