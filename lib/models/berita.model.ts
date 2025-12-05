@@ -9,6 +9,7 @@ import {
 } from "../db-helpers";
 import { Berita, PaginationResult } from "../types";
 import { createLogWithData } from "./log.model";
+import { syncBeritaTags } from "./berita-tags.model";
 
 /**
  * Input untuk membuat berita (app-level)
@@ -233,6 +234,10 @@ export class BeritaRepository {
 
     await execute(sql, params);
 
+    if (data.tag_ids && data.tag_ids.length > 0) {
+      await syncBeritaTags(id, data.tag_ids);
+    }
+
     // Log aktivitas
     await createLogWithData({
       user_id: userId,
@@ -251,7 +256,7 @@ export class BeritaRepository {
   }
 
   /**
-   * Update berita with logging
+   * Update berita with logging and tags
    */
   static async update(
     id: string,
@@ -284,7 +289,6 @@ export class BeritaRepository {
     }
     if (data.featured_image !== undefined) {
       updates.push("featured_image = ?");
-      // Convert undefined to null for MySQL
       params.push(data.featured_image || null);
     }
     if (data.galeri !== undefined) {
@@ -313,36 +317,40 @@ export class BeritaRepository {
     }
     if (data.published_at !== undefined) {
       updates.push("published_at = ?");
-      // Convert undefined to null for MySQL
       params.push(data.published_at || null);
     }
 
-    if (updates.length === 0) {
+    if (updates.length === 0 && !data.tag_ids) {
       return false;
     }
 
-    params.push(id);
-    const sql = `UPDATE berita SET ${updates.join(", ")} WHERE id = ?`;
-
-    const result = await execute(sql, params);
-
-    if (result.affectedRows > 0) {
-      // Log aktivitas
-      await createLogWithData({
-        user_id: userId,
-        aksi: "Update",
-        modul: "Berita",
-        detail_aksi: `Mengupdate berita: ${dataBefore?.judul || id}`,
-        data_sebelum: dataBefore,
-        data_sesudah: { id, ...data },
-        ip_address: ipAddress || null,
-        user_agent: userAgent || null,
-        endpoint: `/api/berita/${id}`,
-        method: "PUT",
-      });
+    // Update berita if there are changes
+    if (updates.length > 0) {
+      params.push(id);
+      const sql = `UPDATE berita SET ${updates.join(", ")} WHERE id = ?`;
+      await execute(sql, params);
     }
 
-    return result.affectedRows > 0;
+    // 👈 TAMBAH INI - Sync tags jika ada perubahan
+    if (data.tag_ids !== undefined) {
+      await syncBeritaTags(id, data.tag_ids);
+    }
+
+    // Log aktivitas
+    await createLogWithData({
+      user_id: userId,
+      aksi: "Update",
+      modul: "Berita",
+      detail_aksi: `Mengupdate berita: ${dataBefore?.judul || id}`,
+      data_sebelum: dataBefore,
+      data_sesudah: { id, ...data },
+      ip_address: ipAddress || null,
+      user_agent: userAgent || null,
+      endpoint: `/api/berita/${id}`,
+      method: "PUT",
+    });
+
+    return true;
   }
 
   /**
@@ -375,6 +383,26 @@ export class BeritaRepository {
     }
 
     return result.affectedRows > 0;
+  }
+
+  /**
+   * Get single berita by ID with tags
+   */
+  static async findByIdWithTags(
+    id: string
+  ): Promise<(Berita & { tag_ids?: string[] }) | null> {
+    const berita = await this.findById(id);
+
+    if (!berita) return null;
+
+    // Get tag IDs
+    const { getTagIdsByBeritaId } = await import("./berita-tags.model");
+    const tagIds = await getTagIdsByBeritaId(id);
+
+    return {
+      ...berita,
+      tag_ids: tagIds,
+    };
   }
 
   /**

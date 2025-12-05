@@ -97,6 +97,7 @@ export async function POST(request: NextRequest) {
       featured_image: z.string().optional(),
       galeri: z.array(z.string()).optional(),
       kategori_id: z.string().min(1, "Kategori harus dipilih"),
+      tag_ids: z.array(z.string()).optional(),
       is_highlight: z.boolean().optional(),
       is_published: z.boolean().optional(),
       published_at: z.string().optional(),

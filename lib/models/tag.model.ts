@@ -1,6 +1,7 @@
 import { query, queryOne, execute } from "@/lib/db-helpers";
 import { v4 as uuidv4 } from "uuid";
 import { Tag, TagStats, TagWithBerita, BeritaTag } from "@/lib/types";
+import { createLogWithData } from "./log.model";
 
 // Generate slug from nama
 function generateSlug(nama: string): string {
@@ -76,9 +77,10 @@ export async function getTags(params: {
        SELECT t.id
        FROM tags t
        LEFT JOIN (
-         SELECT tag_id, COUNT(*) as berita_count
-         FROM berita_tags
-         GROUP BY tag_id
+         SELECT bt.tag_id, COUNT(DISTINCT b.id) as berita_count
+         FROM berita_tags bt
+         INNER JOIN berita b ON bt.berita_id = b.id
+         GROUP BY bt.tag_id
        ) bt ON t.id = bt.tag_id
        ${whereClause}
      ) as filtered`,
@@ -87,7 +89,7 @@ export async function getTags(params: {
 
   const total = countResult?.total || 0;
 
-  // Get tags with berita count
+  // Get tags with berita count (only count existing berita)
   const tags = await query<Tag>(
     `SELECT 
       t.id,
@@ -98,9 +100,10 @@ export async function getTags(params: {
       CASE WHEN COALESCE(bt.berita_count, 0) > 0 THEN 1 ELSE 0 END as is_used
     FROM tags t
     LEFT JOIN (
-      SELECT tag_id, COUNT(*) as berita_count
-      FROM berita_tags
-      GROUP BY tag_id
+      SELECT bt.tag_id, COUNT(DISTINCT b.id) as berita_count
+      FROM berita_tags bt
+      INNER JOIN berita b ON bt.berita_id = b.id
+      GROUP BY bt.tag_id
     ) bt ON t.id = bt.tag_id
     ${whereClause}
     ORDER BY t.created_at DESC
@@ -116,7 +119,9 @@ export async function getTagStats(): Promise<TagStats> {
   const [totalResult] = await query<any>(`SELECT COUNT(*) as total FROM tags`);
 
   const [usedResult] = await query<any>(
-    `SELECT COUNT(DISTINCT tag_id) as used FROM berita_tags`
+    `SELECT COUNT(DISTINCT bt.tag_id) as used 
+     FROM berita_tags bt
+     INNER JOIN berita b ON bt.berita_id = b.id`
   );
 
   const total = totalResult?.total || 0;
@@ -138,9 +143,10 @@ export async function getTagById(id: string): Promise<Tag | null> {
       CASE WHEN COALESCE(bt.berita_count, 0) > 0 THEN 1 ELSE 0 END as is_used
     FROM tags t
     LEFT JOIN (
-      SELECT tag_id, COUNT(*) as berita_count
-      FROM berita_tags
-      GROUP BY tag_id
+      SELECT bt.tag_id, COUNT(DISTINCT b.id) as berita_count
+      FROM berita_tags bt
+      INNER JOIN berita b ON bt.berita_id = b.id
+      GROUP BY bt.tag_id
     ) bt ON t.id = bt.tag_id
     WHERE t.id = ?`,
     [id]
@@ -217,7 +223,7 @@ export async function tagSlugExists(
 export async function createTag(data: {
   nama: string;
   userId?: string;
-  userName: string;
+  userName?: string;
   ipAddress?: string;
   userAgent?: string;
 }): Promise<Tag> {
@@ -238,25 +244,21 @@ export async function createTag(data: {
     [id, data.nama, finalSlug]
   );
 
-  // Log activity
-  await execute(
-    `INSERT INTO log_aktivitas (
-      id, user_id, user_name, aksi, modul, detail_aksi,
-      endpoint, ip_address, user_agent, data_sesudah, created_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())`,
-    [
-      uuidv4(),
-      data.userId,
-      data.userName,
-      "Create",
-      "Tags",
-      `Membuat tag baru: ${data.nama}`,
-      "POST /api/tags",
-      data.ipAddress || null,
-      data.userAgent || null,
-      JSON.stringify({ id, nama: data.nama, slug: finalSlug }),
-    ]
-  );
+  // Log activity menggunakan createLogWithData
+  if (data.userId) {
+    await createLogWithData({
+      user_id: data.userId,
+      aksi: "Create",
+      modul: "Tags",
+      detail_aksi: `Membuat tag baru: ${data.nama}`,
+      data_sebelum: null,
+      data_sesudah: { id, nama: data.nama, slug: finalSlug },
+      ip_address: data.ipAddress || null,
+      user_agent: data.userAgent || null,
+      endpoint: "/api/tags",
+      method: "POST",
+    });
+  }
 
   return {
     id,
@@ -274,12 +276,12 @@ export async function updateTag(
   data: {
     nama: string;
     userId?: string;
-    userName: string;
+    userName?: string;
     ipAddress?: string;
     userAgent?: string;
   }
 ): Promise<Tag> {
-  // Get old data
+  // Get old data for logging
   const oldTag = await getTagById(id);
   if (!oldTag) {
     throw new Error("Tag tidak ditemukan");
@@ -301,27 +303,21 @@ export async function updateTag(
     id,
   ]);
 
-  // Log activity
-  await execute(
-    `INSERT INTO log_aktivitas (
-      id, user_id, user_name, aksi, modul, detail_aksi,
-      endpoint, ip_address, user_agent, 
-      data_sebelum, data_sesudah, created_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())`,
-    [
-      uuidv4(),
-      data.userId,
-      data.userName,
-      "Update",
-      "Tags",
-      `Mengubah tag: ${oldTag.nama} → ${data.nama}`,
-      "PUT /api/tags/" + id,
-      data.ipAddress || null,
-      data.userAgent || null,
-      JSON.stringify({ nama: oldTag.nama, slug: oldTag.slug }),
-      JSON.stringify({ nama: data.nama, slug: finalSlug }),
-    ]
-  );
+  // Log activity menggunakan createLogWithData
+  if (data.userId) {
+    await createLogWithData({
+      user_id: data.userId,
+      aksi: "Update",
+      modul: "Tags",
+      detail_aksi: `Mengubah tag: ${oldTag.nama} → ${data.nama}`,
+      data_sebelum: { nama: oldTag.nama, slug: oldTag.slug },
+      data_sesudah: { nama: data.nama, slug: finalSlug },
+      ip_address: data.ipAddress || null,
+      user_agent: data.userAgent || null,
+      endpoint: `/api/tags/${id}`,
+      method: "PUT",
+    });
+  }
 
   return {
     id,
@@ -338,7 +334,7 @@ export async function deleteTag(
   id: string,
   data: {
     userId?: string;
-    userName: string;
+    userName?: string;
     ipAddress?: string;
     userAgent?: string;
   }
@@ -358,25 +354,21 @@ export async function deleteTag(
 
   await execute(`DELETE FROM tags WHERE id = ?`, [id]);
 
-  // Log activity
-  await execute(
-    `INSERT INTO log_aktivitas (
-      id, user_id, user_name, aksi, modul, detail_aksi,
-      endpoint, ip_address, user_agent, data_sebelum, created_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())`,
-    [
-      uuidv4(),
-      data.userId,
-      data.userName,
-      "Delete",
-      "Tags",
-      `Menghapus tag: ${tag.nama}`,
-      "DELETE /api/tags/" + id,
-      data.ipAddress || null,
-      data.userAgent || null,
-      JSON.stringify({ id, nama: tag.nama, slug: tag.slug }),
-    ]
-  );
+  // Log activity menggunakan createLogWithData
+  if (data.userId) {
+    await createLogWithData({
+      user_id: data.userId,
+      aksi: "Delete",
+      modul: "Tags",
+      detail_aksi: `Menghapus tag: ${tag.nama}`,
+      data_sebelum: { id, nama: tag.nama, slug: tag.slug },
+      data_sesudah: null,
+      ip_address: data.ipAddress || null,
+      user_agent: data.userAgent || null,
+      endpoint: `/api/tags/${id}`,
+      method: "DELETE",
+    });
+  }
 }
 
 // Get tag by slug
@@ -391,13 +383,71 @@ export async function getTagBySlug(slug: string): Promise<Tag | null> {
       CASE WHEN COALESCE(bt.berita_count, 0) > 0 THEN 1 ELSE 0 END as is_used
     FROM tags t
     LEFT JOIN (
-      SELECT tag_id, COUNT(*) as berita_count
-      FROM berita_tags
-      GROUP BY tag_id
+      SELECT bt.tag_id, COUNT(DISTINCT b.id) as berita_count
+      FROM berita_tags bt
+      INNER JOIN berita b ON bt.berita_id = b.id
+      GROUP BY bt.tag_id
     ) bt ON t.id = bt.tag_id
     WHERE t.slug = ?`,
     [slug]
   );
 
   return tag;
+}
+
+/**
+ * Clean up orphan records in berita_tags
+ * (Remove berita_tags records that reference deleted berita)
+ */
+export async function cleanupOrphanBeritaTags(): Promise<number> {
+  const result = await execute(
+    `DELETE bt FROM berita_tags bt
+     LEFT JOIN berita b ON bt.berita_id = b.id
+     WHERE b.id IS NULL`
+  );
+
+  return result.affectedRows;
+}
+
+/**
+ * Get count of orphan records
+ */
+export async function getOrphanBeritaTagsCount(): Promise<number> {
+  const [result] = await query<any>(
+    `SELECT COUNT(*) as count
+     FROM berita_tags bt
+     LEFT JOIN berita b ON bt.berita_id = b.id
+     WHERE b.id IS NULL`
+  );
+
+  return result?.count || 0;
+}
+
+/**
+ * Get all tags (simple list for dropdown/select)
+ */
+export async function getAllTags(): Promise<Tag[]> {
+  return await query<Tag>(`SELECT id, nama, slug FROM tags ORDER BY nama ASC`);
+}
+
+/**
+ * Get all tags (simple list for dropdown/select)
+ * Tanpa pagination, untuk keperluan dropdown
+ */
+export async function getAllTagsSimple(): Promise<Tag[]> {
+  return await query<Tag>(`SELECT id, nama, slug FROM tags ORDER BY nama ASC`);
+}
+
+/**
+ * Get tags by berita ID
+ */
+export async function getTagsByBeritaId(beritaId: string): Promise<Tag[]> {
+  return await query<Tag>(
+    `SELECT t.id, t.nama, t.slug, t.created_at
+     FROM tags t
+     INNER JOIN berita_tags bt ON t.id = bt.tag_id
+     WHERE bt.berita_id = ?
+     ORDER BY t.nama ASC`,
+    [beritaId]
+  );
 }

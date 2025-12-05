@@ -3,6 +3,7 @@
 import { createContext, useContext, useState } from "react";
 import AdminSidebar from "@/components/backend/sidebar";
 import AdminTopbar from "@/components/backend/topbar";
+import { Toaster } from "@/components/ui/sonner";
 
 interface SidebarContextType {
   isOpen: boolean;
@@ -42,6 +43,7 @@ export function BackendLayoutClient({
   return (
     <SidebarContext.Provider value={{ isOpen, setIsOpen, toggle }}>
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+        <Toaster richColors closeButton />
         <div className="flex">
           {/* Sidebar */}
           <AdminSidebar user={user} isOpen={isOpen} setIsOpen={setIsOpen} />

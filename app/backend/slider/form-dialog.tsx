@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
@@ -50,6 +51,9 @@ export default function SliderFormDialog({
     is_published: 1,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [imagePreview, setImagePreview] = useState<string>("");
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     setFormValues({
@@ -58,6 +62,7 @@ export default function SliderFormDialog({
       image: initialData?.image ?? "",
       is_published: initialData?.is_published ?? 1,
     });
+    setImagePreview(initialData?.image ?? "");
   }, [initialData, open]);
 
   const handleChange = (
@@ -68,10 +73,88 @@ export default function SliderFormDialog({
   };
 
   const handleSubmit = async () => {
-    if (!formValues.judul || !formValues.image) return;
+    if (!formValues.judul || !formValues.image) {
+      toast.error("Judul dan gambar wajib diisi");
+      return;
+    }
+    if (uploadingImage) {
+      toast.info("Tunggu hingga proses upload selesai");
+      return;
+    }
+
     setIsSubmitting(true);
-    await onSubmit(formValues);
-    setIsSubmitting(false);
+    try {
+      await onSubmit(formValues);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleFileChange = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event.target.files?.[0];
+
+    if (!file) return;
+
+    const allowedTypes = [
+      "image/jpeg",
+      "image/jpg",
+      "image/png",
+      "image/webp",
+      "image/gif",
+    ];
+
+    if (!allowedTypes.includes(file.type)) {
+      toast.error(
+        "Format file tidak didukung. Gunakan JPG, PNG, WEBP, atau GIF."
+      );
+      event.target.value = "";
+      return;
+    }
+
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+      toast.error("Ukuran file terlalu besar. Maksimal 5MB.");
+      event.target.value = "";
+      return;
+    }
+
+    setUploadingImage(true);
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("type", "slider");
+
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Gagal mengupload gambar");
+      }
+
+      handleChange("image", data.url);
+      setImagePreview(data.url);
+      toast.success("Gambar berhasil diupload");
+    } catch (error: any) {
+      toast.error(error.message || "Gagal mengupload gambar");
+    } finally {
+      setUploadingImage(false);
+      event.target.value = "";
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setImagePreview("");
+    handleChange("image", "");
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
   };
 
   return (
@@ -110,13 +193,54 @@ export default function SliderFormDialog({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="image">URL Gambar</Label>
+            <Label htmlFor="image">
+              Upload Gambar <span className="text-destructive">*</span>
+            </Label>
             <Input
               id="image"
-              placeholder="https://..."
-              value={formValues.image}
-              onChange={(e) => handleChange("image", e.target.value)}
+              type="file"
+              accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
+              onChange={handleFileChange}
+              disabled={uploadingImage}
+              ref={fileInputRef}
             />
+            <p className="text-xs text-muted-foreground">
+              Format yang didukung: JPG, JPEG, PNG, WEBP, atau GIF. Maksimum 1
+              file dengan ukuran 5MB.
+            </p>
+
+            {imagePreview && (
+              <div className="flex items-center gap-3 rounded-md border p-3">
+                <img
+                  src={imagePreview}
+                  alt="Preview gambar slider"
+                  className="h-16 w-24 rounded object-cover"
+                />
+                <div className="flex flex-col gap-2">
+                  <span className="text-sm font-medium">Gambar terpilih</span>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      type="button"
+                      onClick={handleRemoveImage}
+                      disabled={uploadingImage}
+                    >
+                      Hapus
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={uploadingImage}
+                    >
+                      Ganti
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="flex items-center justify-between rounded-lg border p-4">
@@ -143,7 +267,10 @@ export default function SliderFormDialog({
           >
             Batal
           </Button>
-          <Button onClick={handleSubmit} disabled={isSubmitting}>
+          <Button
+            onClick={handleSubmit}
+            disabled={isSubmitting || uploadingImage}
+          >
             {isSubmitting ? "Menyimpan..." : "Simpan"}
           </Button>
         </DialogFooter>

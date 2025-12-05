@@ -400,6 +400,7 @@ export interface BeritaCreateInput {
   published_at?: Date | null;
   kategori_id: string;
   author_id: string;
+  tag_ids?: string[];
 }
 
 /**

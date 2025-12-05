@@ -18,6 +18,8 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, ArrowLeft, Save, X } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
+import { MultipleTagSelect } from "./multiple-tag-select";
+import { Tag } from "@/lib/types";
 
 import dynamic from "next/dynamic";
 
@@ -35,9 +37,14 @@ const TinyMCEEditor = dynamic(
 interface BeritaFormProps {
   berita?: Berita | null;
   kategoriList: Kategori[];
+  tagsList: Tag[];
 }
 
-export default function BeritaForm({ berita, kategoriList }: BeritaFormProps) {
+export default function BeritaForm({
+  berita,
+  kategoriList,
+  tagsList,
+}: BeritaFormProps) {
   const router = useRouter();
   const editorRef = useRef<any>(null);
 
@@ -63,6 +70,7 @@ export default function BeritaForm({ berita, kategoriList }: BeritaFormProps) {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [selectKey, setSelectKey] = useState(0); // Force re-render
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
   const isEdit = !!berita;
 
@@ -107,6 +115,12 @@ export default function BeritaForm({ berita, kategoriList }: BeritaFormProps) {
         } catch (e) {
           console.error("Failed to parse galeri:", e);
         }
+      }
+
+      // Type assertion karena berita dari API bisa punya tag_ids
+      const beritaWithTags = berita as Berita & { tag_ids?: string[] };
+      if (beritaWithTags.tag_ids) {
+        setSelectedTags(beritaWithTags.tag_ids);
       }
     }
   }, [berita, kategoriList]);
@@ -341,8 +355,9 @@ export default function BeritaForm({ berita, kategoriList }: BeritaFormProps) {
         excerpt,
         konten: editorContent,
         featured_image: imageUrl || undefined,
-        galeri: galeriImageUrls, // ← ADD THIS LINE
+        galeri: galeriImageUrls,
         kategori_id: kategoriId,
+        tag_ids: selectedTags,
         is_highlight: isHighlight,
         is_published: isPublished,
         published_at: publishedAt || undefined,
@@ -430,7 +445,8 @@ export default function BeritaForm({ berita, kategoriList }: BeritaFormProps) {
               key={selectKey}
               value={kategoriId}
               onValueChange={setKategoriId}
-              required>
+              required
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Pilih kategori" />
               </SelectTrigger>
@@ -442,6 +458,20 @@ export default function BeritaForm({ berita, kategoriList }: BeritaFormProps) {
                 ))}
               </SelectContent>
             </Select>
+          </div>
+
+          {/* Tags */}
+          <div className="space-y-2">
+            <Label htmlFor="tags">Tags</Label>
+            <MultipleTagSelect
+              tags={tagsList}
+              selectedTags={selectedTags}
+              onChange={setSelectedTags}
+              disabled={loading}
+            />
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              Pilih satu atau lebih tags untuk berita ini
+            </p>
           </div>
 
           {/* Excerpt */}
@@ -549,7 +579,8 @@ export default function BeritaForm({ berita, kategoriList }: BeritaFormProps) {
                     type="button"
                     onClick={handleRemoveImage}
                     className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
-                    title="Hapus gambar">
+                    title="Hapus gambar"
+                  >
                     <X className="h-4 w-4" />
                   </button>
                 </div>
@@ -593,7 +624,8 @@ export default function BeritaForm({ berita, kategoriList }: BeritaFormProps) {
                       type="button"
                       onClick={() => handleRemoveGaleriImage(index)}
                       className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
-                      title="Hapus gambar">
+                      title="Hapus gambar"
+                    >
                       <X className="h-4 w-4" />
                     </button>
                     <div className="absolute bottom-2 left-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">
@@ -667,14 +699,16 @@ export default function BeritaForm({ berita, kategoriList }: BeritaFormProps) {
           type="button"
           variant="outline"
           onClick={() => router.push("/backend/berita")}
-          disabled={loading}>
+          disabled={loading}
+        >
           <ArrowLeft className="h-4 w-4 mr-2" />
           Kembali
         </Button>
         <Button
           type="submit"
           className="w-full md:w-auto"
-          disabled={loading || uploadingImage || uploadingGaleri}>
+          disabled={loading || uploadingImage || uploadingGaleri}
+        >
           {loading || uploadingImage || uploadingGaleri ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />

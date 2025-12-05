@@ -1,10 +1,12 @@
 // app/backend/berita/tambah/page.ts
 
 import { getAllKategori } from "@/lib/models/kategori.model";
+import { getAllTagsSimple } from "@/lib/models/tag.model";
 import BeritaForm from "../berita-form";
 
 export default async function TambahBeritaPage() {
   const kategoriList = await getAllKategori();
+  const tagsList = await getAllTagsSimple();
 
   return (
     <div className="space-y-6">
@@ -17,7 +19,7 @@ export default async function TambahBeritaPage() {
         </p>
       </div>
 
-      <BeritaForm kategoriList={kategoriList} />
+      <BeritaForm kategoriList={kategoriList} tagsList={tagsList} />
     </div>
   );
 }

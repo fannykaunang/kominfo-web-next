@@ -451,7 +451,7 @@ export function LogClient() {
           onClick={handleDeleteAllClick}
           className="whitespace-nowrap"
         >
-          <Trash2 className="mr-2 h-4 w-4" />
+          <Trash2 className="h-4 w-4" />
           Hapus Semua Log
         </Button>
       </div>
@@ -464,12 +464,12 @@ export function LogClient() {
               <TableRow>
                 <TableHead className="w-[180px]">WAKTU</TableHead>
                 <TableHead>PENGGUNA</TableHead>
-                <TableHead className="w-[120px]">AKSI</TableHead>
+                <TableHead className="w-[120px] text-center">AKSI</TableHead>
                 <TableHead className="w-[100px]">MODUL</TableHead>
                 <TableHead>DETAIL</TableHead>
                 <TableHead className="w-[150px]">ENDPOINT</TableHead>
                 <TableHead className="w-[140px]">IP ADDRESS</TableHead>
-                <TableHead className="w-[120px] text-right">AKSI</TableHead>
+                <TableHead className="w-[120px] text-center">AKSI</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

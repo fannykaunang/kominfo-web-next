@@ -109,7 +109,7 @@ export class SliderRepository {
       await createLogWithData({
         user_id: userId,
         aksi: "Create",
-        modul: "slider",
+        modul: "Slider",
         detail_aksi: `Membuat slider baru: ${data.judul}`,
         data_sebelum: null,
         data_sesudah: data,
@@ -166,7 +166,7 @@ export class SliderRepository {
       await createLogWithData({
         user_id: userId,
         aksi: "Update",
-        modul: "slider",
+        modul: "Slider",
         detail_aksi: `Mengupdate slider: ${oldData.judul}`,
         data_sebelum: oldData,
         data_sesudah: { ...oldData, ...data },
@@ -191,7 +191,7 @@ export class SliderRepository {
       await createLogWithData({
         user_id: userId,
         aksi: "Delete",
-        modul: "slider",
+        modul: "Slider",
         detail_aksi: `Menghapus slider: ${slider.judul}`,
         data_sebelum: slider,
         data_sesudah: null,

@@ -15,15 +15,17 @@ function getClientInfo(request: NextRequest) {
 
 export async function GET(
   _request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
+
     const session = await auth();
     if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const slider = await SliderRepository.findById(params.id);
+    const slider = await SliderRepository.findById(id);
     if (!slider) {
       return NextResponse.json({ error: "Slider not found" }, { status: 404 });
     }
@@ -40,9 +42,11 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
+
     const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -54,7 +58,7 @@ export async function PUT(
     const { ipAddress, userAgent } = getClientInfo(request);
 
     await SliderRepository.update(
-      params.id,
+      id,
       {
         judul,
         deskripsi,
@@ -79,9 +83,11 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
+
     const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -89,12 +95,7 @@ export async function DELETE(
 
     const { ipAddress, userAgent } = getClientInfo(request);
 
-    await SliderRepository.delete(
-      params.id,
-      session.user.id,
-      ipAddress,
-      userAgent
-    );
+    await SliderRepository.delete(id, session.user.id, ipAddress, userAgent);
 
     return NextResponse.json({ message: "Slider berhasil dihapus" });
   } catch (error: any) {

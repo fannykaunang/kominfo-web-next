@@ -26,7 +26,7 @@ export async function GET(
 
     // Await params in Next.js 15
     const { id } = await params;
-    const berita = await BeritaRepository.findById(id);
+    const berita = await BeritaRepository.findByIdWithTags(id);
 
     if (!berita) {
       return NextResponse.json(
@@ -89,6 +89,7 @@ export async function PUT(
       featured_image: z.string().optional(),
       galeri: z.array(z.string()).optional(),
       kategori_id: z.string().optional(),
+      tag_ids: z.array(z.string()).optional(),
       is_highlight: z.boolean().optional(),
       is_published: z.boolean().optional(),
       published_at: z.string().nullable().optional(),
