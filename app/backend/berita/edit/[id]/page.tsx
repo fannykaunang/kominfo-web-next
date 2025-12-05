@@ -1,6 +1,4 @@
-// ==========================================
-// CREATE/UPDATE app/backend/berita/[id]/page.tsx
-// ==========================================
+// app/backend/berita/edit/[id]/page.tsx
 
 import { BeritaRepository } from "@/lib/models/berita.model";
 import { getAllKategori } from "@/lib/models/kategori.model";

@@ -20,6 +20,7 @@ import { Loader2, ArrowLeft, Save, X } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { MultipleTagSelect } from "./multiple-tag-select";
 import { Tag } from "@/lib/types";
+import { toast } from "sonner";
 
 import dynamic from "next/dynamic";
 
@@ -378,6 +379,10 @@ export default function BeritaForm({
         throw new Error(data.error || "Terjadi kesalahan");
       }
 
+      toast.success(
+        isEdit ? "Berita berhasil diperbarui" : "Berita berhasil dibuat"
+      );
+
       // Redirect back to list
       router.push("/backend/berita");
       router.refresh();
@@ -460,36 +465,16 @@ export default function BeritaForm({
             </Select>
           </div>
 
-          {/* Tags */}
-          <div className="space-y-2">
-            <Label htmlFor="tags">Tags</Label>
-            {tagsList && tagsList.length > 0 ? (
-              <MultipleTagSelect
-                tags={tagsList}
-                selectedTags={selectedTags}
-                onChange={setSelectedTags}
-                disabled={loading}
-              />
-            ) : (
-              <div className="p-4 text-center text-sm text-muted-foreground border rounded-md">
-                Tidak ada tags tersedia
-              </div>
-            )}
-            <p className="text-xs text-gray-500 dark:text-gray-400">
-              Pilih satu atau lebih tags untuk berita ini
-            </p>
-          </div>
-
           {/* Excerpt */}
           <div className="space-y-2">
             <Label htmlFor="excerpt">
-              Excerpt <span className="text-red-500">*</span>
+              Ringkasan Berita <span className="text-red-500">*</span>
             </Label>
             <Textarea
               id="excerpt"
               value={excerpt}
               onChange={(e) => setExcerpt(e.target.value)}
-              placeholder="Ringkasan singkat berita..."
+              placeholder="Ringkasan singkat berita (5-8 kata saja)..."
               rows={3}
               required
             />
@@ -659,6 +644,26 @@ export default function BeritaForm({
               value={publishedAt}
               onChange={(e) => setPublishedAt(e.target.value)}
             />
+          </div>
+
+          {/* Tags */}
+          <div className="space-y-2">
+            <Label htmlFor="tags">Tags</Label>
+            {tagsList && tagsList.length > 0 ? (
+              <MultipleTagSelect
+                tags={tagsList}
+                selectedTags={selectedTags}
+                onChange={setSelectedTags}
+                disabled={loading}
+              />
+            ) : (
+              <div className="p-4 text-center text-sm text-muted-foreground border rounded-md">
+                Tidak ada tags tersedia
+              </div>
+            )}
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              Pilih satu atau lebih tags untuk berita ini
+            </p>
           </div>
         </CardContent>
       </Card>

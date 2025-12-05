@@ -65,19 +65,30 @@ export default function BeritaClient({
   const [filterKategori, setFilterKategori] = useState<string>("all");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(
+    initialBerita.pagination.page || 1
+  );
+  const [itemsPerPage, setItemsPerPage] = useState(
+    initialBerita.pagination.limit || 10
+  );
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [selectedBerita, setSelectedBerita] = useState<Berita | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
   // Refresh data from server
-  const refreshData = async () => {
+  const refreshData = async (
+    page: number = currentPage,
+    limit: number = itemsPerPage
+  ) => {
+    const targetPage = Math.max(1, page);
+    const targetLimit = Math.max(1, limit);
+
     setIsLoading(true);
     try {
       const params = new URLSearchParams({
-        page: currentPage.toString(),
-        limit: "10",
+        page: targetPage.toString(),
+        limit: targetLimit.toString(),
       });
 
       if (search) params.append("search", search);
@@ -91,13 +102,15 @@ export default function BeritaClient({
       if (dateTo) params.append("dateTo", dateTo);
 
       const [beritaRes, statsRes] = await Promise.all([
-        fetch(`/api/berita?${params.toString()}`),
-        fetch("/api/berita?stats=true"),
+        fetch(`/api/berita?${params.toString()}`, { cache: "no-store" }),
+        fetch("/api/berita?stats=true", { cache: "no-store" }),
       ]);
 
       if (beritaRes.ok) {
         const data = await beritaRes.json();
         setBeritaData(data);
+        setCurrentPage(data.pagination.page);
+        setItemsPerPage(data.pagination.limit);
       }
 
       if (statsRes.ok) {
@@ -114,7 +127,7 @@ export default function BeritaClient({
   // Apply filters
   const handleApplyFilters = () => {
     setCurrentPage(1);
-    refreshData();
+    refreshData(1, itemsPerPage);
   };
 
   // Clear filters
@@ -126,7 +139,7 @@ export default function BeritaClient({
     setDateFrom("");
     setDateTo("");
     setCurrentPage(1);
-    setTimeout(refreshData, 100);
+    refreshData(1, itemsPerPage);
   };
 
   const handleEdit = (berita: Berita) => {
@@ -149,8 +162,21 @@ export default function BeritaClient({
   };
 
   const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-    setTimeout(refreshData, 100);
+    const totalPages = beritaData.pagination.totalPages || 1;
+    const nextPage = Math.min(Math.max(page, 1), totalPages);
+
+    if (nextPage === currentPage) return;
+
+    setCurrentPage(nextPage);
+    refreshData(nextPage, itemsPerPage);
+  };
+
+  const handleLimitChange = (limit: number) => {
+    const newLimit = Math.max(1, limit);
+
+    setItemsPerPage(newLimit);
+    setCurrentPage(1);
+    refreshData(1, newLimit);
   };
 
   // Check if any filter is active
@@ -478,7 +504,7 @@ export default function BeritaClient({
           </div>
 
           {/* Pagination */}
-          {beritaData.pagination.totalPages > 1 && (
+          {beritaData.pagination.totalPages > 0 && (
             <div className="flex items-center justify-between mt-4 flex-wrap gap-4">
               <div className="text-sm text-gray-600 dark:text-gray-400">
                 Menampilkan{" "}
@@ -491,6 +517,25 @@ export default function BeritaClient({
                   beritaData.pagination.total
                 )}{" "}
                 dari {beritaData.pagination.total} berita
+              </div>
+              <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                <span>Tampilkan</span>
+                <Select
+                  value={itemsPerPage.toString()}
+                  onValueChange={(value) => handleLimitChange(Number(value))}
+                >
+                  <SelectTrigger className="w-[90px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {[10, 25, 50, 100].map((limit) => (
+                      <SelectItem key={limit} value={limit.toString()}>
+                        {limit}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <span>per halaman</span>
               </div>
               <div className="flex gap-1">
                 {/* Previous Button */}
