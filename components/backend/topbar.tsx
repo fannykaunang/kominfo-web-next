@@ -38,7 +38,8 @@ export default function AdminTopbar({ user, onMenuClick }: AdminTopbarProps) {
           variant="ghost"
           size="icon"
           onClick={onMenuClick}
-          className="lg:hidden shrink-0">
+          className="lg:hidden shrink-0"
+        >
           <Menu className="h-5 w-5" />
         </Button>
 
@@ -69,7 +70,11 @@ export default function AdminTopbar({ user, onMenuClick }: AdminTopbarProps) {
         {/* Notifications */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="relative hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="relative hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+            >
               <Bell className="h-5 w-5" />
               <span className="absolute top-1.5 right-1.5 h-2 w-2 bg-red-500 rounded-full ring-2 ring-white dark:ring-gray-800" />
             </Button>
@@ -86,7 +91,7 @@ export default function AdminTopbar({ user, onMenuClick }: AdminTopbarProps) {
         {/* User Menu */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="sm" className="gap-2">
+            <Button variant="ghost" size="sm" className="gap-2 cursor-pointer">
               <div className="h-8 w-8 rounded-full bg-linear-to-br from-blue-600 to-purple-600 flex items-center justify-center text-white font-semibold text-xs">
                 {user.name?.charAt(0).toUpperCase() || "A"}
               </div>

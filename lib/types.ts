@@ -138,7 +138,7 @@ export interface Tag extends RowDataPacket {
   id: string;
   nama: string;
   slug: string;
-  created_at: Date;
+  created_at: string;
 }
 
 /**
@@ -521,4 +521,60 @@ export interface SessionFilterOptions {
   user_id?: string;
   is_active?: string;
   ip_address?: string;
+}
+
+// Tag Types
+
+export interface Tag {
+  id: string;
+  nama: string;
+  slug: string;
+  created_at: string;
+  berita_count?: number;
+  is_used?: boolean;
+}
+
+export interface TagWithBerita extends Tag {
+  berita: BeritaTag[];
+}
+
+export interface BeritaTag {
+  id: string;
+  judul: string;
+  slug: string;
+  thumbnail?: string;
+  kategori_nama?: string;
+  published_at?: string;
+  created_at: string;
+}
+
+export interface TagStats {
+  total: number;
+  used: number;
+  unused: number;
+}
+
+export interface CreateTagInput {
+  nama: string;
+}
+
+export interface UpdateTagInput {
+  nama: string;
+}
+
+export interface TagListParams {
+  page?: number;
+  limit?: number;
+  search?: string;
+  start_date?: string;
+  end_date?: string;
+  used?: string; // 'all' | 'used' | 'unused'
+}
+
+export interface TagListResponse {
+  tags: Tag[];
+  currentPage: number;
+  totalPages: number;
+  total: number;
+  limit: number;
 }

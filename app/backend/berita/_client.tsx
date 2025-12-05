@@ -266,7 +266,8 @@ export default function BeritaClient({
               <Label>Status Publish</Label>
               <Select
                 value={filterPublished}
-                onValueChange={setFilterPublished}>
+                onValueChange={setFilterPublished}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Semua Status" />
                 </SelectTrigger>
@@ -282,7 +283,8 @@ export default function BeritaClient({
               <Label>Highlight</Label>
               <Select
                 value={filterHighlight}
-                onValueChange={setFilterHighlight}>
+                onValueChange={setFilterHighlight}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Semua" />
                 </SelectTrigger>
@@ -351,7 +353,8 @@ export default function BeritaClient({
               <Button
                 variant="outline"
                 onClick={handleClearFilters}
-                disabled={isLoading}>
+                disabled={isLoading}
+              >
                 <X className="h-4 w-4 mr-2" />
                 Reset Filter
               </Button>
@@ -380,7 +383,7 @@ export default function BeritaClient({
                   <TableHead className="text-center">Highlight</TableHead>
                   <TableHead className="text-center">Views</TableHead>
                   <TableHead>Dibuat</TableHead>
-                  <TableHead className="text-right">Aksi</TableHead>
+                  <TableHead className="text-center">Aksi</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -388,7 +391,8 @@ export default function BeritaClient({
                   <TableRow>
                     <TableCell
                       colSpan={8}
-                      className="text-center py-8 text-gray-500">
+                      className="text-center py-8 text-gray-500"
+                    >
                       Belum ada berita
                     </TableCell>
                   </TableRow>
@@ -410,7 +414,8 @@ export default function BeritaClient({
                           style={{
                             backgroundColor: berita.kategori_color || "#3b82f6",
                             color: "white",
-                          }}>
+                          }}
+                        >
                           {berita.kategori_nama}
                         </Badge>
                       </TableCell>
@@ -451,14 +456,16 @@ export default function BeritaClient({
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => handleEdit(berita)}>
+                            onClick={() => handleEdit(berita)}
+                          >
                             <Edit className="h-4 w-4" />
                           </Button>
                           <Button
                             variant="ghost"
                             size="sm"
                             onClick={() => handleDelete(berita)}
-                            className="text-red-600 hover:text-red-700 hover:bg-red-50">
+                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                          >
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>
@@ -491,7 +498,8 @@ export default function BeritaClient({
                   variant="outline"
                   size="sm"
                   onClick={() => handlePageChange(currentPage - 1)}
-                  disabled={currentPage === 1 || isLoading}>
+                  disabled={currentPage === 1 || isLoading}
+                >
                   Previous
                 </Button>
 
@@ -543,7 +551,8 @@ export default function BeritaClient({
                           variant="ghost"
                           size="sm"
                           disabled
-                          className="w-10">
+                          className="w-10"
+                        >
                           ...
                         </Button>
                       );
@@ -557,7 +566,8 @@ export default function BeritaClient({
                         size="sm"
                         onClick={() => handlePageChange(pageNum)}
                         disabled={isLoading}
-                        className="w-10">
+                        className="w-10"
+                      >
                         {pageNum}
                       </Button>
                     );
@@ -572,7 +582,8 @@ export default function BeritaClient({
                   disabled={
                     currentPage === beritaData.pagination.totalPages ||
                     isLoading
-                  }>
+                  }
+                >
                   Next
                 </Button>
               </div>
