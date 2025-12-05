@@ -252,6 +252,20 @@ export interface Slider extends RowDataPacket {
   created_at: Date;
 }
 
+export interface SliderCreateInput {
+  judul: string;
+  deskripsi?: string | null;
+  image: string;
+  is_published?: number;
+}
+
+export interface SliderUpdateInput {
+  judul?: string;
+  deskripsi?: string | null;
+  image?: string;
+  is_published?: number;
+}
+
 /**
  * Settings Model
  */
