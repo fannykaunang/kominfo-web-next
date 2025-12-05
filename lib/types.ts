@@ -159,7 +159,21 @@ export interface Komentar extends RowDataPacket {
   konten: string;
   is_approved: number;
   berita_id: string;
-  created_at: Date;
+  created_at: string;
+}
+
+export interface KomentarWithBerita extends Komentar {
+  berita_judul?: string;
+  berita_slug?: string;
+  berita_excerpt?: string;
+  berita_featured_image?: string | null;
+  berita_konten?: string;
+}
+
+export interface KomentarStats {
+  total: number;
+  approved: number;
+  notApproved: number;
 }
 
 /**
@@ -175,6 +189,28 @@ export interface Statistik extends RowDataPacket {
   urutan: number;
   created_at: Date;
   updated_at: Date;
+}
+
+export interface StatistikCreateInput {
+  judul: string;
+  nilai: string;
+  satuan?: string | null;
+  icon?: string | null;
+  kategori: string;
+  urutan?: number;
+}
+
+export interface StatistikUpdateInput {
+  judul?: string;
+  nilai?: string;
+  satuan?: string | null;
+  icon?: string | null;
+  kategori?: string;
+  urutan?: number;
+}
+
+export interface StatistikFilterOptions {
+  search?: string;
 }
 
 /**

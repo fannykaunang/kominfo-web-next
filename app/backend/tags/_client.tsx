@@ -363,7 +363,7 @@ export function TagsClient() {
                 <TableHead className="w-[120px]">JUMLAH BERITA</TableHead>
                 <TableHead className="w-[100px]">STATUS</TableHead>
                 <TableHead className="w-[150px]">DIBUAT</TableHead>
-                <TableHead className="w-[150px] text-right">AKSI</TableHead>
+                <TableHead className="w-[150px] text-center">AKSI</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
