@@ -197,7 +197,7 @@ export async function updateMenu(
       data_sesudah: data,
       ip_address: ipAddress || null,
       user_agent: userAgent || null,
-      endpoint: "/api/menu",
+      endpoint: "/api/menu/" + id,
       method: "PUT",
     });
   }
@@ -228,7 +228,7 @@ export async function deleteMenu(
       data_sesudah: null,
       ip_address: ipAddress || null,
       user_agent: userAgent || null,
-      endpoint: "/api/menu",
+      endpoint: "/api/menu/" + id,
       method: "DELETE",
     });
   }

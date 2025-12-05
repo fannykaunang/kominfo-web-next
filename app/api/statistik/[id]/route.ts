@@ -16,7 +16,7 @@ function getRequestMeta(request: NextRequest) {
 
 export async function GET(
   _request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth();
@@ -24,7 +24,9 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const statistik = await StatistikRepository.findById(params.id);
+    const { id } = await context.params;
+
+    const statistik = await StatistikRepository.findById(id);
     if (!statistik) {
       return NextResponse.json(
         { error: "Statistik tidak ditemukan" },
@@ -44,7 +46,7 @@ export async function GET(
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth();
@@ -57,8 +59,10 @@ export async function PATCH(
     }
 
     const body = await request.json();
+    const { id } = await context.params;
+
     await StatistikRepository.updateStatistik(
-      params.id,
+      id,
       {
         judul: body.judul,
         nilai: body.nilai,
@@ -83,7 +87,7 @@ export async function PATCH(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth();
@@ -95,8 +99,10 @@ export async function DELETE(
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
+    const { id } = await context.params;
+
     await StatistikRepository.deleteStatistik(
-      params.id,
+      id,
       session.user.id,
       getRequestMeta(request)
     );

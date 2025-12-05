@@ -183,7 +183,9 @@ export async function createUser(
 export async function updateUser(
   id: string,
   data: UserUpdateInput,
-  actorId: string | null = null
+  actorId: string | null = null,
+  ipAddress?: string,
+  userAgent?: string
 ): Promise<void> {
   // Get existing data for logging
   const existingUser = await getUserById(id);
@@ -247,6 +249,10 @@ export async function updateUser(
       ...data,
       password: data.password ? "[HIDDEN]" : undefined,
     },
+    ip_address: ipAddress || null,
+    user_agent: userAgent || null,
+    endpoint: "/api/user/" + id,
+    method: "PUT",
   });
 }
 
@@ -255,7 +261,9 @@ export async function updateUser(
  */
 export async function deleteUser(
   id: string,
-  actorId: string | null = null
+  actorId: string | null = null,
+  ipAddress?: string,
+  userAgent?: string
 ): Promise<void> {
   // Get existing data for logging
   const existingUser = await getUserById(id);
@@ -274,6 +282,10 @@ export async function deleteUser(
     detail_aksi: `Menghapus user: ${existingUser.name} (${existingUser.email})`,
     data_sebelum: existingUser,
     data_sesudah: null,
+    ip_address: ipAddress || null,
+    user_agent: userAgent || null,
+    endpoint: "/api/user/" + id,
+    method: "DELETE",
   });
 }
 
@@ -282,7 +294,9 @@ export async function deleteUser(
  */
 export async function toggleUserActive(
   id: string,
-  actorId: string | null = null
+  actorId: string | null = null,
+  ipAddress?: string,
+  userAgent?: string
 ): Promise<void> {
   const user = await getUserById(id);
   if (!user) {
@@ -303,6 +317,10 @@ export async function toggleUserActive(
     }`,
     data_sebelum: { is_active: user.is_active },
     data_sesudah: { is_active: newStatus },
+    ip_address: ipAddress || null,
+    user_agent: userAgent || null,
+    endpoint: "/api/user/" + id,
+    method: "PUT",
   });
 }
 
@@ -311,7 +329,9 @@ export async function toggleUserActive(
  */
 export async function verifyUserEmail(
   id: string,
-  actorId: string | null = null
+  actorId: string | null = null,
+  ipAddress?: string,
+  userAgent?: string
 ): Promise<void> {
   const sql =
     "UPDATE users SET email_verified = 1, updated_at = NOW() WHERE id = ?";
@@ -326,6 +346,10 @@ export async function verifyUserEmail(
       detail_aksi: `Memverifikasi email user: ${user.name}`,
       data_sebelum: { email_verified: 0 },
       data_sesudah: { email_verified: 1 },
+      ip_address: ipAddress || null,
+      user_agent: userAgent || null,
+      endpoint: "/api/user/" + id,
+      method: "PUT",
     });
   }
 }

@@ -133,6 +133,7 @@ export async function GET(request: NextRequest) {
       FROM log_aktivitas la
       JOIN users u ON la.user_id = u.id
       ${whereClause}
+       ORDER BY la.created_at DESC
      LIMIT ${limit} OFFSET ${offset}`,
       params
     );

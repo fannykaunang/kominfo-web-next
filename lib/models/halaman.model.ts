@@ -296,7 +296,7 @@ export async function updateHalaman(
       data_sesudah: data,
       ip_address: ipAddress || null,
       user_agent: userAgent || null,
-      endpoint: "/api/halaman",
+      endpoint: "/api/halaman/" + id,
       method: "UPDATE",
     });
   }
@@ -327,7 +327,7 @@ export async function deleteHalaman(
       data_sesudah: null,
       ip_address: ipAddress || null,
       user_agent: userAgent || null,
-      endpoint: "/api/halaman",
+      endpoint: "/api/halaman/" + id,
       method: "DELETE",
     });
   }

@@ -1,3 +1,5 @@
+// app/backend/menu/_client.tsx
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -336,7 +338,8 @@ export function MenuClient() {
                           <Badge
                             variant={
                               item.is_published === 1 ? "default" : "secondary"
-                            }>
+                            }
+                          >
                             {item.is_published === 1 ? "Published" : "Draft"}
                           </Badge>
                         </div>
@@ -347,7 +350,8 @@ export function MenuClient() {
                             variant="ghost"
                             size="icon"
                             onClick={() => handleEdit(item)}
-                            disabled={actionLoading === item.id}>
+                            disabled={actionLoading === item.id}
+                          >
                             <Pencil className="h-4 w-4" />
                           </Button>
                           <Button
@@ -357,7 +361,8 @@ export function MenuClient() {
                               setMenuToDelete(item.id);
                               setDeleteDialogOpen(true);
                             }}
-                            disabled={actionLoading === item.id}>
+                            disabled={actionLoading === item.id}
+                          >
                             {actionLoading === item.id ? (
                               <Loader2 className="h-4 w-4 animate-spin" />
                             ) : (
@@ -397,7 +402,8 @@ export function MenuClient() {
             <AlertDialogCancel>Batal</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
               {actionLoading ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />

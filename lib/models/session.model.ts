@@ -178,7 +178,9 @@ export async function updateSessionActivity(tokenHash: string): Promise<void> {
 export async function revokeSession(
   sessionId: string,
   revokedBy: string,
-  reason?: string
+  reason?: string,
+  ipAddress?: string,
+  userAgent?: string
 ): Promise<void> {
   // Get session
   const session = await queryOne<Session>(
@@ -216,6 +218,10 @@ export async function revokeSession(
     detail_aksi: `Kicked session: ${sessionId}`,
     data_sebelum: session,
     data_sesudah: { ...session, is_active: 0 },
+    ip_address: ipAddress || null,
+    user_agent: userAgent || null,
+    endpoint: "/api/session/" + sessionId,
+    method: "PUT",
   });
 }
 
@@ -225,7 +231,9 @@ export async function revokeSession(
 export async function revokeSessionAndBanUser(
   sessionId: string,
   revokedBy: string,
-  reason?: string
+  reason?: string,
+  ipAddress?: string,
+  userAgent?: string
 ): Promise<void> {
   // Get session
   const session = await queryOne<Session>(
@@ -277,6 +285,10 @@ export async function revokeSessionAndBanUser(
     detail_aksi: `Banned user and revoked all sessions: ${session.user_id}`,
     data_sebelum: { user_id: session.user_id, sessions: userSessions },
     data_sesudah: { user_id: session.user_id, is_active: 0 },
+    ip_address: ipAddress || null,
+    user_agent: userAgent || null,
+    endpoint: "/api/session/" + sessionId,
+    method: "PUT",
   });
 }
 

@@ -243,7 +243,7 @@ export class BeritaRepository {
       data_sesudah: { id, ...data },
       ip_address: ipAddress || null,
       user_agent: userAgent || null,
-      endpoint: "/api/berita",
+      endpoint: "/api/berita/tambah",
       method: "POST",
     });
 
