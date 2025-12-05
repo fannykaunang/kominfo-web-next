@@ -1,32 +1,29 @@
-// app/backend/berita/edit/[id]/page.ts
+// ==========================================
+// CREATE/UPDATE app/backend/berita/[id]/page.tsx
+// ==========================================
 
 import { BeritaRepository } from "@/lib/models/berita.model";
 import { getAllKategori } from "@/lib/models/kategori.model";
-import { redirect } from "next/navigation";
+import { getAllTagsSimple } from "@/lib/models/tag.model";
 import BeritaForm from "../../berita-form";
-import { Metadata } from "next";
+import { notFound } from "next/navigation";
 
-export const metadata: Metadata = {
-  title: "Edit Berita | Web Portal",
-  description: "Edit Berita",
-};
-
-export default async function EditBeritaPage({
-  params,
-}: {
+interface EditBeritaPageProps {
   params: Promise<{ id: string }>;
-}) {
-  // Await params in Next.js 15
+}
+
+export default async function EditBeritaPage({ params }: EditBeritaPageProps) {
   const { id } = await params;
 
-  const [berita, kategoriList] = await Promise.all([
-    BeritaRepository.findById(id),
-    getAllKategori(),
-  ]);
+  // Load berita with tags
+  const berita = await BeritaRepository.findByIdWithTags(id);
 
   if (!berita) {
-    redirect("/backend/berita");
+    notFound();
   }
+
+  const kategoriList = await getAllKategori();
+  const tagsList = await getAllTagsSimple();
 
   return (
     <div className="space-y-6">
@@ -35,11 +32,15 @@ export default async function EditBeritaPage({
           Edit Berita
         </h1>
         <p className="text-gray-600 dark:text-gray-400 mt-1">
-          Update informasi berita: {berita.judul}
+          Edit berita: {berita.judul}
         </p>
       </div>
 
-      <BeritaForm berita={berita} kategoriList={kategoriList} />
+      <BeritaForm
+        berita={berita}
+        kategoriList={kategoriList}
+        tagsList={tagsList}
+      />
     </div>
   );
 }

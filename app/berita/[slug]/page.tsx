@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Calendar, Eye, Clock, Share2 } from "lucide-react";
+import { Calendar, Eye, Clock, Share2, Tag } from "lucide-react";
 import { SiFacebook, SiX, SiWhatsapp } from "react-icons/si";
 
 import { Badge } from "@/components/ui/badge";
@@ -33,6 +33,10 @@ export default async function NewsDetailPage({ params }: NewsDetailPageProps) {
 
   // Fetch berita from database
   const berita = await BeritaRepository.findBySlug(slug);
+
+  const beritaWithTags = berita as typeof berita & {
+    tags?: { id: string; nama: string; slug: string }[];
+  };
 
   if (!berita) {
     notFound();
@@ -71,7 +75,8 @@ export default async function NewsDetailPage({ params }: NewsDetailPageProps) {
             {/* Category Badge */}
             <Badge
               className="mb-4"
-              style={{ backgroundColor: berita.kategori_color || "#3b82f6" }}>
+              style={{ backgroundColor: berita.kategori_color || "#3b82f6" }}
+            >
               {berita.kategori_nama}
             </Badge>
 
@@ -142,11 +147,13 @@ export default async function NewsDetailPage({ params }: NewsDetailPageProps) {
                       size="sm"
                       variant="ghost"
                       className="h-9 w-9 p-0 hover:bg-[#1877f2] hover:text-white"
-                      asChild>
+                      asChild
+                    >
                       <a
                         href={`https://facebook.com/sharer/sharer.php?u=${currentUrl}`}
                         target="_blank"
-                        rel="noopener noreferrer">
+                        rel="noopener noreferrer"
+                      >
                         <SiFacebook className="h-4 w-4" />
                       </a>
                     </Button>
@@ -154,11 +161,13 @@ export default async function NewsDetailPage({ params }: NewsDetailPageProps) {
                       size="sm"
                       variant="ghost"
                       className="h-9 w-9 p-0 hover:bg-[#1da1f2] hover:text-white"
-                      asChild>
+                      asChild
+                    >
                       <a
                         href={`https://twitter.com/intent/tweet?url=${currentUrl}&text=${berita.judul}`}
                         target="_blank"
-                        rel="noopener noreferrer">
+                        rel="noopener noreferrer"
+                      >
                         <SiX className="h-4 w-4" />
                       </a>
                     </Button>
@@ -166,11 +175,13 @@ export default async function NewsDetailPage({ params }: NewsDetailPageProps) {
                       size="sm"
                       variant="ghost"
                       className="h-9 w-9 p-0 hover:bg-[#25d366] hover:text-white"
-                      asChild>
+                      asChild
+                    >
                       <a
                         href={`https://wa.me/?text=${berita.judul} ${currentUrl}`}
                         target="_blank"
-                        rel="noopener noreferrer">
+                        rel="noopener noreferrer"
+                      >
                         <SiWhatsapp className="h-4 w-4" />
                       </a>
                     </Button>
@@ -204,6 +215,32 @@ export default async function NewsDetailPage({ params }: NewsDetailPageProps) {
             {/* Gallery */}
             {galeri.length > 0 && (
               <GalleryLightbox images={galeri} title={berita.judul} />
+            )}
+
+            {/* Tags Section - Alternative placement at bottom */}
+            {beritaWithTags.tags && beritaWithTags.tags.length > 0 && (
+              <div className="mt-8 pt-8 border-t">
+                <div className="flex flex-wrap items-center gap-3">
+                  <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                    <Tag className="h-4 w-4" />
+                    <span>Tags:</span>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {beritaWithTags.tags.map((tag) => (
+                      <Link
+                        key={tag.id}
+                        href={`/berita?tag=${tag.slug}`}
+                        className="inline-flex items-center px-3 py-1.5 text-sm font-medium 
+                       bg-primary/10 text-primary rounded-full 
+                       hover:bg-primary hover:text-primary-foreground 
+                       transition-colors duration-200"
+                      >
+                        {tag.nama}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              </div>
             )}
           </article>
 

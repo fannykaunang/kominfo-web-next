@@ -27,8 +27,8 @@ interface MultipleTagSelectProps {
 }
 
 export function MultipleTagSelect({
-  tags,
-  selectedTags,
+  tags = [], // 👈 TAMBAH DEFAULT VALUE
+  selectedTags = [], // 👈 TAMBAH DEFAULT VALUE
   onChange,
   disabled = false,
 }: MultipleTagSelectProps) {
@@ -49,6 +49,24 @@ export function MultipleTagSelect({
   const getTagName = (tagId: string) => {
     return tags.find((t) => t.id === tagId)?.nama || "";
   };
+
+  // 👈 TAMBAH CHECK - Jika tags belum load, tampilkan loading
+  if (!tags) {
+    return (
+      <div className="w-full p-4 text-center text-sm text-muted-foreground">
+        Loading tags...
+      </div>
+    );
+  }
+
+  // 👈 TAMBAH CHECK - Jika tags kosong
+  if (tags.length === 0) {
+    return (
+      <div className="w-full p-4 text-center text-sm text-muted-foreground border rounded-md">
+        Tidak ada tags tersedia
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-2">

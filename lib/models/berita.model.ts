@@ -7,31 +7,14 @@ import {
   generateUUID,
   buildPagination,
 } from "../db-helpers";
-import { Berita, PaginationResult } from "../types";
+import {
+  Berita,
+  PaginationResult,
+  BeritaCreateInput,
+  BeritaUpdateInput,
+} from "../types";
 import { createLogWithData } from "./log.model";
 import { syncBeritaTags } from "./berita-tags.model";
-
-/**
- * Input untuk membuat berita (app-level)
- */
-export interface BeritaCreateInput {
-  judul: string;
-  slug: string;
-  excerpt: string;
-  konten: string;
-  featured_image?: string;
-  galeri?: string[];
-  kategori_id: string;
-  author_id: string;
-  is_highlight?: boolean;
-  is_published?: boolean;
-  published_at?: Date | null;
-}
-
-/**
- * Input untuk update berita
- */
-export interface BeritaUpdateInput extends Partial<BeritaCreateInput> {}
 
 /**
  * Repository untuk tabel berita dengan logging
@@ -157,24 +140,92 @@ export class BeritaRepository {
   }
 
   /**
+   * Get single berita by slug (published) WITH TAGS
+   */
+  static async findBySlugWithTags(
+    slug: string
+  ): Promise<
+    (Berita & { tags?: { id: string; nama: string; slug: string }[] }) | null
+  > {
+    const sql = `
+    SELECT 
+      b.*,
+      k.nama as kategori_nama,
+      k.slug as kategori_slug,
+      k.color as kategori_color,
+      u.name as author_name
+    FROM berita b
+    INNER JOIN kategori k ON b.kategori_id = k.id
+    INNER JOIN users u ON b.author_id = u.id
+    WHERE b.slug = ? AND b.is_published = 1
+    LIMIT 1
+  `;
+
+    const berita = await queryOne<Berita>(sql, [slug]);
+
+    if (!berita) return null;
+
+    // Get tags for this berita
+    const tagsQuery = `
+    SELECT t.id, t.nama, t.slug
+    FROM tags t
+    INNER JOIN berita_tags bt ON t.id = bt.tag_id
+    WHERE bt.berita_id = ?
+    ORDER BY t.nama ASC
+  `;
+
+    const tags = await query<{ id: string; nama: string; slug: string }>(
+      tagsQuery,
+      [berita.id]
+    );
+
+    return {
+      ...berita,
+      tags: tags,
+    };
+  }
+
+  /**
    * Get single berita by slug (published)
    */
   static async findBySlug(slug: string): Promise<Berita | null> {
     const sql = `
-      SELECT 
-        b.*,
-        k.nama as kategori_nama,
-        k.slug as kategori_slug,
-        k.color as kategori_color,
-        u.name as author_name
-      FROM berita b
-      INNER JOIN kategori k ON b.kategori_id = k.id
-      INNER JOIN users u ON b.author_id = u.id
-      WHERE b.slug = ? AND b.is_published = 1
-      LIMIT 1
-    `;
+    SELECT 
+      b.*,
+      k.nama as kategori_nama,
+      k.slug as kategori_slug,
+      k.color as kategori_color,
+      u.name as author_name
+    FROM berita b
+    INNER JOIN kategori k ON b.kategori_id = k.id
+    INNER JOIN users u ON b.author_id = u.id
+    WHERE b.slug = ? AND b.is_published = 1
+    LIMIT 1
+  `;
 
-    return await queryOne<Berita>(sql, [slug]);
+    const berita = await queryOne<Berita>(sql, [slug]);
+
+    if (!berita) return null;
+
+    // 👈 TAMBAH INI - Get tags for this berita
+    const tagsQuery = `
+    SELECT t.id, t.nama, t.slug
+    FROM tags t
+    INNER JOIN berita_tags bt ON t.id = bt.tag_id
+    WHERE bt.berita_id = ?
+    ORDER BY t.nama ASC
+  `;
+
+    const tags = await query<{ id: string; nama: string; slug: string }>(
+      tagsQuery,
+      [berita.id]
+    );
+
+    // Add tags to berita object
+    return {
+      ...berita,
+      tags: tags as any, // Type assertion untuk backward compatibility
+    };
   }
 
   /**
@@ -211,11 +262,11 @@ export class BeritaRepository {
     const galeriJson = data.galeri ? JSON.stringify(data.galeri) : null;
 
     const sql = `
-      INSERT INTO berita (
-        id, judul, slug, excerpt, konten, featured_image, galeri,
-        kategori_id, author_id, is_highlight, is_published, published_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `;
+    INSERT INTO berita (
+      id, judul, slug, excerpt, konten, featured_image, galeri,
+      kategori_id, author_id, is_highlight, is_published, published_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `;
 
     const params = [
       id,

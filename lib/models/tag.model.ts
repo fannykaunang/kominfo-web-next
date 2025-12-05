@@ -435,7 +435,9 @@ export async function getAllTags(): Promise<Tag[]> {
  * Tanpa pagination, untuk keperluan dropdown
  */
 export async function getAllTagsSimple(): Promise<Tag[]> {
-  return await query<Tag>(`SELECT id, nama, slug FROM tags ORDER BY nama ASC`);
+  return await query<Tag>(
+    `SELECT id, nama, slug, created_at FROM tags ORDER BY nama ASC`
+  );
 }
 
 /**

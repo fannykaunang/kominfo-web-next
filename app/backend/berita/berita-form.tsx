@@ -37,13 +37,13 @@ const TinyMCEEditor = dynamic(
 interface BeritaFormProps {
   berita?: Berita | null;
   kategoriList: Kategori[];
-  tagsList: Tag[];
+  tagsList?: Tag[];
 }
 
 export default function BeritaForm({
   berita,
   kategoriList,
-  tagsList,
+  tagsList = [],
 }: BeritaFormProps) {
   const router = useRouter();
   const editorRef = useRef<any>(null);
@@ -463,12 +463,18 @@ export default function BeritaForm({
           {/* Tags */}
           <div className="space-y-2">
             <Label htmlFor="tags">Tags</Label>
-            <MultipleTagSelect
-              tags={tagsList}
-              selectedTags={selectedTags}
-              onChange={setSelectedTags}
-              disabled={loading}
-            />
+            {tagsList && tagsList.length > 0 ? (
+              <MultipleTagSelect
+                tags={tagsList}
+                selectedTags={selectedTags}
+                onChange={setSelectedTags}
+                disabled={loading}
+              />
+            ) : (
+              <div className="p-4 text-center text-sm text-muted-foreground border rounded-md">
+                Tidak ada tags tersedia
+              </div>
+            )}
             <p className="text-xs text-gray-500 dark:text-gray-400">
               Pilih satu atau lebih tags untuk berita ini
             </p>
