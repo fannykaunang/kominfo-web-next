@@ -49,6 +49,67 @@ export interface LoginAttempt extends RowDataPacket {
 }
 
 /**
+ * Settings Model (singleton row)
+ */
+export interface AppSettings extends RowDataPacket {
+  id: number;
+  nama_aplikasi: string;
+  alias_aplikasi: string;
+  deskripsi: string | null;
+  versi: string;
+  copyright: string | null;
+  tahun: number;
+  logo: string | null;
+  favicon: string | null;
+  email: string;
+  no_telepon: string;
+  whatsapp: string | null;
+  alamat: string;
+  domain: string;
+  mode: "online" | "offline" | "maintenance";
+  maintenance_message: string | null;
+  timezone: string;
+  bahasa_default: string;
+  database_version: string | null;
+  max_upload_size: number;
+  allowed_extensions: string | string[] | null;
+  meta_keywords: string | null;
+  meta_description: string | null;
+  og_image: string | null;
+  facebook_url: string | null;
+  instagram_url: string | null;
+  twitter_url: string | null;
+  youtube_url: string | null;
+  tiktok_url: string | null;
+  smtp_host: string | null;
+  smtp_port: number | null;
+  smtp_user: string | null;
+  smtp_from_name: string | null;
+  notifikasi_email: string | null;
+  session_timeout: number;
+  password_min_length: number;
+  max_login_attempts: number;
+  lockout_duration: number;
+  enable_2fa: number;
+  theme_color: string;
+  date_format: string;
+  time_format: string;
+  instansi_nama: string | null;
+  kepala_dinas: string | null;
+  nip_kepala_dinas: string | null;
+  pimpinan_wilayah: string | null;
+  logo_pemda: string | null;
+  backup_auto: number;
+  backup_interval: number;
+  last_backup: Date | string | null;
+  log_activity: number;
+  log_retention_days: number;
+  created_at?: Date;
+  updated_at?: Date;
+  updated_by?: string | null;
+}
+
+/**
  * Kategori Model
  * (sudah termasuk `berita_count?` untuk hasil JOIN)
  */

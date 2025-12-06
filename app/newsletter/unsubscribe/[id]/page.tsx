@@ -1,3 +1,5 @@
+// app/newsletter/unsubscribe/[id]/page.tsx
+
 import {
   getNewsletterById,
   updateNewsletter,
@@ -9,13 +11,15 @@ export const metadata: Metadata = {
 };
 
 type UnsubscribePageProps = {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 };
 
 export default async function UnsubscribePage({
   params,
 }: UnsubscribePageProps) {
-  const subscriber = await getNewsletterById(params.id);
+  const { id } = await params;
+
+  const subscriber = await getNewsletterById(id);
 
   if (!subscriber) {
     return (
@@ -38,7 +42,7 @@ export default async function UnsubscribePage({
   }
 
   try {
-    await updateNewsletter(params.id, {
+    await updateNewsletter(id, {
       is_active: 0,
       unsubscribed_at: new Date(),
     });
