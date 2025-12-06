@@ -41,6 +41,14 @@ import { useRouter } from "next/navigation";
 import { formatDistanceToNow } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
 import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 interface BeritaClientProps {
   initialBerita: PaginationResult<Berita>;
@@ -74,6 +82,7 @@ export default function BeritaClient({
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [selectedBerita, setSelectedBerita] = useState<Berita | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
   const router = useRouter();
 
   // Refresh data from server
@@ -128,6 +137,7 @@ export default function BeritaClient({
   const handleApplyFilters = () => {
     setCurrentPage(1);
     refreshData(1, itemsPerPage);
+    setIsFilterOpen(false);
   };
 
   // Clear filters
@@ -140,6 +150,7 @@ export default function BeritaClient({
     setDateTo("");
     setCurrentPage(1);
     refreshData(1, itemsPerPage);
+    setIsFilterOpen(false);
   };
 
   const handleEdit = (berita: Berita) => {
@@ -200,10 +211,6 @@ export default function BeritaClient({
             Manage berita dan artikel untuk website
           </p>
         </div>
-        <Button onClick={handleAddNew} className="gap-2">
-          <Plus className="h-4 w-4" />
-          Tambah Berita
-        </Button>
       </div>
 
       {/* Stats Cards */}
@@ -263,139 +270,166 @@ export default function BeritaClient({
         </Card>
       </div>
 
-      {/* Filters */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Filter className="h-5 w-5" />
-            Filter & Pencarian
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {/* Search */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="space-y-2">
-              <Label>Pencarian</Label>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <Input
-                  type="search"
-                  placeholder="Cari judul berita..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label>Status Publish</Label>
-              <Select
-                value={filterPublished}
-                onValueChange={setFilterPublished}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Semua Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Semua Status</SelectItem>
-                  <SelectItem value="true">Published</SelectItem>
-                  <SelectItem value="false">Unpublished</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label>Highlight</Label>
-              <Select
-                value={filterHighlight}
-                onValueChange={setFilterHighlight}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Semua" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Semua</SelectItem>
-                  <SelectItem value="true">Ya</SelectItem>
-                  <SelectItem value="false">Tidak</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label>Kategori</Label>
-              <Select value={filterKategori} onValueChange={setFilterKategori}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Semua Kategori" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Semua Kategori</SelectItem>
-                  {kategoriList.map((k) => (
-                    <SelectItem key={k.id} value={k.id}>
-                      {k.nama}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          {/* Date Range */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Tanggal Dari</Label>
-              <div className="relative">
-                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <Input
-                  type="date"
-                  value={dateFrom}
-                  onChange={(e) => setDateFrom(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label>Tanggal Sampai</Label>
-              <div className="relative">
-                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <Input
-                  type="date"
-                  value={dateTo}
-                  onChange={(e) => setDateTo(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Action Buttons */}
-          <div className="flex items-center gap-2">
-            <Button onClick={handleApplyFilters} disabled={isLoading}>
-              <Search className="h-4 w-4 mr-2" />
-              Terapkan Filter
-            </Button>
-            {hasActiveFilters && (
-              <Button
-                variant="outline"
-                onClick={handleClearFilters}
-                disabled={isLoading}
-              >
-                <X className="h-4 w-4 mr-2" />
-                Reset Filter
-              </Button>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-
       {/* Table */}
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between gap-4">
           <CardTitle className="flex items-center gap-2">
             <FileText className="h-5 w-5" />
             Daftar Berita
           </CardTitle>
+
+          <div className="flex items-center gap-2">
+            <Dialog open={isFilterOpen} onOpenChange={setIsFilterOpen}>
+              <DialogTrigger asChild>
+                <Button
+                  variant={hasActiveFilters ? "default" : "outline"}
+                  className="gap-2"
+                  disabled={isLoading}
+                >
+                  <Filter className="h-4 w-4" />
+                  Filter & Pencarian
+                  {hasActiveFilters && <Badge variant="secondary">Aktif</Badge>}
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-4xl">
+                <DialogHeader>
+                  <DialogTitle className="flex items-center gap-2">
+                    <Filter className="h-5 w-5" />
+                    Filter & Pencarian
+                  </DialogTitle>
+                </DialogHeader>
+
+                <div className="space-y-4">
+                  {/* Search */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="space-y-2">
+                      <Label>Pencarian</Label>
+                      <div className="relative">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                        <Input
+                          type="search"
+                          placeholder="Cari judul berita..."
+                          value={search}
+                          onChange={(e) => setSearch(e.target.value)}
+                          className="pl-10"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>Status Publish</Label>
+                      <Select
+                        value={filterPublished}
+                        onValueChange={setFilterPublished}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Semua Status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">Semua Status</SelectItem>
+                          <SelectItem value="true">Published</SelectItem>
+                          <SelectItem value="false">Unpublished</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>Highlight</Label>
+                      <Select
+                        value={filterHighlight}
+                        onValueChange={setFilterHighlight}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Semua" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">Semua</SelectItem>
+                          <SelectItem value="true">Ya</SelectItem>
+                          <SelectItem value="false">Tidak</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>Kategori</Label>
+                      <Select
+                        value={filterKategori}
+                        onValueChange={setFilterKategori}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Semua Kategori" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">Semua Kategori</SelectItem>
+                          {kategoriList.map((k) => (
+                            <SelectItem key={k.id} value={k.id}>
+                              {k.nama}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  {/* Date Range */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Tanggal Dari</Label>
+                      <div className="relative">
+                        <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                        <Input
+                          type="date"
+                          value={dateFrom}
+                          onChange={(e) => setDateFrom(e.target.value)}
+                          className="pl-10"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>Tanggal Sampai</Label>
+                      <div className="relative">
+                        <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                        <Input
+                          type="date"
+                          value={dateTo}
+                          onChange={(e) => setDateTo(e.target.value)}
+                          className="pl-10"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <DialogFooter className="flex-col sm:flex-row sm:justify-between sm:space-x-2">
+                  {hasActiveFilters && (
+                    <Button
+                      variant="outline"
+                      onClick={handleClearFilters}
+                      disabled={isLoading}
+                      className="w-full sm:w-auto"
+                    >
+                      <X className="h-4 w-4 mr-2" />
+                      Reset Filter
+                    </Button>
+                  )}
+                  <Button
+                    onClick={handleApplyFilters}
+                    disabled={isLoading}
+                    className="w-full sm:w-auto"
+                  >
+                    <Search className="h-4 w-4 mr-2" />
+                    Terapkan Filter
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+            {/* Tambah Berita dipindah ke sini */}
+            <Button onClick={handleAddNew} className="gap-2">
+              <Plus className="h-4 w-4" />
+              Tambah Berita
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="border rounded-lg overflow-hidden">
@@ -431,7 +465,7 @@ export default function BeritaClient({
                             {berita.judul}
                           </div>
                           <code className="text-xs text-gray-500">
-                            {berita.slug}
+                            {berita.excerpt}
                           </code>
                         </div>
                       </TableCell>
