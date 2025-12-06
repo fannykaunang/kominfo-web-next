@@ -1,3 +1,5 @@
+// app/backend/newsletter/_client.tsx
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -208,6 +210,9 @@ export function NewsletterClient() {
       day: "2-digit",
       month: "short",
       year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
     }).format(date);
   };
 

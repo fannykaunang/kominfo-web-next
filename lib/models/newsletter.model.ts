@@ -79,6 +79,7 @@ export async function getNewsletters(params: {
 
   const total = Number(countResult?.total || 0);
   const totalPages = Math.max(1, Math.ceil(total / safeLimit));
+  const paginationClause = `LIMIT ${safeLimit} OFFSET ${offset}`;
 
   const newsletters = await query<Newsletter>(
     `
@@ -91,9 +92,9 @@ export async function getNewsletters(params: {
       FROM newsletter
       ${whereClause}
       ORDER BY subscribed_at DESC
-      LIMIT ? OFFSET ?
+      ${paginationClause}
     `,
-    [...queryParams, safeLimit, offset]
+    queryParams
   );
 
   return {
@@ -102,6 +103,21 @@ export async function getNewsletters(params: {
     currentPage: safePage,
     totalPages,
   };
+}
+
+export async function getActiveSubscribers(): Promise<Newsletter[]> {
+  return query<Newsletter>(
+    `
+      SELECT
+        id,
+        email,
+        is_active,
+        subscribed_at,
+        unsubscribed_at
+      FROM newsletter
+      WHERE is_active = 1
+    `
+  );
 }
 
 export async function getNewsletterById(

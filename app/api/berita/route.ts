@@ -4,6 +4,93 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { BeritaRepository } from "@/lib/models/berita.model";
 import { z } from "zod";
+import { getActiveSubscribers } from "@/lib/models/newsletter.model";
+import { sendEmail } from "@/lib/email";
+
+function getBaseUrl() {
+  const deploymentUrl = process.env.VERCEL_URL
+    ? `https://${process.env.VERCEL_URL}`
+    : null;
+
+  return (
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    process.env.APP_URL ||
+    process.env.NEXTAUTH_URL ||
+    deploymentUrl ||
+    "http://localhost:3000"
+  );
+}
+
+function buildBeritaEmailTemplate({
+  judul,
+  excerpt,
+  articleUrl,
+  unsubscribeUrl,
+}: {
+  judul: string;
+  excerpt: string;
+  articleUrl: string;
+  unsubscribeUrl: string;
+}) {
+  const subject = `Berita terbaru: ${judul}`;
+  const safeExcerpt =
+    excerpt.length > 200 ? `${excerpt.slice(0, 197)}...` : excerpt;
+
+  const html = `
+    <div style="font-family: Arial, sans-serif; color: #1f2937;">
+      <h2 style="color: #111827; margin-bottom: 8px;">${judul}</h2>
+      <p style="margin-top: 0; margin-bottom: 16px; line-height: 1.6;">${safeExcerpt}</p>
+      <a
+        href="${articleUrl}"
+        style="display: inline-block; padding: 12px 20px; background-color: #2563eb; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: 600;"
+      >
+        Baca selengkapnya
+      </a>
+      <p style="margin-top: 24px; font-size: 12px; color: #6b7280;">
+        Anda menerima email ini karena berlangganan newsletter kami. Jika tidak ingin menerima email lagi, silakan <a href="${unsubscribeUrl}" style="color: #2563eb;">berhenti berlangganan</a>.
+      </p>
+    </div>
+  `;
+
+  const text = `Berita terbaru: ${judul}\n\n${safeExcerpt}\n\nBaca selengkapnya: ${articleUrl}\nBerhenti berlangganan: ${unsubscribeUrl}`;
+
+  return { subject, html, text };
+}
+
+async function sendNewsletterEmailForBerita({
+  judul,
+  excerpt,
+  slug,
+}: {
+  judul: string;
+  excerpt: string;
+  slug: string;
+}) {
+  const subscribers = await getActiveSubscribers();
+  if (!subscribers.length) return;
+
+  const baseUrl = getBaseUrl();
+  const articleUrl = `${baseUrl}/berita/${slug}`;
+
+  await Promise.all(
+    subscribers.map(async (subscriber) => {
+      const unsubscribeUrl = `${baseUrl}/api/newsletter/unsubscribe/${subscriber.id}`;
+      const emailContent = buildBeritaEmailTemplate({
+        judul,
+        excerpt,
+        articleUrl,
+        unsubscribeUrl,
+      });
+
+      await sendEmail({
+        to: subscriber.email,
+        subject: emailContent.subject,
+        html: emailContent.html,
+        text: emailContent.text,
+      });
+    })
+  );
+}
 
 // Helper to get client info
 function getClientInfo(request: NextRequest) {
@@ -164,6 +251,16 @@ export async function POST(request: NextRequest) {
       ipAddress,
       userAgent
     );
+
+    if (data.is_published) {
+      sendNewsletterEmailForBerita({
+        judul: data.judul,
+        excerpt: data.excerpt,
+        slug: data.slug,
+      }).catch((error) =>
+        console.error("Error sending berita newsletter emails:", error)
+      );
+    }
 
     return NextResponse.json(
       { message: "Berita berhasil dibuat", id },

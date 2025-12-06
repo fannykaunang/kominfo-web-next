@@ -66,12 +66,14 @@ export default function DeleteBeritaDialog({
             Hapus Berita?
           </AlertDialogTitle>
           <AlertDialogDescription className="space-y-2">
-            <p>
+            <span>
               Anda akan menghapus berita: <strong>{berita.judul}</strong>
-            </p>
-            <p className="text-red-600 font-medium">
+            </span>
+            <br></br>
+            <br></br>
+            <span className="text-red-600 font-medium">
               Tindakan ini tidak dapat dibatalkan!
-            </p>
+            </span>
           </AlertDialogDescription>
         </AlertDialogHeader>
 
@@ -86,7 +88,8 @@ export default function DeleteBeritaDialog({
           <AlertDialogAction
             onClick={handleDelete}
             disabled={loading}
-            className="bg-red-600 hover:bg-red-700">
+            className="bg-red-600 hover:bg-red-700"
+          >
             {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Hapus
           </AlertDialogAction>
