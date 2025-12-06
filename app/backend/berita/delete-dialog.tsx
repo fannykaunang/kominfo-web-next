@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Berita } from "@/lib/types";
 import {
   AlertDialog,
@@ -31,6 +31,13 @@ export default function DeleteBeritaDialog({
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    if (!open) {
+      setLoading(false);
+      setError("");
+    }
+  }, [open]);
+
   const handleDelete = async () => {
     if (!berita) return;
 
@@ -51,6 +58,7 @@ export default function DeleteBeritaDialog({
       onSuccess();
     } catch (err: any) {
       setError(err.message);
+    } finally {
       setLoading(false);
     }
   };

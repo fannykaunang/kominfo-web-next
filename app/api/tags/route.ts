@@ -48,6 +48,9 @@ export async function GET(request: NextRequest) {
     const startDate = searchParams.get("start_date") || "";
     const endDate = searchParams.get("end_date") || "";
     const used = searchParams.get("used") || "all";
+    const sortParam = searchParams.get("sort") || "default";
+    const sort =
+      sortParam === "most" || sortParam === "least" ? sortParam : "default";
 
     const { tags, total } = await getTags({
       page,
@@ -56,6 +59,7 @@ export async function GET(request: NextRequest) {
       start_date: startDate,
       end_date: endDate,
       used,
+      sort,
     });
 
     const totalPages = Math.ceil(total / limit);

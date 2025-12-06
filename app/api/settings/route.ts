@@ -1,3 +1,5 @@
+// app/api/settings/route.ts
+
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { AppSettings, AppSettings as AppSettingsType } from "@/lib/types";

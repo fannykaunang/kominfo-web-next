@@ -2,7 +2,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Kategori } from "@/lib/types";
 import {
   AlertDialog,
@@ -32,6 +32,13 @@ export default function DeleteKategoriDialog({
 }: DeleteKategoriDialogProps) {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!open) {
+      setLoading(false);
+      setError("");
+    }
+  }, [open]);
 
   const handleDelete = async () => {
     if (!kategori) return;
@@ -74,12 +81,15 @@ export default function DeleteKategoriDialog({
             <AlertTriangle className="h-5 w-5 text-red-600" />
             Hapus Kategori?
           </AlertDialogTitle>
-          <AlertDialogDescription className="space-y-2">
-            <span>
+
+          {/* wrapper untuk spacing, bukan AlertDialogDescription */}
+          <div className="space-y-2">
+            <AlertDialogDescription>
               Anda akan menghapus kategori: <strong>{kategori.nama}</strong>
-            </span>
+            </AlertDialogDescription>
+
             {hasBerita && (
-              <Alert variant="destructive" className="mt-2">
+              <Alert variant="destructive">
                 <AlertDescription>
                   Kategori ini sedang digunakan oleh{" "}
                   <strong>{kategori.berita_count} berita</strong>. Anda tidak
@@ -87,11 +97,11 @@ export default function DeleteKategoriDialog({
                 </AlertDescription>
               </Alert>
             )}
-          </AlertDialogDescription>
+          </div>
         </AlertDialogHeader>
 
         {error && (
-          <Alert variant="destructive">
+          <Alert variant="destructive" className="mt-4">
             <AlertDescription>{error}</AlertDescription>
           </Alert>
         )}
@@ -101,7 +111,8 @@ export default function DeleteKategoriDialog({
           <AlertDialogAction
             onClick={handleDelete}
             disabled={loading || hasBerita}
-            className="bg-red-600 hover:bg-red-700">
+            className="bg-red-600 hover:bg-red-700"
+          >
             {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Hapus
           </AlertDialogAction>

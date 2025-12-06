@@ -8,7 +8,6 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import {
   Select,
@@ -128,8 +127,8 @@ const tabs: TabConfig[] = [
     ],
   },
   {
-    key: "email",
-    label: "Email",
+    key: "integrasi",
+    label: "Integrasi",
     description: "Pengaturan SMTP dan notifikasi.",
     sections: [
       {
@@ -145,6 +144,39 @@ const tabs: TabConfig[] = [
             type: "text",
             colSpan: 2,
           },
+        ],
+      },
+    ],
+  },
+  {
+    key: "keamanan",
+    label: "Keamanan",
+    description: "Kebijakan login dan sesi.",
+    sections: [
+      {
+        title: "Batasan Akses",
+        fields: [
+          {
+            key: "session_timeout",
+            label: "Durasi Sesi (menit)",
+            type: "number",
+          },
+          {
+            key: "password_min_length",
+            label: "Minimal Kata Sandi",
+            type: "number",
+          },
+          {
+            key: "max_login_attempts",
+            label: "Maks. Percobaan Login",
+            type: "number",
+          },
+          {
+            key: "lockout_duration",
+            label: "Durasi Blokir (menit)",
+            type: "number",
+          },
+          { key: "enable_2fa", label: "Aktifkan 2FA", type: "switch" },
         ],
       },
     ],
@@ -199,41 +231,8 @@ const tabs: TabConfig[] = [
     ],
   },
   {
-    key: "keamanan",
-    label: "Keamanan",
-    description: "Kebijakan login dan sesi.",
-    sections: [
-      {
-        title: "Batasan Akses",
-        fields: [
-          {
-            key: "session_timeout",
-            label: "Durasi Sesi (menit)",
-            type: "number",
-          },
-          {
-            key: "password_min_length",
-            label: "Minimal Kata Sandi",
-            type: "number",
-          },
-          {
-            key: "max_login_attempts",
-            label: "Maks. Percobaan Login",
-            type: "number",
-          },
-          {
-            key: "lockout_duration",
-            label: "Durasi Blokir (menit)",
-            type: "number",
-          },
-          { key: "enable_2fa", label: "Aktifkan 2FA", type: "switch" },
-        ],
-      },
-    ],
-  },
-  {
-    key: "sistem",
-    label: "Sistem",
+    key: "laporan",
+    label: "Laporan",
     description: "Backup, log aktivitas, dan batasan sistem.",
     sections: [
       {
@@ -269,6 +268,21 @@ const tabs: TabConfig[] = [
             type: "textarea",
             colSpan: 2,
           },
+        ],
+      },
+    ],
+  },
+  {
+    key: "sistem",
+    label: "Sistem",
+    description: "Pengaturan sistem lainnya.",
+    sections: [
+      {
+        title: "Konfigurasi Sistem",
+        fields: [
+          { key: "theme_color", label: "Warna Tema", type: "color" },
+          { key: "date_format", label: "Format Tanggal", type: "text" },
+          { key: "time_format", label: "Format Waktu", type: "text" },
         ],
       },
     ],
@@ -522,13 +536,13 @@ export default function SettingsClient() {
       return (
         <div className="space-y-2">
           {value && (
-            <div className="text-sm text-muted-foreground break-all">
+            <div className="text-sm text-gray-600 dark:text-gray-400 break-all">
               File saat ini: {value}
             </div>
           )}
           <Label
             htmlFor={`${field.key}-file`}
-            className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-md border border-dashed px-3 py-4 text-sm hover:bg-muted"
+            className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-md border border-dashed px-3 py-4 text-sm hover:bg-gray-50 dark:hover:bg-gray-700"
           >
             {uploadingField === field.key ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -557,7 +571,9 @@ export default function SettingsClient() {
             checked={Boolean(value)}
             onCheckedChange={(checked) => handleChange(field.key, checked)}
           />
-          <span className="text-sm text-muted-foreground">{field.label}</span>
+          <span className="text-sm text-gray-600 dark:text-gray-400">
+            {field.label}
+          </span>
         </div>
       );
     }
@@ -571,6 +587,7 @@ export default function SettingsClient() {
             value ? new Date(value).toLocaleString() : "Belum pernah backup"
           }
           disabled
+          className="bg-gray-50 dark:bg-gray-700"
         />
       );
     }
@@ -589,22 +606,24 @@ export default function SettingsClient() {
     <div className="space-y-6">
       <div className="flex flex-col gap-2">
         <div className="flex items-center gap-3">
-          <h1 className="text-3xl font-bold tracking-tight">
+          <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
             Pengaturan Aplikasi
           </h1>
           <Badge variant="outline">Single row only</Badge>
         </div>
-        <p className="text-muted-foreground">
+        <p className="text-gray-600 dark:text-gray-400">
           Seluruh pengaturan tersimpan pada satu baris tabel{" "}
           <strong>app_settings</strong>.
         </p>
       </div>
 
-      <Card>
-        <CardHeader className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+      <div className="rounded-lg border bg-white dark:bg-gray-800">
+        <div className="flex flex-col gap-4 border-b p-6 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <CardTitle className="text-xl">Form Pengaturan</CardTitle>
-            <p className="text-sm text-muted-foreground">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+              Form Pengaturan
+            </h2>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
               Setiap tab mengelompokkan field yang saling berkaitan.
             </p>
           </div>
@@ -636,130 +655,136 @@ export default function SettingsClient() {
               )}
             </Button>
           </div>
-        </CardHeader>
-        <CardContent className="space-y-6">
+        </div>
+        <div className="space-y-6 p-6">
           <div className="flex flex-col gap-4">
-            <div className="overflow-x-auto">
-              <Tabs
-                value={activeTab}
-                onValueChange={(val) => setActiveTab(val)}
-                className="w-full"
-              >
-                <TabsList className="flex min-w-max gap-2 overflow-x-auto">
+            <Tabs
+              value={activeTab}
+              onValueChange={(val) => setActiveTab(val)}
+              className="w-full"
+            >
+              <div className="w-full overflow-x-auto">
+                <TabsList className="inline-flex h-auto w-full min-w-max items-center justify-start gap-1 rounded-lg bg-gray-100 p-1 dark:bg-gray-900">
                   {tabs.map((tab) => (
                     <TabsTrigger
                       key={tab.key}
                       value={tab.key}
-                      className="capitalize"
+                      className="whitespace-nowrap rounded-md px-4 py-2 text-sm font-medium transition-all data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm dark:data-[state=active]:bg-gray-800 dark:data-[state=active]:text-white"
                     >
                       {tab.label}
                     </TabsTrigger>
                   ))}
                 </TabsList>
+              </div>
 
-                {tabs.map((tab) => (
-                  <TabsContent
-                    key={tab.key}
-                    value={tab.key}
-                    className="mt-4 space-y-4"
-                  >
-                    {tab.description && (
-                      <p className="text-sm text-muted-foreground">
-                        {tab.description}
-                      </p>
-                    )}
+              {tabs.map((tab) => (
+                <TabsContent
+                  key={tab.key}
+                  value={tab.key}
+                  className="mt-6 space-y-4"
+                >
+                  {tab.description && (
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      {tab.description}
+                    </p>
+                  )}
 
-                    {tab.sections.map((section) => (
-                      <div
-                        key={`${tab.key}-${section.title}`}
-                        className="space-y-3 rounded-lg border p-4"
-                      >
-                        <div className="space-y-1">
-                          <p className="text-base font-semibold">
-                            {section.title}
+                  {tab.sections.map((section) => (
+                    <div
+                      key={`${tab.key}-${section.title}`}
+                      className="space-y-4 rounded-lg border bg-gray-50 p-6 dark:bg-gray-900"
+                    >
+                      <div className="space-y-1">
+                        <p className="text-base font-semibold text-gray-900 dark:text-white">
+                          {section.title}
+                        </p>
+                        {section.description && (
+                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                            {section.description}
                           </p>
-                          {section.description && (
-                            <p className="text-sm text-muted-foreground">
-                              {section.description}
-                            </p>
-                          )}
-                        </div>
+                        )}
+                      </div>
 
-                        <div className="grid gap-4 md:grid-cols-2">
-                          {section.fields.map((field) => (
-                            <div
-                              key={field.key}
-                              className={`space-y-2 ${
-                                field.colSpan === 2 ? "md:col-span-2" : ""
-                              }`}
+                      <div className="grid gap-4 md:grid-cols-2">
+                        {section.fields.map((field) => (
+                          <div
+                            key={field.key}
+                            className={`space-y-2 ${
+                              field.colSpan === 2 ? "md:col-span-2" : ""
+                            }`}
+                          >
+                            <Label
+                              htmlFor={field.key}
+                              className="text-gray-900 dark:text-white"
                             >
-                              <Label htmlFor={field.key}>{field.label}</Label>
-                              {renderField(field)}
-                              {field.description && (
-                                <p className="text-xs text-muted-foreground">
-                                  {field.description}
-                                </p>
-                              )}
-                            </div>
-                          ))}
+                              {field.label}
+                            </Label>
+                            {renderField(field)}
+                            {field.description && (
+                              <p className="text-xs text-gray-600 dark:text-gray-400">
+                                {field.description}
+                              </p>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+
+                  {tab.key === "laporan" && (
+                    <div className="rounded-lg border bg-blue-50 p-6 dark:bg-blue-900/20">
+                      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                        <div className="space-y-2">
+                          <p className="font-semibold text-gray-900 dark:text-white">
+                            Auto Backup
+                          </p>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                            Menggunakan field <strong>backup_auto</strong>,{" "}
+                            <strong>backup_interval</strong>, dan
+                            <strong> last_backup</strong> untuk penjadwalan
+                            otomatis.
+                          </p>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                            Backup terakhir:{" "}
+                            {values.last_backup
+                              ? new Date(values.last_backup).toLocaleString()
+                              : "Belum pernah"}
+                          </p>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            onClick={fetchSettings}
+                            disabled={loading || backupLoading}
+                          >
+                            <RefreshCw className="mr-2 h-4 w-4" /> Segarkan Data
+                          </Button>
+                          <Button
+                            onClick={handleRunBackup}
+                            disabled={backupLoading}
+                          >
+                            {backupLoading ? (
+                              <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />{" "}
+                                Menjalankan...
+                              </>
+                            ) : (
+                              <>
+                                <Upload className="mr-2 h-4 w-4" /> Jalankan
+                                Backup
+                              </>
+                            )}
+                          </Button>
                         </div>
                       </div>
-                    ))}
-
-                    {tab.key === "sistem" && (
-                      <div className="rounded-lg border bg-muted/50 p-4">
-                        <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-                          <div className="space-y-1">
-                            <p className="font-medium">Auto Backup</p>
-                            <p className="text-sm text-muted-foreground">
-                              Menggunakan field <strong>backup_auto</strong>,{" "}
-                              <strong>backup_interval</strong>, dan
-                              <strong> last_backup</strong> untuk penjadwalan
-                              otomatis.
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                              Backup terakhir:{" "}
-                              {values.last_backup
-                                ? new Date(values.last_backup).toLocaleString()
-                                : "Belum pernah"}
-                            </p>
-                          </div>
-                          <div className="flex gap-2">
-                            <Button
-                              variant="outline"
-                              onClick={fetchSettings}
-                              disabled={loading || backupLoading}
-                            >
-                              <RefreshCw className="mr-2 h-4 w-4" /> Segarkan
-                              Data
-                            </Button>
-                            <Button
-                              onClick={handleRunBackup}
-                              disabled={backupLoading}
-                            >
-                              {backupLoading ? (
-                                <>
-                                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />{" "}
-                                  Menjalankan...
-                                </>
-                              ) : (
-                                <>
-                                  <Upload className="mr-2 h-4 w-4" /> Jalankan
-                                  Backup
-                                </>
-                              )}
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </TabsContent>
-                ))}
-              </Tabs>
-            </div>
+                    </div>
+                  )}
+                </TabsContent>
+              ))}
+            </Tabs>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }

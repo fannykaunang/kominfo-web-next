@@ -699,9 +699,8 @@ export interface TagListParams {
   page?: number;
   limit?: number;
   search?: string;
-  start_date?: string;
-  end_date?: string;
   used?: string; // 'all' | 'used' | 'unused'
+  sort?: "default" | "most" | "least";
 }
 
 export interface TagListResponse {

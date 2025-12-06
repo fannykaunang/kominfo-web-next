@@ -1,0 +1,117 @@
+# ========================================
+# SYSTEMD SERVICE FILE
+# ========================================
+# File: /etc/systemd/system/izakod-backup.service
+#
+# Untuk membuat file ini:
+# sudo nano /etc/systemd/system/izakod-backup.service
+#
+# Copy isi dibawah ini, sesuaikan path
+
+[Unit]
+Description=IZAKOD-ASN Auto Backup Service
+After=network.target mysql.service mariadb.service
+Wants=mysql.service
+
+[Service]
+Type=oneshot
+User=www-data
+Group=www-data
+WorkingDirectory=/path/to/backup-script
+EnvironmentFile=/path/to/backup-script/.env
+ExecStart=/usr/bin/node /path/to/backup-script/auto-backup.js
+StandardOutput=append:/var/log/izakod-backup.log
+StandardError=append:/var/log/izakod-backup-error.log
+TimeoutStartSec=600
+SyslogIdentifier=izakod-backup
+
+# Security options (optional, untuk production)
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/backups/izakod-asn /var/log
+
+[Install]
+WantedBy=multi-user.target
+
+
+# ========================================
+# PENJELASAN
+# ========================================
+#
+# [Unit]
+# Description: Deskripsi service
+# After: Service yang harus jalan duluan
+# Wants: Dependency yang diinginkan (tidak wajib)
+#
+# [Service]
+# Type=oneshot: Service yang jalan sekali lalu selesai
+# User/Group: User yang menjalankan service
+# WorkingDirectory: Direktori kerja script
+# EnvironmentFile: File environment variables (.env)
+# ExecStart: Command yang dijalankan
+# StandardOutput: Kemana output ditulis
+# StandardError: Kemana error ditulis
+# TimeoutStartSec: Timeout dalam detik
+# SyslogIdentifier: Identifier untuk syslog
+#
+# Security options:
+# NoNewPrivileges: Cegah privilege escalation
+# PrivateTmp: Gunakan /tmp terpisah
+# ProtectSystem: Protect system files
+# ProtectHome: Protect home directories
+# ReadWritePaths: Direktori yang boleh ditulis
+#
+# [Install]
+# WantedBy: Target untuk enable service
+#
+# ========================================
+# CUSTOMIZATION
+# ========================================
+#
+# Ganti nilai berikut:
+#
+# 1. User dan Group
+#    User=www-data          → User yang jalan web server
+#    Group=www-data         → Group yang jalan web server
+#    
+#    Atau gunakan user Anda:
+#    User=your_username
+#    Group=your_username
+#
+# 2. WorkingDirectory
+#    /path/to/backup-script → /home/user/izakod-backup
+#
+# 3. EnvironmentFile
+#    /path/to/backup-script/.env → /home/user/izakod-backup/.env
+#
+# 4. ExecStart
+#    /path/to/backup-script/auto-backup.js → /home/user/izakod-backup/auto-backup.js
+#
+# 5. ReadWritePaths (jika pakai Security options)
+#    Tambahkan path backup directory dan log
+#
+# ========================================
+# CONTOH LENGKAP
+# ========================================
+
+[Unit]
+Description=IZAKOD-ASN Auto Backup Service
+After=network.target mysql.service
+Wants=mysql.service
+
+[Service]
+Type=oneshot
+User=izakod
+Group=izakod
+WorkingDirectory=/home/izakod/backup-script
+EnvironmentFile=/home/izakod/backup-script/.env
+ExecStart=/usr/bin/node /home/izakod/backup-script/auto-backup.js
+StandardOutput=append:/var/log/izakod-backup.log
+StandardError=append:/var/log/izakod-backup-error.log
+TimeoutStartSec=600
+SyslogIdentifier=izakod-backup
+
+[Install]
+WantedBy=multi-user.target

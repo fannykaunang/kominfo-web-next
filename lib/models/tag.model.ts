@@ -21,6 +21,7 @@ export async function getTags(params: {
   start_date?: string;
   end_date?: string;
   used?: string;
+  sort?: "default" | "most" | "least";
 }): Promise<{ tags: Tag[]; total: number }> {
   const page = params.page || 1;
   const limit = params.limit || 20;
@@ -28,6 +29,7 @@ export async function getTags(params: {
   const startDate = params.start_date || "";
   const endDate = params.end_date || "";
   const used = params.used || "all";
+  const sort = params.sort || "default";
 
   // Sanitize pagination inputs
   const safePage =
@@ -70,6 +72,14 @@ export async function getTags(params: {
   const whereClause =
     conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
 
+  let orderBy = "t.created_at DESC";
+
+  if (sort === "most") {
+    orderBy = "COALESCE(bt.berita_count, 0) DESC, t.created_at DESC";
+  } else if (sort === "least") {
+    orderBy = "COALESCE(bt.berita_count, 0) ASC, t.created_at DESC";
+  }
+
   // Get total count
   const [countResult] = await query<any>(
     `SELECT COUNT(*) as total 
@@ -106,7 +116,7 @@ export async function getTags(params: {
       GROUP BY bt.tag_id
     ) bt ON t.id = bt.tag_id
     ${whereClause}
-    ORDER BY t.created_at DESC
+   ORDER BY ${orderBy}
     LIMIT ${safeLimit} OFFSET ${offset}`,
     queryParams
   );

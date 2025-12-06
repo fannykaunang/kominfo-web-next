@@ -1,0 +1,254 @@
+# ========================================
+# SYSTEMD TIMER FILE
+# ========================================
+# File: /etc/systemd/system/izakod-backup.timer
+#
+# Untuk membuat file ini:
+# sudo nano /etc/systemd/system/izakod-backup.timer
+#
+# Copy isi dibawah ini
+
+[Unit]
+Description=IZAKOD-ASN Auto Backup Timer
+Requires=izakod-backup.service
+
+[Timer]
+# Jadwal backup (pilih salah satu atau kombinasi)
+
+# OPSI 1: Backup setiap hari jam 2 pagi
+OnCalendar=daily
+OnCalendar=*-*-* 02:00:00
+
+# OPSI 2: Backup setiap hari jam tertentu
+# OnCalendar=*-*-* 02:00:00
+
+# OPSI 3: Backup setiap Minggu jam 3 pagi
+# OnCalendar=Sun *-*-* 03:00:00
+
+# OPSI 4: Backup setiap 6 jam
+# OnCalendar=*-*-* 00,06,12,18:00:00
+
+# OPSI 5: Backup setiap hari kerja jam 6 pagi
+# OnCalendar=Mon..Fri *-*-* 06:00:00
+
+# Pengaturan tambahan
+Persistent=true
+AccuracySec=1min
+RandomizedDelaySec=5min
+
+[Install]
+WantedBy=timers.target
+
+
+# ========================================
+# PENJELASAN
+# ========================================
+#
+# [Unit]
+# Description: Deskripsi timer
+# Requires: Service yang diperlukan
+#
+# [Timer]
+# OnCalendar: Jadwal dalam format systemd
+# Persistent: Jalankan jika terlewat saat system mati
+# AccuracySec: Akurasi waktu
+# RandomizedDelaySec: Random delay untuk load balancing
+#
+# [Install]
+# WantedBy: Target untuk enable timer
+#
+# ========================================
+# FORMAT OnCalendar
+# ========================================
+#
+# Format: DayOfWeek Year-Month-Day Hour:Minute:Second
+#
+# Contoh:
+# - daily                    = Setiap hari tengah malam
+# - weekly                   = Setiap Minggu tengah malam
+# - monthly                  = Setiap tanggal 1 tengah malam
+# - *-*-* 02:00:00          = Setiap hari jam 2 pagi
+# - Mon *-*-* 03:00:00      = Setiap Senin jam 3 pagi
+# - Mon..Fri 06:00:00       = Senin-Jumat jam 6 pagi
+# - *-*-01 04:00:00         = Tanggal 1 setiap bulan jam 4 pagi
+# - Sun 03:00:00            = Setiap Minggu jam 3 pagi
+# - *-*-* 00,06,12,18:00:00 = Setiap 6 jam (00:00, 06:00, 12:00, 18:00)
+#
+# Hari dalam seminggu:
+# Mon, Tue, Wed, Thu, Fri, Sat, Sun
+#
+# Range:
+# Mon..Fri = Senin sampai Jumat
+# Sat,Sun = Sabtu dan Minggu
+#
+# ========================================
+# CONTOH LENGKAP BERBAGAI JADWAL
+# ========================================
+
+# 1. BACKUP HARIAN JAM 2 PAGI
+[Unit]
+Description=IZAKOD-ASN Daily Backup at 2 AM
+Requires=izakod-backup.service
+
+[Timer]
+OnCalendar=*-*-* 02:00:00
+Persistent=true
+AccuracySec=1min
+
+[Install]
+WantedBy=timers.target
+
+
+# 2. BACKUP SETIAP 6 JAM
+[Unit]
+Description=IZAKOD-ASN Backup Every 6 Hours
+Requires=izakod-backup.service
+
+[Timer]
+OnCalendar=*-*-* 00,06,12,18:00:00
+Persistent=true
+AccuracySec=1min
+
+[Install]
+WantedBy=timers.target
+
+
+# 3. BACKUP MINGGUAN (MINGGU PAGI)
+[Unit]
+Description=IZAKOD-ASN Weekly Backup
+Requires=izakod-backup.service
+
+[Timer]
+OnCalendar=Sun *-*-* 03:00:00
+Persistent=true
+AccuracySec=1min
+
+[Install]
+WantedBy=timers.target
+
+
+# 4. BACKUP HARI KERJA JAM 6 PAGI
+[Unit]
+Description=IZAKOD-ASN Weekday Backup
+Requires=izakod-backup.service
+
+[Timer]
+OnCalendar=Mon..Fri *-*-* 06:00:00
+Persistent=true
+AccuracySec=1min
+
+[Install]
+WantedBy=timers.target
+
+
+# 5. BACKUP BULANAN (TANGGAL 1 JAM 4 PAGI)
+[Unit]
+Description=IZAKOD-ASN Monthly Backup
+Requires=izakod-backup.service
+
+[Timer]
+OnCalendar=*-*-01 04:00:00
+Persistent=true
+AccuracySec=1min
+
+[Install]
+WantedBy=timers.target
+
+
+# ========================================
+# PERINTAH SYSTEMD
+# ========================================
+#
+# Setelah membuat file service dan timer:
+#
+# 1. Reload systemd
+sudo systemctl daemon-reload
+
+# 2. Enable timer (autostart saat boot)
+sudo systemctl enable izakod-backup.timer
+
+# 3. Start timer
+sudo systemctl start izakod-backup.timer
+
+# 4. Cek status timer
+sudo systemctl status izakod-backup.timer
+
+# 5. List semua timer
+sudo systemctl list-timers --all
+
+# 6. Cek log service
+sudo journalctl -u izakod-backup.service -f
+
+# 7. Cek log timer
+sudo journalctl -u izakod-backup.timer -f
+
+# 8. Stop timer
+sudo systemctl stop izakod-backup.timer
+
+# 9. Disable timer
+sudo systemctl disable izakod-backup.timer
+
+# 10. Trigger manual (tanpa tunggu jadwal)
+sudo systemctl start izakod-backup.service
+
+# 11. Cek kapan timer terakhir jalan
+systemctl show izakod-backup.timer --property=LastTriggerUSec
+
+# 12. Cek kapan timer akan jalan lagi
+systemctl show izakod-backup.timer --property=NextElapseUSecRealtime
+
+# ========================================
+# MONITORING
+# ========================================
+#
+# Lihat status detail:
+systemctl status izakod-backup.timer
+systemctl status izakod-backup.service
+
+# Lihat log real-time:
+journalctl -u izakod-backup.service -f
+
+# Lihat log 50 baris terakhir:
+journalctl -u izakod-backup.service -n 50
+
+# Lihat log hari ini:
+journalctl -u izakod-backup.service --since today
+
+# Lihat log minggu ini:
+journalctl -u izakod-backup.service --since "1 week ago"
+
+# ========================================
+# TROUBLESHOOTING
+# ========================================
+#
+# Timer tidak jalan:
+# 1. Cek service aktif: systemctl is-enabled izakod-backup.timer
+# 2. Cek syntax timer: systemd-analyze calendar "*-*-* 02:00:00"
+# 3. Reload: sudo systemctl daemon-reload
+# 4. Restart timer: sudo systemctl restart izakod-backup.timer
+#
+# Service gagal:
+# 1. Cek log: journalctl -u izakod-backup.service -n 50
+# 2. Test manual: sudo systemctl start izakod-backup.service
+# 3. Cek permission: ls -l /path/to/script
+# 4. Cek .env file: cat /path/to/.env
+#
+# ========================================
+# ADVANTAGES vs CRON
+# ========================================
+#
+# Systemd Timer lebih baik dari cron karena:
+# ✓ Lebih modern dan integrated dengan systemd
+# ✓ Logging lebih baik (journalctl)
+# ✓ Dependency management (After, Requires)
+# ✓ Resource limits
+# ✓ Security options
+# ✓ Persistent (jalan otomatis jika terlewat)
+# ✓ RandomizedDelay untuk load distribution
+# ✓ AccuracySec untuk resource saving
+#
+# Cron lebih baik jika:
+# ✓ Butuh kompatibilitas dengan sistem lama
+# ✓ Lebih familiar dengan cron syntax
+# ✓ Sistem tidak pakai systemd
+#
