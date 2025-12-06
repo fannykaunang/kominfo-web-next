@@ -439,10 +439,11 @@ export default function BeritaClient({
                   <TableHead>Judul</TableHead>
                   <TableHead>Kategori</TableHead>
                   <TableHead>Author</TableHead>
+                  <TableHead>Dibuat</TableHead>
                   <TableHead className="text-center">Status</TableHead>
                   <TableHead className="text-center">Highlight</TableHead>
+                  <TableHead className="text-center">Komentar</TableHead>
                   <TableHead className="text-center">Views</TableHead>
-                  <TableHead>Dibuat</TableHead>
                   <TableHead className="text-center">Aksi</TableHead>
                 </TableRow>
               </TableHeader>
@@ -450,7 +451,7 @@ export default function BeritaClient({
                 {beritaData.data.length === 0 ? (
                   <TableRow>
                     <TableCell
-                      colSpan={8}
+                      colSpan={9}
                       className="text-center py-8 text-gray-500"
                     >
                       Belum ada berita
@@ -469,18 +470,47 @@ export default function BeritaClient({
                           </code>
                         </div>
                       </TableCell>
-                      <TableCell>
-                        <Badge
-                          style={{
-                            backgroundColor: berita.kategori_color || "#3b82f6",
-                            color: "white",
-                          }}
-                        >
-                          {berita.kategori_nama}
-                        </Badge>
+                      <TableCell className="align-middle">
+                        {(() => {
+                          const namaKategori = berita.kategori_nama ?? ""; // aman dari undefined
+                          const tampil =
+                            namaKategori.length > 11
+                              ? namaKategori.slice(0, 11) // contoh: "Sekilas Mer"
+                              : namaKategori;
+
+                          // Kalau kamu mau tetap pakai Badge hanya saat ada kategori:
+                          if (!namaKategori) {
+                            return (
+                              <span className="text-xs text-gray-400 italic">
+                                Tanpa Kategori
+                              </span>
+                            );
+                          }
+
+                          return (
+                            <Badge
+                              className="whitespace-nowrap"
+                              style={{
+                                backgroundColor:
+                                  berita.kategori_color || "#3b82f6",
+                                color: "white",
+                              }}
+                              title={namaKategori}
+                            >
+                              {tampil}
+                            </Badge>
+                          );
+                        })()}
                       </TableCell>
-                      <TableCell className="text-sm">
+
+                      <TableCell className="text-xs">
                         {berita.author_name}
+                      </TableCell>
+                      <TableCell className="text-xs text-gray-600 dark:text-gray-400">
+                        {formatDistanceToNow(new Date(berita.created_at), {
+                          addSuffix: true,
+                          locale: idLocale,
+                        })}
                       </TableCell>
                       <TableCell className="text-center">
                         {berita.is_published ? (
@@ -503,26 +533,31 @@ export default function BeritaClient({
                         )}
                       </TableCell>
                       <TableCell className="text-center">
+                        {berita.is_commented ? (
+                          <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                            Aktif
+                          </Badge>
+                        ) : (
+                          <Badge variant="outline" className="text-gray-500">
+                            Nonaktif
+                          </Badge>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-center">
                         <Badge variant="secondary">{berita.views}</Badge>
                       </TableCell>
-                      <TableCell className="text-sm text-gray-600 dark:text-gray-400">
-                        {formatDistanceToNow(new Date(berita.created_at), {
-                          addSuffix: true,
-                          locale: idLocale,
-                        })}
-                      </TableCell>
                       <TableCell className="text-right">
-                        <div className="flex items-center justify-end gap-2">
+                        <div className="flex items-center justify-end gap-0">
                           <Button
                             variant="ghost"
-                            size="sm"
+                            size="icon"
                             onClick={() => handleEdit(berita)}
                           >
                             <Edit className="h-4 w-4" />
                           </Button>
                           <Button
                             variant="ghost"
-                            size="sm"
+                            size="icon"
                             onClick={() => handleDelete(berita)}
                             className="text-red-600 hover:text-red-700 hover:bg-red-50"
                           >

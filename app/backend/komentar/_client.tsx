@@ -1,3 +1,5 @@
+// app/backend/komentar/_client.tsx
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -390,7 +392,7 @@ export default function KomentarClient({
                     <TableCell>
                       {new Date(komentar.created_at).toLocaleString("id-ID")}
                     </TableCell>
-                    <TableCell className="text-right space-x-2">
+                    <TableCell className="text-center space-x-2">
                       <Button
                         variant="ghost"
                         size="sm"

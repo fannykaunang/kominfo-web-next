@@ -100,7 +100,12 @@ export async function POST(request: NextRequest) {
       tag_ids: z.array(z.string()).optional(),
       is_highlight: z.boolean().optional(),
       is_published: z.boolean().optional(),
-      published_at: z.string().optional(),
+      is_commented: z.boolean().optional(),
+      published_at: z
+        .string()
+        .regex(/^\d{4}-\d{2}-\d{2}$/, "Format tanggal publish tidak valid")
+        .optional()
+        .or(z.literal("")),
     });
 
     const validation = schema.safeParse(body);
@@ -114,12 +119,46 @@ export async function POST(request: NextRequest) {
     const data = validation.data;
     const { ipAddress, userAgent } = getClientInfo(request);
 
+    // 🚦 VALIDASI TANGGAL PUBLISH (SERVER SIDE)
+    let publishedAt: Date | null = null;
+
+    if (data.published_at) {
+      const dt = new Date(data.published_at);
+
+      if (Number.isNaN(dt.getTime())) {
+        return NextResponse.json(
+          { error: "Tanggal publish tidak valid" },
+          { status: 400 }
+        );
+      }
+
+      // opsional: cegah tanggal '0000-00-00'
+      if (dt.getFullYear() < 1970) {
+        return NextResponse.json(
+          { error: "Tanggal publish terlalu awal / tidak valid" },
+          { status: 400 }
+        );
+      }
+
+      publishedAt = dt;
+    }
+
+    // Kalau is_published = true tapi tanggal tidak diisi
+    if (data.is_published && !publishedAt) {
+      return NextResponse.json(
+        {
+          error: "Tanggal publish wajib diisi ketika status publish diaktifkan",
+        },
+        { status: 400 }
+      );
+    }
+
     // Create berita
     const id = await BeritaRepository.create(
       {
         ...data,
         author_id: session.user.id,
-        published_at: data.published_at ? new Date(data.published_at) : null,
+        published_at: publishedAt,
       },
       session.user.id,
       ipAddress,

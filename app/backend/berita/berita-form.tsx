@@ -24,7 +24,6 @@ import { toast } from "sonner";
 
 import dynamic from "next/dynamic";
 
-// Import TinyMCE Editor hanya di client (SSR dimatikan)
 const TinyMCEEditor = dynamic(
   () => import("@tinymce/tinymce-react").then((m) => m.Editor),
   {
@@ -52,13 +51,10 @@ export default function BeritaForm({
   const [judul, setJudul] = useState("");
   const [slug, setSlug] = useState("");
   const [excerpt, setExcerpt] = useState("");
-
-  // ADD THESE LINES ↓
   const [galeriFiles, setGaleriFiles] = useState<File[]>([]);
   const [galeriPreviews, setGaleriPreviews] = useState<string[]>([]);
   const [galeriUrls, setGaleriUrls] = useState<string[]>([]);
   const [uploadingGaleri, setUploadingGaleri] = useState(false);
-
   const [konten, setKonten] = useState("");
   const [featuredImage, setFeaturedImage] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -67,10 +63,11 @@ export default function BeritaForm({
   const [kategoriId, setKategoriId] = useState("");
   const [isHighlight, setIsHighlight] = useState(false);
   const [isPublished, setIsPublished] = useState(false);
+  const [isCommented, setIsCommented] = useState(true); // 👈 NEW
   const [publishedAt, setPublishedAt] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [selectKey, setSelectKey] = useState(0); // Force re-render
+  const [selectKey, setSelectKey] = useState(0);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
   const isEdit = !!berita;
@@ -85,18 +82,13 @@ export default function BeritaForm({
       setFeaturedImage(berita.featured_image || "");
       setImagePreview(berita.featured_image || "");
 
-      // Ensure kategori_id is string and exists in list
       const kategoriIdStr = String(berita.kategori_id);
-      const kategoriExists = kategoriList.some(
-        (k) => String(k.id) === kategoriIdStr
-      );
-
       setKategoriId(kategoriIdStr);
-      // Force Select to re-render
       setSelectKey((prev) => prev + 1);
 
       setIsHighlight(!!berita.is_highlight);
       setIsPublished(!!berita.is_published);
+      setIsCommented(!!berita.is_commented); // 👈 NEW
       setPublishedAt(
         berita.published_at
           ? new Date(berita.published_at).toISOString().split("T")[0]
@@ -118,7 +110,6 @@ export default function BeritaForm({
         }
       }
 
-      // Type assertion karena berita dari API bisa punya tag_ids
       const beritaWithTags = berita as Berita & { tag_ids?: string[] };
       if (beritaWithTags.tag_ids) {
         setSelectedTags(beritaWithTags.tag_ids);
@@ -145,7 +136,6 @@ export default function BeritaForm({
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate file type
     const allowedTypes = [
       "image/jpeg",
       "image/jpg",
@@ -160,8 +150,7 @@ export default function BeritaForm({
       return;
     }
 
-    // Validate file size (max 5MB)
-    const maxSize = 5 * 1024 * 1024; // 5MB
+    const maxSize = 5 * 1024 * 1024;
     if (file.size > maxSize) {
       setError("Ukuran file terlalu besar. Maksimal 5MB.");
       return;
@@ -170,7 +159,6 @@ export default function BeritaForm({
     setImageFile(file);
     setError("");
 
-    // Create preview
     const reader = new FileReader();
     reader.onloadend = () => {
       setImagePreview(reader.result as string);
@@ -218,7 +206,6 @@ export default function BeritaForm({
   const handleGaleriChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
 
-    // Validate: max 5 images total
     const totalImages = galeriPreviews.length + files.length;
     if (totalImages > 5) {
       setError(
@@ -227,7 +214,6 @@ export default function BeritaForm({
       return;
     }
 
-    // Validate each file
     const allowedTypes = [
       "image/jpeg",
       "image/jpg",
@@ -248,7 +234,6 @@ export default function BeritaForm({
       }
     }
 
-    // Create previews
     let loadedCount = 0;
     const newPreviews: string[] = [];
 
@@ -274,21 +259,17 @@ export default function BeritaForm({
 
   // Remove galeri image
   const handleRemoveGaleriImage = (index: number) => {
-    // Determine if this is an uploaded image or new file
     const isUploadedImage = index < galeriUrls.length;
 
     if (isUploadedImage) {
-      // Remove from uploaded URLs
       const newUrls = galeriUrls.filter((_, i) => i !== index);
       setGaleriUrls(newUrls);
     } else {
-      // Remove from new files
       const fileIndex = index - galeriUrls.length;
       const newFiles = galeriFiles.filter((_, i) => i !== fileIndex);
       setGaleriFiles(newFiles);
     }
 
-    // Remove from previews
     const newPreviews = galeriPreviews.filter((_, i) => i !== index);
     setGaleriPreviews(newPreviews);
   };
@@ -331,10 +312,38 @@ export default function BeritaForm({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+
+    // Kalau berita dipublish, tanggal wajib diisi
+    if (isPublished && !publishedAt) {
+      const msg =
+        "Tanggal publish wajib dipilih ketika status publish diaktifkan.";
+      setError(msg);
+      toast.error(msg);
+      return;
+    }
+
+    // Kalau ada nilai tanggal, cek format dan validitas
+    if (publishedAt) {
+      const pattern = /^\d{4}-\d{2}-\d{2}$/; // YYYY-MM-DD
+      if (!pattern.test(publishedAt)) {
+        const msg = "Format tanggal publish tidak valid (gunakan YYYY-MM-DD).";
+        setError(msg);
+        toast.error(msg);
+        return;
+      }
+
+      const dt = new Date(publishedAt);
+      if (Number.isNaN(dt.getTime())) {
+        const msg = "Tanggal publish tidak valid.";
+        setError(msg);
+        toast.error(msg);
+        return;
+      }
+    }
+
     setLoading(true);
 
     try {
-      // Upload image first if there's a new file
       let imageUrl = featuredImage;
       if (imageFile) {
         const uploadedUrl = await uploadImage();
@@ -344,10 +353,7 @@ export default function BeritaForm({
         imageUrl = uploadedUrl;
       }
 
-      // Get content from TinyMCE
       const editorContent = editorRef.current?.getContent() || konten;
-
-      // Upload galeri images
       const galeriImageUrls = await uploadGaleriImages();
 
       const payload = {
@@ -361,6 +367,7 @@ export default function BeritaForm({
         tag_ids: selectedTags,
         is_highlight: isHighlight,
         is_published: isPublished,
+        is_commented: isCommented,
         published_at: publishedAt || undefined,
       };
 
@@ -383,12 +390,12 @@ export default function BeritaForm({
         isEdit ? "Berita berhasil diperbarui" : "Berita berhasil dibuat"
       );
 
-      // Redirect back to list
       router.push("/backend/berita");
       router.refresh();
     } catch (err: any) {
       setError(err.message);
       setLoading(false);
+      toast.error(err.message);
     }
   };
 
@@ -465,6 +472,26 @@ export default function BeritaForm({
             </Select>
           </div>
 
+          {/* Tags */}
+          <div className="space-y-2">
+            <Label htmlFor="tags">Tags</Label>
+            {tagsList && tagsList.length > 0 ? (
+              <MultipleTagSelect
+                tags={tagsList}
+                selectedTags={selectedTags}
+                onChange={setSelectedTags}
+                disabled={loading}
+              />
+            ) : (
+              <div className="p-4 text-center text-sm text-muted-foreground border rounded-md">
+                Tidak ada tags tersedia
+              </div>
+            )}
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              Pilih satu atau lebih tags untuk berita ini
+            </p>
+          </div>
+
           {/* Excerpt */}
           <div className="space-y-2">
             <Label htmlFor="excerpt">
@@ -487,7 +514,7 @@ export default function BeritaForm({
             </Label>
             <div className="border rounded-md">
               <TinyMCEEditor
-                apiKey={process.env.NEXT_PUBLIC_TINYMCE_API_KEY} // Ganti dengan API key TinyMCE Anda
+                apiKey={process.env.NEXT_PUBLIC_TINYMCE_API_KEY}
                 onInit={(evt, editor) => (editorRef.current = editor)}
                 initialValue={konten}
                 init={{
@@ -522,8 +549,6 @@ export default function BeritaForm({
                     "body { font-family:Helvetica,Arial,sans-serif; font-size:14px }",
                   images_upload_handler: (blobInfo: any) =>
                     new Promise<string>((resolve, reject) => {
-                      // Handle image upload here
-                      // For now, just convert to base64
                       const reader = new FileReader();
                       reader.onload = () => {
                         resolve(reader.result as string);
@@ -540,7 +565,6 @@ export default function BeritaForm({
           <div className="space-y-2">
             <Label htmlFor="featured_image">Thumbnail Gambar</Label>
             <div className="space-y-3">
-              {/* File Input */}
               <div className="flex items-center gap-2">
                 <Input
                   id="featured_image"
@@ -558,7 +582,6 @@ export default function BeritaForm({
                 Format: JPEG, PNG, GIF, WebP. Maksimal 5MB.
               </p>
 
-              {/* Image Preview */}
               {imagePreview && (
                 <div className="relative inline-block">
                   <img
@@ -588,7 +611,6 @@ export default function BeritaForm({
               </span>
             </Label>
 
-            {/* Upload Input - Only show if less than 5 images */}
             {galeriPreviews.length < 5 && (
               <Input
                 id="galeri"
@@ -601,7 +623,6 @@ export default function BeritaForm({
               />
             )}
 
-            {/* Preview Grid */}
             {galeriPreviews.length > 0 && (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mt-4">
                 {galeriPreviews.map((preview, index) => (
@@ -627,7 +648,6 @@ export default function BeritaForm({
               </div>
             )}
 
-            {/* Info Text */}
             <p className="text-sm text-muted-foreground">
               {galeriPreviews.length}/5 gambar. Format: JPEG, PNG, GIF, WebP.
               Maksimal 5MB per gambar.
@@ -644,26 +664,6 @@ export default function BeritaForm({
               value={publishedAt}
               onChange={(e) => setPublishedAt(e.target.value)}
             />
-          </div>
-
-          {/* Tags */}
-          <div className="space-y-2">
-            <Label htmlFor="tags">Tags</Label>
-            {tagsList && tagsList.length > 0 ? (
-              <MultipleTagSelect
-                tags={tagsList}
-                selectedTags={selectedTags}
-                onChange={setSelectedTags}
-                disabled={loading}
-              />
-            ) : (
-              <div className="p-4 text-center text-sm text-muted-foreground border rounded-md">
-                Tidak ada tags tersedia
-              </div>
-            )}
-            <p className="text-xs text-gray-500 dark:text-gray-400">
-              Pilih satu atau lebih tags untuk berita ini
-            </p>
           </div>
         </CardContent>
       </Card>
@@ -699,6 +699,20 @@ export default function BeritaForm({
               id="is_highlight"
               checked={isHighlight}
               onCheckedChange={setIsHighlight}
+            />
+          </div>
+
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label htmlFor="is_commented">Aktifkan Komentar</Label>
+              <p className="text-xs text-gray-500">
+                Izinkan pembaca memberikan komentar pada berita ini
+              </p>
+            </div>
+            <Switch
+              id="is_commented"
+              checked={isCommented}
+              onCheckedChange={setIsCommented}
             />
           </div>
         </CardContent>

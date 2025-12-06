@@ -118,6 +118,7 @@ export interface Berita extends RowDataPacket {
   views: number;
   is_highlight: number; // tinyint(1) di DB
   is_published: number; // tinyint(1) di DB
+  is_commented: number; // tinyint(1) di DB
   published_at: Date | null;
   kategori_id: string;
   author_id: string;
@@ -289,6 +290,25 @@ export interface Newsletter extends RowDataPacket {
   unsubscribed_at: Date | null;
 }
 
+export interface NewsletterStats {
+  total: number;
+  active: number;
+  inactive: number;
+}
+
+export interface NewsletterCreateInput {
+  email: string;
+  is_active?: number;
+  subscribed_at?: Date;
+  unsubscribed_at?: Date | null;
+}
+
+export interface NewsletterUpdateInput {
+  email?: string;
+  is_active?: number;
+  unsubscribed_at?: Date | null;
+}
+
 /**
  * Safe User Type (without password)
  */
@@ -397,6 +417,7 @@ export interface BeritaCreateInput {
   galeri?: string[]; // array di app, disimpan ke DB sebagai JSON string
   is_highlight?: boolean; // app-level boolean
   is_published?: boolean; // app-level boolean
+  is_commented?: boolean; // app-level boolean
   published_at?: Date | null;
   kategori_id: string;
   author_id: string;

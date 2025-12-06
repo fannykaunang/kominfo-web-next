@@ -1,3 +1,5 @@
+// app/api/berita/[id]/route.ts
+
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { BeritaRepository } from "@/lib/models/berita.model";
@@ -76,6 +78,7 @@ export async function PUT(
     const body = await request.json();
 
     // Validation schema
+    // 👇 ADD is_commented validation
     const schema = z.object({
       judul: z.string().min(1).max(500).optional(),
       slug: z
@@ -92,6 +95,7 @@ export async function PUT(
       tag_ids: z.array(z.string()).optional(),
       is_highlight: z.boolean().optional(),
       is_published: z.boolean().optional(),
+      is_commented: z.boolean().optional(),
       published_at: z.string().nullable().optional(),
     });
 

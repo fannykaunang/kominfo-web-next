@@ -264,8 +264,8 @@ export class BeritaRepository {
     const sql = `
     INSERT INTO berita (
       id, judul, slug, excerpt, konten, featured_image, galeri,
-      kategori_id, author_id, is_highlight, is_published, published_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      kategori_id, author_id, is_highlight, is_published, is_commented, published_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
 
     const params = [
@@ -280,6 +280,7 @@ export class BeritaRepository {
       data.author_id,
       data.is_highlight ? 1 : 0,
       data.is_published ? 1 : 0,
+      data.is_commented !== undefined ? (data.is_commented ? 1 : 0) : 1,
       data.published_at || null,
     ];
 
@@ -365,6 +366,10 @@ export class BeritaRepository {
     if (data.is_published !== undefined) {
       updates.push("is_published = ?");
       params.push(data.is_published ? 1 : 0);
+    }
+    if (data.is_commented !== undefined) {
+      updates.push("is_commented = ?");
+      params.push(data.is_commented ? 1 : 0);
     }
     if (data.published_at !== undefined) {
       updates.push("published_at = ?");

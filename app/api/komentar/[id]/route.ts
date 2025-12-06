@@ -19,15 +19,16 @@ function getRequestMeta(request: NextRequest) {
 
 export async function GET(
   _request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await context.params;
     const session = await auth();
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const komentar = await KomentarRepository.findById(params.id);
+    const komentar = await KomentarRepository.findById(id);
     if (!komentar) {
       return NextResponse.json(
         { error: "Komentar tidak ditemukan" },
@@ -47,9 +48,10 @@ export async function GET(
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await context.params;
     const session = await auth();
 
     if (!session?.user?.id) {
@@ -78,7 +80,7 @@ export async function PATCH(
     }
 
     await KomentarRepository.approveKomentar(
-      params.id,
+      id,
       session.user.id,
       getRequestMeta(request)
     );
@@ -95,10 +97,12 @@ export async function PATCH(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await context.params;
     const session = await auth();
+
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -108,7 +112,7 @@ export async function DELETE(
     }
 
     await KomentarRepository.deleteKomentar(
-      params.id,
+      id,
       session.user.id,
       getRequestMeta(request)
     );
