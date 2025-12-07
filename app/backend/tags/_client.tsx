@@ -2,7 +2,7 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Plus,
   Search,
@@ -56,16 +56,35 @@ import { TagFormDialog } from "./form-dialog";
 import { TagDetailDialog } from "./detail-dialog";
 import { Tag, TagStats } from "@/lib/types";
 
-export function TagsClient() {
-  const [tags, setTags] = useState<Tag[]>([]);
-  const [stats, setStats] = useState<TagStats>({
-    total: 0,
-    used: 0,
-    unused: 0,
-  });
-  const [loading, setLoading] = useState(true);
+interface TagsClientProps {
+  initialTags: Tag[];
+  initialStats: TagStats;
+  initialPagination: {
+    currentPage: number;
+    totalPages: number;
+    total: number;
+    limit: number;
+  };
+}
 
-  // Filters
+export function TagsClient({
+  initialTags,
+  initialStats,
+  initialPagination,
+}: TagsClientProps) {
+  // ====== STATE DATA DARI SERVER (INITIAL) ======
+  const [tags, setTags] = useState<Tag[]>(initialTags);
+  const [stats, setStats] = useState<TagStats>(initialStats);
+
+  const [currentPage, setCurrentPage] = useState(initialPagination.currentPage);
+  const [totalPages, setTotalPages] = useState(initialPagination.totalPages);
+  const [total, setTotal] = useState(initialPagination.total);
+  const limit = initialPagination.limit;
+
+  // Loading untuk fetch selanjutnya (bukan initial SSR)
+  const [loading, setLoading] = useState(false);
+
+  // ====== FILTERS ======
   const [searchQuery, setSearchQuery] = useState("");
   const [usedFilter, setUsedFilter] = useState("all");
   const [sortOrder, setSortOrder] = useState<"default" | "most" | "least">(
@@ -78,13 +97,7 @@ export function TagsClient() {
     "default" | "most" | "least"
   >("default");
 
-  // Pagination
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [total, setTotal] = useState(0);
-  const limit = 20;
-
-  // Dialogs
+  // ====== DIALOGS ======
   const [formDialogOpen, setFormDialogOpen] = useState(false);
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -93,13 +106,10 @@ export function TagsClient() {
   const [selectedTag, setSelectedTag] = useState<Tag | null>(null);
   const [tagToDelete, setTagToDelete] = useState<Tag | null>(null);
 
-  useEffect(() => {
-    fetchStats();
-  }, []);
+  // Flag untuk skip fetch pertama (karena data sudah dari server)
+  const isFirstLoad = useRef(true);
 
-  useEffect(() => {
-    fetchTags();
-  }, [currentPage, searchQuery, usedFilter, sortOrder]);
+  // ====== FETCH FUNCTIONS ======
 
   const fetchStats = async () => {
     try {
@@ -140,6 +150,19 @@ export function TagsClient() {
       setLoading(false);
     }
   };
+
+  // Hanya fetchTags setelah interaksi (pagination / filter),
+  // bukan saat mount pertama (data sudah dari server).
+  useEffect(() => {
+    if (isFirstLoad.current) {
+      isFirstLoad.current = false;
+      return;
+    }
+    fetchTags();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentPage, searchQuery, usedFilter, sortOrder]);
+
+  // ====== HANDLERS ======
 
   const handleOpenFilter = () => {
     setTempSearch(searchQuery);
@@ -256,6 +279,8 @@ export function TagsClient() {
 
     return pages;
   };
+
+  // ====== RENDER ======
 
   return (
     <div className="space-y-6">

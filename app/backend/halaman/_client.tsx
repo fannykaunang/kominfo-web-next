@@ -1,6 +1,7 @@
+// app/backend/halaman/_client.tsx
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -44,31 +45,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { HalamanFormDialog } from "./form-dialog";
-
-interface Halaman {
-  id: string;
-  menu_id: string;
-  judul: string;
-  slug: string;
-  konten: string;
-  excerpt: string | null;
-  urutan: number;
-  is_published: number;
-  views: number;
-  meta_title: string | null;
-  meta_description: string | null;
-  author_id: string | null;
-  menu_nama: string;
-  menu_slug: string;
-  author_name: string | null;
-  created_at: string;
-  updated_at: string;
-}
-
-interface Menu {
-  id: string;
-  nama: string;
-}
+import type { Halaman, Menu } from "@/lib/types";
 
 interface Stats {
   total: number;
@@ -77,17 +54,24 @@ interface Stats {
   total_views: number;
 }
 
-export function HalamanClient() {
-  const [halaman, setHalaman] = useState<Halaman[]>([]);
-  const [filteredHalaman, setFilteredHalaman] = useState<Halaman[]>([]);
-  const [menu, setMenu] = useState<Menu[]>([]);
-  const [stats, setStats] = useState<Stats>({
-    total: 0,
-    published: 0,
-    draft: 0,
-    total_views: 0,
-  });
-  const [loading, setLoading] = useState(true);
+interface HalamanClientProps {
+  initialHalaman: Halaman[];
+  initialMenu: Menu[];
+  initialStats: Stats;
+}
+
+export function HalamanClient({
+  initialHalaman,
+  initialMenu,
+  initialStats,
+}: HalamanClientProps) {
+  const [halaman, setHalaman] = useState<Halaman[]>(initialHalaman);
+  const [filteredHalaman, setFilteredHalaman] =
+    useState<Halaman[]>(initialHalaman);
+  const [menu, setMenu] = useState<Menu[]>(initialMenu);
+  const [stats, setStats] = useState<Stats>(initialStats);
+
+  const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [filterMenu, setFilterMenu] = useState<string>("all");
@@ -97,19 +81,10 @@ export function HalamanClient() {
   const [halamanToDelete, setHalamanToDelete] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
-  // Fetch menu for filter
-  const fetchMenu = async () => {
-    try {
-      const response = await fetch("/api/menu");
-      if (!response.ok) throw new Error("Failed to fetch menu");
-      const data = await response.json();
-      setMenu(data.menu);
-    } catch (error) {
-      console.error("Error fetching menu:", error);
-    }
-  };
+  // Flag untuk skip fetch pertama (data awal sudah dari server)
+  const isFirstLoad = useRef(true);
 
-  // Fetch halaman
+  // Fetch halaman (untuk filter, ubah status, delete, dll)
   const fetchHalaman = async () => {
     try {
       setLoading(true);
@@ -118,7 +93,7 @@ export function HalamanClient() {
       if (filterStatus !== "all") params.append("is_published", filterStatus);
       if (filterMenu !== "all") params.append("menu_id", filterMenu);
 
-      const response = await fetch(`/api/halaman?${params}`);
+      const response = await fetch(`/api/halaman?${params.toString()}`);
       if (!response.ok) throw new Error("Failed to fetch halaman");
 
       const data = await response.json();
@@ -126,18 +101,21 @@ export function HalamanClient() {
       setFilteredHalaman(data.halaman);
       setStats(data.stats);
     } catch (error) {
+      console.error("Error fetching halaman:", error);
       toast.error("Gagal memuat data halaman");
     } finally {
       setLoading(false);
     }
   };
 
+  // Panggil fetchHalaman hanya ketika filter berubah, *bukan* saat initial mount
   useEffect(() => {
-    fetchMenu();
-  }, []);
-
-  useEffect(() => {
+    if (isFirstLoad.current) {
+      isFirstLoad.current = false;
+      return;
+    }
     fetchHalaman();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchTerm, filterStatus, filterMenu]);
 
   // Handle create
@@ -165,9 +143,9 @@ export function HalamanClient() {
       if (!response.ok) throw new Error("Failed to delete halaman");
 
       toast.success("Halaman berhasil dihapus");
-
       fetchHalaman();
     } catch (error) {
+      console.error("Error deleting halaman:", error);
       toast.error("Gagal menghapus halaman");
     } finally {
       setActionLoading(null);
@@ -194,6 +172,7 @@ export function HalamanClient() {
 
       fetchHalaman();
     } catch (error) {
+      console.error("Error toggling publish:", error);
       toast.error("Gagal mengubah status");
     } finally {
       setActionLoading(null);
@@ -320,13 +299,12 @@ export function HalamanClient() {
             </div>
           </div>
 
-          {/* Loading State */}
+          {/* Loading / Empty / Table */}
           {loading ? (
             <div className="flex items-center justify-center py-12">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
           ) : filteredHalaman.length === 0 ? (
-            /* Empty State */
             <div className="flex flex-col items-center justify-center py-12 text-center">
               <FileText className="h-12 w-12 text-muted-foreground mb-4" />
               <h3 className="text-lg font-semibold mb-2">Belum ada halaman</h3>
@@ -339,7 +317,6 @@ export function HalamanClient() {
               </Button>
             </div>
           ) : (
-            /* Data Table */
             <div className="border rounded-lg overflow-x-auto">
               <Table>
                 <TableHeader>
@@ -396,7 +373,8 @@ export function HalamanClient() {
                           <Badge
                             variant={
                               item.is_published === 1 ? "default" : "secondary"
-                            }>
+                            }
+                          >
                             {item.is_published === 1 ? "Published" : "Draft"}
                           </Badge>
                         </div>
@@ -412,7 +390,8 @@ export function HalamanClient() {
                             variant="ghost"
                             size="icon"
                             onClick={() => handleEdit(item)}
-                            disabled={actionLoading === item.id}>
+                            disabled={actionLoading === item.id}
+                          >
                             <Pencil className="h-4 w-4" />
                           </Button>
                           <Button
@@ -422,7 +401,8 @@ export function HalamanClient() {
                               setHalamanToDelete(item.id);
                               setDeleteDialogOpen(true);
                             }}
-                            disabled={actionLoading === item.id}>
+                            disabled={actionLoading === item.id}
+                          >
                             {actionLoading === item.id ? (
                               <Loader2 className="h-4 w-4 animate-spin" />
                             ) : (
@@ -463,7 +443,8 @@ export function HalamanClient() {
             <AlertDialogCancel>Batal</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
               {actionLoading ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />

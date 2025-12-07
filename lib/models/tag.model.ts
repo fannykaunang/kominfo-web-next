@@ -1,3 +1,5 @@
+// lib/models/tag.model.ts
+
 import { query, queryOne, execute } from "@/lib/db-helpers";
 import { v4 as uuidv4 } from "uuid";
 import { Tag, TagStats, TagWithBerita, BeritaTag } from "@/lib/types";
@@ -22,7 +24,13 @@ export async function getTags(params: {
   end_date?: string;
   used?: string;
   sort?: "default" | "most" | "least";
-}): Promise<{ tags: Tag[]; total: number }> {
+}): Promise<{
+  tags: Tag[];
+  total: number;
+  currentPage: number;
+  totalPages: number;
+  limit: number;
+}> {
   const page = params.page || 1;
   const limit = params.limit || 20;
   const search = params.search || "";
@@ -98,8 +106,10 @@ export async function getTags(params: {
   );
 
   const total = countResult?.total || 0;
+  const totalPages =
+    total === 0 ? 1 : Math.max(1, Math.ceil(total / safeLimit));
 
-  // Get tags with berita count (only count existing berita)
+  // Get tags with berita count
   const tags = await query<Tag>(
     `SELECT 
       t.id,
@@ -116,12 +126,18 @@ export async function getTags(params: {
       GROUP BY bt.tag_id
     ) bt ON t.id = bt.tag_id
     ${whereClause}
-   ORDER BY ${orderBy}
+    ORDER BY ${orderBy}
     LIMIT ${safeLimit} OFFSET ${offset}`,
     queryParams
   );
 
-  return { tags, total };
+  return {
+    tags,
+    total,
+    currentPage: safePage,
+    totalPages,
+    limit: safeLimit,
+  };
 }
 
 // Get tag stats
@@ -172,7 +188,7 @@ export async function getBeritaByTagId(tagId: string): Promise<BeritaTag[]> {
       b.id,
       b.judul,
       b.slug,
-      b.thumbnail,
+      b.featured_image,
       k.nama as kategori_nama,
       b.published_at,
       b.created_at

@@ -1,3 +1,5 @@
+// app/api/tags/route.ts
+
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import {
@@ -52,7 +54,13 @@ export async function GET(request: NextRequest) {
     const sort =
       sortParam === "most" || sortParam === "least" ? sortParam : "default";
 
-    const { tags, total } = await getTags({
+    const {
+      tags,
+      total,
+      currentPage,
+      totalPages,
+      limit: safeLimit,
+    } = await getTags({
       page,
       limit,
       search,
@@ -62,14 +70,12 @@ export async function GET(request: NextRequest) {
       sort,
     });
 
-    const totalPages = Math.ceil(total / limit);
-
     return NextResponse.json({
       tags,
-      currentPage: page,
+      currentPage,
       totalPages,
       total,
-      limit,
+      limit: safeLimit,
     });
   } catch (error) {
     console.error("Get tags error:", error);
