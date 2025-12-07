@@ -436,7 +436,7 @@ export function GaleriClient() {
                                     className="w-full h-full object-cover"
                                     onError={(e) => {
                                       e.currentTarget.src =
-                                        "/images/placeholder.png";
+                                        "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='450'%3E%3Crect fill='%23e5e7eb' width='800' height='450'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='%239ca3af' font-size='24' font-family='system-ui'%3ENo Image%3C/text%3E%3C/svg%3E";
                                     }}
                                   />
                                   {imageCount > 1 && (
@@ -490,7 +490,8 @@ export function GaleriClient() {
                             item.media_type === "image"
                               ? "default"
                               : "secondary"
-                          }>
+                          }
+                        >
                           {item.media_type === "image" ? (
                             <>
                               <ImageIcon className="h-3 w-3 mr-1" />
@@ -523,7 +524,8 @@ export function GaleriClient() {
                         <Badge
                           variant={
                             item.is_published === 1 ? "default" : "secondary"
-                          }>
+                          }
+                        >
                           {item.is_published === 1 ? "Published" : "Draft"}
                         </Badge>
                       </TableCell>
@@ -544,13 +546,15 @@ export function GaleriClient() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            onClick={() => handleEdit(item)}>
+                            onClick={() => handleEdit(item)}
+                          >
                             <Pencil className="h-4 w-4" />
                           </Button>
                           <Button
                             variant="ghost"
                             size="icon"
-                            onClick={() => setDeleteId(item.id)}>
+                            onClick={() => setDeleteId(item.id)}
+                          >
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>
@@ -587,7 +591,8 @@ export function GaleriClient() {
             <AlertDialogAction
               onClick={handleDelete}
               disabled={isDeleting}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
               {isDeleting ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />

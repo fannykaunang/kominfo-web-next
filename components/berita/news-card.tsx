@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Calendar, Eye } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { NewsImage, NewsImageCompact, NewsImageHorizontal } from "./news-image";
 
 interface NewsCardProps {
@@ -20,6 +20,7 @@ interface NewsCardProps {
   };
   author: {
     name: string;
+    avatar?: string;
   };
   publishedAt: string;
   views: number;
@@ -52,7 +53,8 @@ export function NewsCard({
           <div className="absolute top-3 left-3">
             <Badge
               style={{ backgroundColor: kategori.color }}
-              className="text-white shadow-lg">
+              className="text-white shadow-lg"
+            >
               {kategori.nama}
             </Badge>
           </div>
@@ -74,10 +76,17 @@ export function NewsCard({
           <div className="flex items-center justify-between pt-3 border-t border-border/50">
             <div className="flex items-center gap-2">
               <Avatar className="h-7 w-7">
+                {/* kalau avatar ada, coba tampilkan gambar */}
+                {author.avatar && (
+                  <AvatarImage src={author.avatar} alt={author.name} />
+                )}
+
+                {/* kalau src kosong / error, yang ini akan tampil */}
                 <AvatarFallback className="text-xs bg-primary/10 text-primary">
                   {author.name.charAt(0).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
+
               <span className="text-xs text-muted-foreground">
                 {author.name}
               </span>
@@ -90,6 +99,9 @@ export function NewsCard({
                   {new Date(publishedAt).toLocaleDateString("id-ID", {
                     day: "numeric",
                     month: "short",
+                    year: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
                   })}
                 </span>
               </div>
@@ -133,7 +145,8 @@ export function NewsCardCompact({
             style={{
               backgroundColor: `${kategori.color}20`,
               color: kategori.color,
-            }}>
+            }}
+          >
             {kategori.nama}
           </Badge>
 

@@ -191,6 +191,7 @@ export interface Berita extends RowDataPacket {
   kategori_slug?: string;
   kategori_color?: string;
   author_name?: string;
+  avatar?: string;
 }
 
 /**

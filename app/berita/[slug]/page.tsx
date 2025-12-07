@@ -1,4 +1,5 @@
-import Image from "next/image";
+// app/berita/[slug]/page.tsx
+
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Calendar, Eye, Clock, Share2, Tag } from "lucide-react";
@@ -8,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { NewsCardCompact } from "@/components/berita/news-card";
 import { BeritaRepository } from "@/lib/models/berita.model";
 import GalleryLightbox from "@/components/berita/gallery-lightbox";
@@ -89,10 +90,17 @@ export default async function NewsDetailPage({ params }: NewsDetailPageProps) {
             <div className="flex flex-wrap items-center gap-4 mb-6 text-sm text-muted-foreground">
               <div className="flex items-center gap-2">
                 <Avatar className="h-8 w-8">
+                  {/* kalau avatar ada, coba tampilkan gambar */}
+                  {berita.avatar && (
+                    <AvatarImage src={berita.avatar} alt={berita.author_name} />
+                  )}
+
+                  {/* kalau src kosong / error, yang ini akan tampil */}
                   <AvatarFallback className="bg-primary/10 text-primary">
                     {berita.author_name?.charAt(0).toUpperCase() || "A"}
                   </AvatarFallback>
                 </Avatar>
+
                 <span className="font-medium">
                   {berita.author_name || "Admin"}
                 </span>
@@ -197,18 +205,7 @@ export default async function NewsDetailPage({ params }: NewsDetailPageProps) {
 
             {/* Content */}
             <div
-              className="prose prose-lg max-w-none dark:prose-invert
-                prose-headings:font-bold prose-headings:text-foreground
-                prose-p:text-foreground prose-p:leading-relaxed
-                prose-a:text-primary prose-a:no-underline hover:prose-a:underline
-                prose-strong:text-foreground prose-strong:font-semibold
-                prose-ul:text-foreground prose-ol:text-foreground
-                prose-li:text-foreground prose-li:marker:text-primary
-                prose-img:rounded-lg prose-img:shadow-lg
-                prose-blockquote:border-l-4 prose-blockquote:border-primary
-                prose-blockquote:bg-muted/30 prose-blockquote:py-2 prose-blockquote:px-4
-                prose-code:bg-muted prose-code:px-1 prose-code:py-0.5 prose-code:rounded
-                prose-pre:bg-muted prose-pre:border"
+              className="news-content"
               dangerouslySetInnerHTML={{ __html: berita.konten }}
             />
 
@@ -259,7 +256,8 @@ export default async function NewsDetailPage({ params }: NewsDetailPageProps) {
                       judul={news.judul}
                       slug={news.slug}
                       featuredImage={
-                        news.featured_image || "/images/placeholder.jpg"
+                        news.featured_image ||
+                        "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='450'%3E%3Crect fill='%23e5e7eb' width='800' height='450'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='%239ca3af' font-size='24' font-family='system-ui'%3ENo Image%3C/text%3E%3C/svg%3E"
                       }
                       kategori={{
                         nama: news.kategori_nama || "Umum",
@@ -290,7 +288,8 @@ export default async function NewsDetailPage({ params }: NewsDetailPageProps) {
                       judul={news.judul}
                       slug={news.slug}
                       featuredImage={
-                        news.featured_image || "/images/placeholder.jpg"
+                        news.featured_image ||
+                        "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='450'%3E%3Crect fill='%23e5e7eb' width='800' height='450'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='%239ca3af' font-size='24' font-family='system-ui'%3ENo Image%3C/text%3E%3C/svg%3E"
                       }
                       kategori={{
                         nama: news.kategori_nama || "Umum",

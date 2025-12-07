@@ -92,18 +92,25 @@ export class BeritaRepository {
         k.nama as kategori_nama,
         k.slug as kategori_slug,
         k.color as kategori_color,
-        u.name as author_name
+        u.name as author_name,
+        u.avatar
       FROM berita b
       INNER JOIN kategori k ON b.kategori_id = k.id
       INNER JOIN users u ON b.author_id = u.id
       ${whereClause}
-      ORDER BY b.created_at DESC
+      ORDER BY COALESCE(b.published_at, b.created_at) DESC
       ${limitClause}
     `;
 
     const data = await query<Berita>(sql, params);
 
-    const countSql = `SELECT COUNT(*) as total FROM berita b ${whereClause}`;
+    const countSql = `
+  SELECT COUNT(*) as total 
+  FROM berita b
+  INNER JOIN kategori k ON b.kategori_id = k.id
+  INNER JOIN users u ON b.author_id = u.id
+  ${whereClause}
+`;
     const countRow = await queryOne<any>(countSql, params);
     const total = countRow?.total ?? 0;
 
@@ -195,7 +202,8 @@ export class BeritaRepository {
       k.nama as kategori_nama,
       k.slug as kategori_slug,
       k.color as kategori_color,
-      u.name as author_name
+      u.name as author_name,
+      u.avatar
     FROM berita b
     INNER JOIN kategori k ON b.kategori_id = k.id
     INNER JOIN users u ON b.author_id = u.id
