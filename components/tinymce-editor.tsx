@@ -1,3 +1,5 @@
+// components/tinymce-editor.tsx
+
 "use client";
 
 import { useTheme } from "next-themes";
@@ -15,13 +17,35 @@ export function TinyMCEEditor({
   value,
   onChange,
   height = 500,
-  apiKey = "abm3eap60gozqod2updw7s76wjh0uwa2ma28777vy2r7lbda",
+  apiKey = process.env.NEXT_PUBLIC_TINYMCE_API_KEY,
 }: TinyMCEEditorProps) {
   const { theme, systemTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    const style = document.createElement("style");
+    style.textContent = `
+      .tox .tox-menubar button,
+      .tox .tox-mbtn,
+      .tox .tox-tbtn,
+      .tox .tox-collection__item,
+      .tox .tox-collection__item button,
+      .tox .tox-collection__item button *,
+      .tox .tox-collection__item .tox-collection__item-label,
+      .tox .tox-collection__item .tox-collection__item-icon {
+        cursor: pointer !important;
+        pointer-events: auto !important;
+      }
+    `;
+    document.head.appendChild(style);
+
+    return () => {
+      document.head.removeChild(style);
+    };
   }, []);
 
   // Show loading skeleton during SSR

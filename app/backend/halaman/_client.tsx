@@ -1,7 +1,9 @@
 // app/backend/halaman/_client.tsx
+
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -65,6 +67,7 @@ export function HalamanClient({
   initialMenu,
   initialStats,
 }: HalamanClientProps) {
+  const router = useRouter();
   const [halaman, setHalaman] = useState<Halaman[]>(initialHalaman);
   const [filteredHalaman, setFilteredHalaman] =
     useState<Halaman[]>(initialHalaman);
@@ -126,8 +129,7 @@ export function HalamanClient({
 
   // Handle edit
   const handleEdit = (item: Halaman) => {
-    setEditingHalaman(item);
-    setIsFormOpen(true);
+    router.push(`/backend/halaman/${item.id}`);
   };
 
   // Handle delete
