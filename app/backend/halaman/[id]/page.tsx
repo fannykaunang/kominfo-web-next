@@ -15,10 +15,12 @@ export const metadata = {
 export default async function EditHalamanPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
+  const { id } = await params;
+
   const [halaman, menuOptions] = await Promise.all([
-    getHalamanById(params.id),
+    getHalamanById(id),
     getAllMenu(),
   ]);
 
