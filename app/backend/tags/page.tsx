@@ -12,8 +12,6 @@ export const metadata: Metadata = {
 };
 
 export default async function TagsPage() {
-  // Default initial filter sama seperti sekarang:
-  // page = 1, limit = 20, tanpa search, usedFilter "all", sort "default"
   const [stats, pageData] = await Promise.all([
     getTagStats(),
     getTags({

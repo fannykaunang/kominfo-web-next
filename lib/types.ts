@@ -772,3 +772,36 @@ export interface VisitorFilterOptions {
   page?: number;
   limit?: number;
 }
+
+/**
+ * SKPD Model
+ */
+export interface SKPD extends RowDataPacket {
+  id: number;
+  nama: string;
+  singkatan: string;
+  kategori: "Sekretariat" | "Dinas" | "Badan" | "Inspektorat" | "Satuan";
+  alamat: string | null;
+  telepon: string | null;
+  email: string | null;
+  website: string | null;
+  kepala: string | null;
+  deskripsi: string | null;
+  created_at: Date;
+  updated_at: Date;
+}
+
+/**
+ * SKPD Create/Update Input
+ */
+export interface SKPDInput {
+  nama: string;
+  singkatan: string;
+  kategori: "Sekretariat" | "Dinas" | "Badan" | "Inspektorat" | "Satuan";
+  alamat?: string;
+  telepon?: string;
+  email?: string;
+  website?: string;
+  kepala?: string;
+  deskripsi?: string;
+}

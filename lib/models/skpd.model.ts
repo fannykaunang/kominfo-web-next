@@ -2,35 +2,7 @@
 
 import { execute, query } from "@/lib/db-helpers";
 import { createLogWithData } from "./log.model";
-
-// SKPD Interface
-export interface SKPD {
-  id: number;
-  nama: string;
-  singkatan: string;
-  kategori: "Sekretariat" | "Dinas" | "Badan" | "Inspektorat" | "Satuan";
-  alamat: string | null;
-  telepon: string | null;
-  email: string | null;
-  website: string | null;
-  kepala: string | null;
-  deskripsi: string | null;
-  created_at: string;
-  updated_at: string;
-}
-
-// SKPD Create/Update Interface
-export interface SKPDInput {
-  nama: string;
-  singkatan: string;
-  kategori: "Sekretariat" | "Dinas" | "Badan" | "Inspektorat" | "Satuan";
-  alamat?: string;
-  telepon?: string;
-  email?: string;
-  website?: string;
-  kepala?: string;
-  deskripsi?: string;
-}
+import type { SKPD, SKPDInput } from "@/lib/types";
 
 /**
  * Get all SKPD
