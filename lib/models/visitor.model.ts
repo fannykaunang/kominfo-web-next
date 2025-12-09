@@ -95,27 +95,17 @@ export async function getAllVisitorLogs(
   const total = Number(countResult[0]?.total || 0);
 
   // Get paginated data
-  const offset = (page - 1) * limit;
+  const safeLimit = Number.isFinite(limit) && limit > 0 ? limit : 50;
+  const offset = (page - 1) * safeLimit;
   const dataSql = `
     SELECT * FROM visitor_logs
     ${whereClause}
     ORDER BY visited_at DESC
-    LIMIT ? OFFSET ?
+    LIMIT ${safeLimit} OFFSET ${offset}
   `;
 
-  // Add LIMIT and OFFSET to params
-  const dataParams = [...params, limit, offset];
-
-  console.log("📊 Data Query:", {
-    sql: dataSql,
-    paramsCount: params.length,
-    limit: limit,
-    limitType: typeof limit,
-    offset: offset,
-    offsetType: typeof offset,
-    dataParams: dataParams,
-    dataParamsLength: dataParams.length,
-  });
+  // Use only filter params since LIMIT/OFFSET are injected as numbers
+  const dataParams = [...params];
 
   const logs = await query<VisitorLog>(dataSql, dataParams);
 

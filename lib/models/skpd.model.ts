@@ -1,0 +1,207 @@
+import { query } from "@/lib/db-helpers";
+
+// SKPD Interface
+export interface SKPD {
+  id: number;
+  nama: string;
+  singkatan: string;
+  kategori: "Sekretariat" | "Dinas" | "Badan" | "Inspektorat" | "Satuan";
+  alamat: string | null;
+  telepon: string | null;
+  email: string | null;
+  website: string | null;
+  kepala: string | null;
+  deskripsi: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+// SKPD Create/Update Interface
+export interface SKPDInput {
+  nama: string;
+  singkatan: string;
+  kategori: "Sekretariat" | "Dinas" | "Badan" | "Inspektorat" | "Satuan";
+  alamat?: string;
+  telepon?: string;
+  email?: string;
+  website?: string;
+  kepala?: string;
+  deskripsi?: string;
+}
+
+/**
+ * Get all SKPD
+ * @returns Array of all SKPD ordered by kategori and nama
+ */
+export async function getAllSKPD(): Promise<SKPD[]> {
+  return await query<SKPD>("SELECT * FROM skpd ORDER BY kategori, nama");
+}
+
+/**
+ * Get SKPD by ID
+ * @param id - SKPD ID
+ * @returns Single SKPD or null if not found
+ */
+export async function getSKPDById(id: number): Promise<SKPD | null> {
+  const results = await query<SKPD>("SELECT * FROM skpd WHERE id = ?", [id]);
+  return results[0] || null;
+}
+
+/**
+ * Get SKPD by kategori
+ * @param kategori - SKPD kategori (Sekretariat, Dinas, Badan, Inspektorat, Satuan)
+ * @returns Array of SKPD in the kategori
+ */
+export async function getSKPDByKategori(kategori: string): Promise<SKPD[]> {
+  return await query<SKPD>(
+    "SELECT * FROM skpd WHERE kategori = ? ORDER BY nama",
+    [kategori]
+  );
+}
+
+/**
+ * Search SKPD by name or singkatan
+ * @param searchTerm - Search term
+ * @returns Array of matching SKPD
+ */
+export async function searchSKPD(searchTerm: string): Promise<SKPD[]> {
+  const searchPattern = `%${searchTerm}%`;
+  return await query<SKPD>(
+    `SELECT * FROM skpd 
+     WHERE nama LIKE ? OR singkatan LIKE ? 
+     ORDER BY kategori, nama`,
+    [searchPattern, searchPattern]
+  );
+}
+
+/**
+ * Get SKPD count by kategori
+ * @returns Object with kategori as key and count as value
+ */
+export async function getSKPDCountByKategori(): Promise<
+  { kategori: string; jumlah: number }[]
+> {
+  return await query<{ kategori: string; jumlah: number }>(
+    `SELECT kategori, COUNT(*) as jumlah 
+     FROM skpd 
+     GROUP BY kategori 
+     ORDER BY jumlah DESC`
+  );
+}
+
+/**
+ * Create new SKPD
+ * @param data - SKPD data
+ * @returns Inserted SKPD ID
+ */
+export async function createSKPD(data: SKPDInput): Promise<number> {
+  const { query: executeQuery } = await import("@/lib/db-helpers");
+
+  const result = await executeQuery(
+    `INSERT INTO skpd (nama, singkatan, kategori, alamat, telepon, email, website, kepala, deskripsi)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    [
+      data.nama,
+      data.singkatan,
+      data.kategori,
+      data.alamat || null,
+      data.telepon || null,
+      data.email || null,
+      data.website || null,
+      data.kepala || null,
+      data.deskripsi || null,
+    ]
+  );
+
+  return result.insertId;
+}
+
+/**
+ * Update SKPD
+ * @param id - SKPD ID
+ * @param data - SKPD data to update
+ * @returns Number of affected rows
+ */
+export async function updateSKPD(
+  id: number,
+  data: Partial<SKPDInput>
+): Promise<number> {
+  const { execute } = await import("@/lib/db-helpers");
+
+  const fields: string[] = [];
+  const values: any[] = [];
+
+  if (data.nama !== undefined) {
+    fields.push("nama = ?");
+    values.push(data.nama);
+  }
+  if (data.singkatan !== undefined) {
+    fields.push("singkatan = ?");
+    values.push(data.singkatan);
+  }
+  if (data.kategori !== undefined) {
+    fields.push("kategori = ?");
+    values.push(data.kategori);
+  }
+  if (data.alamat !== undefined) {
+    fields.push("alamat = ?");
+    values.push(data.alamat);
+  }
+  if (data.telepon !== undefined) {
+    fields.push("telepon = ?");
+    values.push(data.telepon);
+  }
+  if (data.email !== undefined) {
+    fields.push("email = ?");
+    values.push(data.email);
+  }
+  if (data.website !== undefined) {
+    fields.push("website = ?");
+    values.push(data.website);
+  }
+  if (data.kepala !== undefined) {
+    fields.push("kepala = ?");
+    values.push(data.kepala);
+  }
+  if (data.deskripsi !== undefined) {
+    fields.push("deskripsi = ?");
+    values.push(data.deskripsi);
+  }
+
+  if (fields.length === 0) {
+    return 0;
+  }
+
+  values.push(id);
+
+  const result = await execute(
+    `UPDATE skpd SET ${fields.join(", ")} WHERE id = ?`,
+    values
+  );
+
+  return result.affectedRows;
+}
+
+/**
+ * Delete SKPD
+ * @param id - SKPD ID
+ * @returns Number of affected rows
+ */
+export async function deleteSKPD(id: number): Promise<number> {
+  const { execute } = await import("@/lib/db-helpers");
+
+  const result = await execute("DELETE FROM skpd WHERE id = ?", [id]);
+
+  return result.affectedRows;
+}
+
+/**
+ * Get total SKPD count
+ * @returns Total number of SKPD
+ */
+export async function getTotalSKPD(): Promise<number> {
+  const result = await query<{ total: number }>(
+    "SELECT COUNT(*) as total FROM skpd"
+  );
+  return result[0]?.total || 0;
+}

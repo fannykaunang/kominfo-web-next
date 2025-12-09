@@ -22,6 +22,7 @@ import {
   Mail,
   History,
   Timer,
+  Eye,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -111,6 +112,12 @@ const menuCategories = [
         title: "Statistik",
         href: "/backend/statistik",
         icon: BarChart3,
+      },
+      {
+        title: "Visitor",
+        href: "/backend/visitor",
+        icon: Eye,
+        // adminOnly: true,
       },
       {
         title: "Users",

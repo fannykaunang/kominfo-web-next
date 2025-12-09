@@ -7,11 +7,10 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 
 const footerLinks = {
-  pemerintahan: [
-    { name: "Profil Daerah", href: "/tentang/profil" },
-    { name: "Visi & Misi", href: "/tentang/visi-misi" },
-    { name: "Struktur Organisasi", href: "/tentang/struktur" },
-    { name: "SKPD", href: "/tentang/skpd" },
+  tentang: [
+    { name: "Tentang Kami", href: "/tentang" },
+    { name: "Hubungi Kami", href: "/hubungi-kami" },
+    { name: "SKPD", href: "/skpd" },
   ],
   layanan: [
     { name: "Layanan Publik", href: "/layanan/publik" },
@@ -103,13 +102,14 @@ export function Footer() {
 
             {/* Quick Links */}
             <div>
-              <h4 className="font-semibold text-white mb-4">Pemerintahan</h4>
+              <h4 className="font-semibold text-white mb-4">Tentang</h4>
               <ul className="space-y-2">
-                {footerLinks.pemerintahan.map((link) => (
+                {footerLinks.tentang.map((link) => (
                   <li key={link.name}>
                     <Link
                       href={link.href}
-                      className="text-sm text-slate-400 hover:text-merauke-400 transition-colors">
+                      className="text-sm text-slate-400 hover:text-merauke-400 transition-colors"
+                    >
                       {link.name}
                     </Link>
                   </li>
@@ -124,7 +124,8 @@ export function Footer() {
                   <li key={link.name}>
                     <Link
                       href={link.href}
-                      className="text-sm text-slate-400 hover:text-merauke-400 transition-colors">
+                      className="text-sm text-slate-400 hover:text-merauke-400 transition-colors"
+                    >
                       {link.name}
                     </Link>
                   </li>
@@ -139,7 +140,8 @@ export function Footer() {
                   <li key={link.name}>
                     <Link
                       href={link.href}
-                      className="text-sm text-slate-400 hover:text-merauke-400 transition-colors">
+                      className="text-sm text-slate-400 hover:text-merauke-400 transition-colors"
+                    >
                       {link.name}
                     </Link>
                   </li>
@@ -164,7 +166,8 @@ export function Footer() {
                 size="icon"
                 variant="ghost"
                 className="h-9 w-9 rounded-full hover:bg-slate-800 hover:text-merauke-400"
-                asChild>
+                asChild
+              >
                 <Link href="https://facebook.com" target="_blank">
                   <SiFacebook className="h-4 w-4" />
                 </Link>
@@ -173,7 +176,8 @@ export function Footer() {
                 size="icon"
                 variant="ghost"
                 className="h-9 w-9 rounded-full hover:bg-slate-800 hover:text-merauke-400"
-                asChild>
+                asChild
+              >
                 <Link href="https://instagram.com" target="_blank">
                   <SiInstagram className="h-4 w-4" />
                 </Link>
@@ -182,7 +186,8 @@ export function Footer() {
                 size="icon"
                 variant="ghost"
                 className="h-9 w-9 rounded-full hover:bg-slate-800 hover:text-merauke-400"
-                asChild>
+                asChild
+              >
                 <Link href="https://twitter.com" target="_blank">
                   <SiX className="h-4 w-4" />
                 </Link>
@@ -191,7 +196,8 @@ export function Footer() {
                 size="icon"
                 variant="ghost"
                 className="h-9 w-9 rounded-full hover:bg-slate-800 hover:text-merauke-400"
-                asChild>
+                asChild
+              >
                 <Link href="https://youtube.com" target="_blank">
                   <SiYoutube className="h-4 w-4" />
                 </Link>

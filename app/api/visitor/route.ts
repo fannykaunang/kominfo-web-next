@@ -25,11 +25,7 @@ export async function GET(request: NextRequest) {
       limit: parseInt(searchParams.get("limit") || "50"),
     };
 
-    console.log("Visitor API - Options:", options);
-
     const { logs, total } = await getAllVisitorLogs(options);
-
-    console.log("Visitor API - Results:", { logsCount: logs.length, total });
 
     return NextResponse.json({
       logs,
