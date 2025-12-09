@@ -86,7 +86,7 @@ export default function SKPDModal({
     setIsLoading(true);
 
     try {
-      const url = skpd ? `/api/backend/skpd/${skpd.id}` : "/api/backend/skpd";
+      const url = skpd ? `/api/skpd/${skpd.id}` : "/api/skpd";
       const method = skpd ? "PUT" : "POST";
 
       const res = await fetch(url, {

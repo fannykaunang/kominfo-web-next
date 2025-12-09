@@ -99,8 +99,8 @@ export default function SKPDClient({
     setIsLoading(true);
     try {
       const [skpdRes, statsRes] = await Promise.all([
-        fetch("/api/backend/skpd"),
-        fetch("/api/backend/skpd?stats=true"),
+        fetch("/api/skpd"),
+        fetch("/api/skpd?stats=true"),
       ]);
 
       if (skpdRes.ok) {

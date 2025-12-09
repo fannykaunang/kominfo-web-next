@@ -15,7 +15,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { SKPD } from "@/lib/models/skpd.model";
+import { SKPD } from "@/lib/types";
 
 interface SKPDContentProps {
   skpdData: SKPD[];

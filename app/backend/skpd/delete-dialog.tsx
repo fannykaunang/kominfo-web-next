@@ -38,7 +38,7 @@ export default function DeleteSKPDDialog({
     setIsLoading(true);
 
     try {
-      const res = await fetch(`/api/backend/skpd/${skpd.id}`, {
+      const res = await fetch(`/api/skpd/${skpd.id}`, {
         method: "DELETE",
       });
 

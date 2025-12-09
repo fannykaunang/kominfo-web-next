@@ -1,13 +1,8 @@
+// app/[menuSlug]/[halamanSlug]/page.tsx
+
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import {
-  Calendar,
-  Eye,
-  User,
-  ChevronRight,
-  Home,
-  FileText,
-} from "lucide-react";
+import { Calendar, Eye, ChevronRight, Home, FileText } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";

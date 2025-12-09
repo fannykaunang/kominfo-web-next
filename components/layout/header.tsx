@@ -158,13 +158,35 @@ export function Header() {
   // Combine static and dynamic nav items
   const allNavItems: NavItem[] = [
     ...staticNavItems,
-    ...menuItems.map<NavItem>((menu) => ({
-      name: menu.nama,
-      href: `/${menu.slug}`,
-      icon: menu.icon,
-      hasDropdown: menu.halaman.length > 0,
-      halaman: menu.halaman,
-    })),
+    ...menuItems.map<NavItem>((menu) => {
+      // Untuk menu Organisasi, tambahkan item SKPD
+      if (menu.slug === "organisasi") {
+        return {
+          name: menu.nama,
+          href: `/${menu.slug}`,
+          icon: menu.icon,
+          hasDropdown: true,
+          halaman: [
+            ...menu.halaman,
+            // Tambahkan item SKPD sebagai halaman statis
+            {
+              id: "skpd-static",
+              judul: "SKPD",
+              slug: "skpd",
+              urutan: 999, // Urutan terakhir
+            },
+          ],
+        };
+      }
+
+      return {
+        name: menu.nama,
+        href: `/${menu.slug}`,
+        icon: menu.icon,
+        hasDropdown: menu.halaman.length > 0,
+        halaman: menu.halaman,
+      };
+    }),
   ];
 
   return (
@@ -173,7 +195,8 @@ export function Header() {
         isScrolled
           ? "bg-background/95 backdrop-blur-md shadow-md"
           : "bg-background"
-      }`}>
+      }`}
+    >
       {/* Main Header */}
       <div className="container mx-auto px-4">
         <div className="max-w-7xl mx-auto flex h-16 items-center justify-between gap-4">
@@ -211,7 +234,8 @@ export function Header() {
                         <DropdownMenuItem key={halaman.id} asChild>
                           <Link
                             href={`${item.href}/${halaman.slug}`}
-                            className="cursor-pointer">
+                            className="cursor-pointer"
+                          >
                             {halaman.judul}
                           </Link>
                         </DropdownMenuItem>
@@ -226,7 +250,8 @@ export function Header() {
                 <Link
                   key={item.name}
                   href={item.href}
-                  className="px-3 py-2 rounded-md text-sm font-medium text-foreground/80 hover:text-foreground hover:bg-accent transition-colors flex items-center">
+                  className="px-3 py-2 rounded-md text-sm font-medium text-foreground/80 hover:text-foreground hover:bg-accent transition-colors flex items-center"
+                >
                   {"icon" in item && item.icon && getIcon(item.icon)}
                   {item.name}
                 </Link>
@@ -241,7 +266,8 @@ export function Header() {
               variant="ghost"
               size="icon"
               className="h-9 w-9"
-              aria-label="Search">
+              aria-label="Search"
+            >
               <Search className="h-5 w-5" />
             </Button>
 
@@ -251,7 +277,8 @@ export function Header() {
               size="icon"
               className="h-9 w-9"
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              aria-label="Toggle theme">
+              aria-label="Toggle theme"
+            >
               {theme === "dark" ? (
                 <Sun className="h-5 w-5" />
               ) : (
@@ -266,13 +293,15 @@ export function Header() {
                   variant="ghost"
                   size="icon"
                   className="h-9 w-9 lg:hidden"
-                  aria-label="Menu">
+                  aria-label="Menu"
+                >
                   <MenuIcon className="h-5 w-5" />
                 </Button>
               </SheetTrigger>
               <SheetContent
                 side="right"
-                className="w-[300px] sm:w-[400px] flex flex-col">
+                className="w-[300px] sm:w-[400px] flex flex-col"
+              >
                 <SheetHeader>
                   <SheetTitle>Menu</SheetTitle>
                 </SheetHeader>
@@ -281,7 +310,8 @@ export function Header() {
                     <div key={item.name}>
                       <Link
                         href={item.href}
-                        className="px-4 py-2 rounded-md text-base font-medium hover:bg-accent transition-colors flex items-center">
+                        className="px-4 py-2 rounded-md text-base font-medium hover:bg-accent transition-colors flex items-center"
+                      >
                         {"icon" in item && item.icon && getIcon(item.icon)}
                         {item.name}
                       </Link>
@@ -293,7 +323,8 @@ export function Header() {
                             <Link
                               key={halaman.id}
                               href={`${item.href}/${halaman.slug}`}
-                              className="block px-4 py-1.5 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors">
+                              className="block px-4 py-1.5 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors"
+                            >
                               {halaman.judul}
                             </Link>
                           ))}

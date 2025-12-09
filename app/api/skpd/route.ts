@@ -1,4 +1,4 @@
-// app/api/backend/skpd/route.ts
+// app/api/skpd/route.ts
 
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
