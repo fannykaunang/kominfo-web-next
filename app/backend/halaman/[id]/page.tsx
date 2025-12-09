@@ -1,3 +1,5 @@
+// app/backend/halaman/[id]/page.tsx
+
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

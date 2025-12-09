@@ -5,6 +5,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ConditionalLayout } from "@/components/conditional-layout";
+import { VisitorTracker } from "@/components/visitor-tracker";
 
 export const metadata: Metadata = {
   title: "Portal Berita Kabupaten Merauke",
@@ -77,12 +78,15 @@ export default function RootLayout({
   return (
     <html lang="id" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-50 text-gray-900 dark:text-gray-100 dark:bg-gray-900 dark:text-gray-100`}>
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-50 text-gray-900 dark:text-gray-100 dark:bg-gray-900 dark:text-gray-100`}
+      >
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
           enableSystem
-          disableTransitionOnChange>
+          disableTransitionOnChange
+        >
+          <VisitorTracker />
           <div className="flex min-h-screen flex-col">
             <ConditionalLayout>{children}</ConditionalLayout>
           </div>

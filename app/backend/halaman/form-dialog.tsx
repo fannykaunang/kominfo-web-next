@@ -51,22 +51,22 @@ function HalamanForm({
   submitLabel = "Simpan",
 }: HalamanFormProps) {
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState({
-    menu_id: "",
-    judul: "",
-    slug: "",
-    konten: "",
-    excerpt: "",
-    urutan: 0,
-    is_published: 1,
-    meta_title: "",
-    meta_description: "",
-  });
+  const [formData, setFormData] = useState(() => ({
+    menu_id: editingHalaman?.menu_id ? String(editingHalaman.menu_id) : "",
+    judul: editingHalaman?.judul || "",
+    slug: editingHalaman?.slug || "",
+    konten: editingHalaman?.konten || "",
+    excerpt: editingHalaman?.excerpt || "",
+    urutan: editingHalaman?.urutan || 0,
+    is_published: editingHalaman?.is_published || 1,
+    meta_title: editingHalaman?.meta_title || "",
+    meta_description: editingHalaman?.meta_description || "",
+  }));
 
   useEffect(() => {
     if (editingHalaman) {
       setFormData({
-        menu_id: editingHalaman.menu_id || "",
+        menu_id: editingHalaman.menu_id ? String(editingHalaman.menu_id) : "",
         judul: editingHalaman.judul || "",
         slug: editingHalaman.slug || "",
         konten: editingHalaman.konten || "",
@@ -156,7 +156,7 @@ function HalamanForm({
               Menu <span className="text-destructive">*</span>
             </Label>
             <Select
-              value={formData.menu_id}
+              value={formData.menu_id || undefined}
               onValueChange={(value) =>
                 setFormData((prev) => ({ ...prev, menu_id: value }))
               }
@@ -167,7 +167,7 @@ function HalamanForm({
               </SelectTrigger>
               <SelectContent>
                 {menuOptions.map((menu) => (
-                  <SelectItem key={menu.id} value={menu.id}>
+                  <SelectItem key={menu.id} value={String(menu.id)}>
                     {menu.nama}
                   </SelectItem>
                 ))}

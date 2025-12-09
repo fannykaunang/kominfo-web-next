@@ -711,3 +711,64 @@ export interface TagListResponse {
   total: number;
   limit: number;
 }
+
+/**
+ * Visitor Log Model
+ */
+export interface VisitorLog extends RowDataPacket {
+  id: number;
+  ip_address: string;
+  user_agent: string | null;
+  browser: string | null;
+  browser_version: string | null;
+  os: string | null;
+  device: "desktop" | "mobile" | "tablet" | "bot";
+  page_url: string;
+  referrer: string | null;
+  country: string | null;
+  city: string | null;
+  session_id: string | null;
+  visited_at: Date;
+}
+
+export interface VisitorLogCreateInput {
+  ip_address: string;
+  user_agent?: string | null;
+  browser?: string | null;
+  browser_version?: string | null;
+  os?: string | null;
+  device?: "desktop" | "mobile" | "tablet" | "bot";
+  page_url: string;
+  referrer?: string | null;
+  session_id?: string | null;
+}
+
+export interface VisitorStats {
+  total: number;
+  today: number;
+  yesterday: number;
+  this_week: number;
+  this_month: number;
+  unique_ips: number;
+  by_device: {
+    desktop: number;
+    mobile: number;
+    tablet: number;
+    bot: number;
+  };
+  by_browser: Array<{ browser: string; count: number }>;
+  by_os: Array<{ os: string; count: number }>;
+  top_pages: Array<{ page_url: string; count: number }>;
+  recent_visitors: VisitorLog[];
+}
+
+export interface VisitorFilterOptions {
+  search?: string;
+  device?: "desktop" | "mobile" | "tablet" | "bot";
+  browser?: string;
+  os?: string;
+  date_from?: string;
+  date_to?: string;
+  page?: number;
+  limit?: number;
+}
