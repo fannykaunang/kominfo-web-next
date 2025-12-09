@@ -1,4 +1,7 @@
-import { query } from "@/lib/db-helpers";
+// lib/models/skpd.model.ts
+
+import { execute, query } from "@/lib/db-helpers";
+import { createLogWithData } from "./log.model";
 
 // SKPD Interface
 export interface SKPD {
@@ -94,12 +97,17 @@ export async function getSKPDCountByKategori(): Promise<
  * @param data - SKPD data
  * @returns Inserted SKPD ID
  */
-export async function createSKPD(data: SKPDInput): Promise<number> {
-  const { query: executeQuery } = await import("@/lib/db-helpers");
-
-  const result = await executeQuery(
-    `INSERT INTO skpd (nama, singkatan, kategori, alamat, telepon, email, website, kepala, deskripsi)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+export async function createSKPD(
+  data: SKPDInput,
+  userId?: string,
+  ipAddress?: string,
+  userAgent?: string
+): Promise<number> {
+  const result = await execute(
+    `
+    INSERT INTO skpd (nama, singkatan, kategori, alamat, telepon, email, website, kepala, deskripsi)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `,
     [
       data.nama,
       data.singkatan,
@@ -113,7 +121,25 @@ export async function createSKPD(data: SKPDInput): Promise<number> {
     ]
   );
 
-  return result.insertId;
+  const id = result.insertId;
+
+  // Log activity
+  if (userId) {
+    await createLogWithData({
+      user_id: userId,
+      aksi: "Create",
+      modul: "SKPD",
+      detail_aksi: `Membuat SKPD baru: ${data.nama}`,
+      data_sebelum: null,
+      data_sesudah: data,
+      ip_address: ipAddress || null,
+      user_agent: userAgent || null,
+      endpoint: "/api/skpd",
+      method: "POST",
+    });
+  }
+
+  return id;
 }
 
 /**
@@ -124,7 +150,10 @@ export async function createSKPD(data: SKPDInput): Promise<number> {
  */
 export async function updateSKPD(
   id: number,
-  data: Partial<SKPDInput>
+  data: Partial<SKPDInput>,
+  userId?: string,
+  ipAddress?: string,
+  userAgent?: string
 ): Promise<number> {
   const { execute } = await import("@/lib/db-helpers");
 
@@ -168,6 +197,7 @@ export async function updateSKPD(
     values.push(data.deskripsi);
   }
 
+  // Tidak ada field yang diupdate
   if (fields.length === 0) {
     return 0;
   }
@@ -179,6 +209,23 @@ export async function updateSKPD(
     values
   );
 
+  // Hanya log kalau ada baris yang berubah dan userId tersedia
+  if (userId && result.affectedRows > 0) {
+    await createLogWithData({
+      user_id: userId,
+      aksi: "Update",
+      modul: "SKPD",
+      detail_aksi: `Mengubah data SKPD dengan ID: ${id}`,
+      // Kalau nanti kamu punya fungsi getSKPDById, bisa isi data_sebelum dengan data lama
+      data_sebelum: null,
+      data_sesudah: { id, ...data }, // data yang diupdate + id
+      ip_address: ipAddress || null,
+      user_agent: userAgent || null,
+      endpoint: "/api/skpd",
+      method: "PUT", // atau "PATCH" sesuai route kamu
+    });
+  }
+
   return result.affectedRows;
 }
 
@@ -187,12 +234,32 @@ export async function updateSKPD(
  * @param id - SKPD ID
  * @returns Number of affected rows
  */
-export async function deleteSKPD(id: number): Promise<number> {
-  const { execute } = await import("@/lib/db-helpers");
+export async function deleteSKPD(
+  id: number,
+  userId?: string,
+  ipAddress?: string,
+  userAgent?: string
+): Promise<void> {
+  // Get data for logging
+  const skpd = await getSKPDById(id);
 
-  const result = await execute("DELETE FROM skpd WHERE id = ?", [id]);
+  await execute(`DELETE FROM skpd WHERE id = ?`, [id]);
 
-  return result.affectedRows;
+  // Log activity
+  if (userId && skpd) {
+    await createLogWithData({
+      user_id: userId,
+      aksi: "Delete",
+      modul: "halaman",
+      detail_aksi: `Menghapus SKPD: ${skpd.nama}`,
+      data_sebelum: skpd,
+      data_sesudah: null,
+      ip_address: ipAddress || null,
+      user_agent: userAgent || null,
+      endpoint: "/api/skpd/" + id,
+      method: "DELETE",
+    });
+  }
 }
 
 /**
