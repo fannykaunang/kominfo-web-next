@@ -12,6 +12,7 @@ import {
   Sun,
   MapPin,
   ChevronDown,
+  CircleUser,
 } from "lucide-react";
 import * as LucideIcons from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -265,7 +266,7 @@ export function Header() {
             <Button
               variant="ghost"
               size="icon"
-              className="h-9 w-9"
+              className="h-6 w-6"
               aria-label="Search"
             >
               <Search className="h-5 w-5" />
@@ -275,15 +276,28 @@ export function Header() {
             <Button
               variant="ghost"
               size="icon"
-              className="h-9 w-9"
+              className="h-5 w-5 cursor-pointer"
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
               aria-label="Toggle theme"
             >
               {theme === "dark" ? (
-                <Sun className="h-5 w-5" />
+                <Sun className="h-6 w-6" />
               ) : (
                 <Moon className="h-5 w-5" />
               )}
+            </Button>
+
+            {/* User Profile */}
+            <Button
+              asChild
+              variant="ghost"
+              size="icon"
+              className="h-6 w-6"
+              aria-label="User profile"
+            >
+              <Link href="/login" title="Halaman Login">
+                <CircleUser className="h-5 w-5" />
+              </Link>
             </Button>
 
             {/* Mobile Menu */}

@@ -1,3 +1,5 @@
+// lib/models/settings.model.ts
+
 import { execute, queryOne } from "@/lib/db-helpers";
 import { AppSettings } from "@/lib/types";
 import { createLog } from "@/lib/models/log.model";
