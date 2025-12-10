@@ -5,7 +5,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, Calendar } from "lucide-react";
+import { ArrowLeft, ArrowRight, Calendar, Eye } from "lucide-react";
 import { Card } from "../ui/card";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
@@ -23,6 +23,7 @@ interface SideNewsItem {
     color: string;
   };
   publishedAt: string;
+  views?: number;
 }
 
 interface HomeSliderProps {
@@ -72,7 +73,8 @@ export function HomeSlider({ sliders, sideNews }: HomeSliderProps) {
               <div className="absolute inset-0">
                 <div
                   className="flex h-full transition-transform duration-500 ease-out"
-                  style={{ transform: `translateX(-${activeIndex * 100}%)` }}>
+                  style={{ transform: `translateX(-${activeIndex * 100}%)` }}
+                >
                   {safeSlides.map((slide) => (
                     <div key={slide.id} className="relative min-w-full h-full">
                       <NewsImage
@@ -98,7 +100,8 @@ export function HomeSlider({ sliders, sideNews }: HomeSliderProps) {
                 </div>
                 <h2
                   className="font-bold leading-tight text-balance
-             text-lg sm:text-xl md:text-2xl lg:text-3xl">
+             text-lg sm:text-xl md:text-2xl lg:text-3xl"
+                >
                   {currentSlide?.judul}
                 </h2>
                 {currentSlide?.deskripsi ? (
@@ -116,7 +119,8 @@ export function HomeSlider({ sliders, sideNews }: HomeSliderProps) {
                     size="icon"
                     variant="secondary"
                     className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 h-8 w-8 sm:h-10 sm:w-10 bg-white/20 hover:bg-white"
-                    onClick={goPrev}>
+                    onClick={goPrev}
+                  >
                     <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
                   </Button>
 
@@ -126,7 +130,8 @@ export function HomeSlider({ sliders, sideNews }: HomeSliderProps) {
                     size="icon"
                     variant="secondary"
                     className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 h-8 w-8 sm:h-10 sm:w-10 bg-white/20 hover:bg-white"
-                    onClick={goNext}>
+                    onClick={goNext}
+                  >
                     <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5" />
                   </Button>
 
@@ -137,10 +142,11 @@ export function HomeSlider({ sliders, sideNews }: HomeSliderProps) {
                         key={slide.id}
                         type="button"
                         onClick={() => setActiveIndex(index)}
-                        className={`h-2 rounded-full transition-all ${index === activeIndex
+                        className={`h-2 rounded-full transition-all ${
+                          index === activeIndex
                             ? "w-8 bg-primary"
                             : "w-2 bg-white/70 hover:bg-white"
-                          }`}
+                        }`}
                         aria-label={`Pilih slider ${index + 1}`}
                       />
                     ))}
@@ -156,7 +162,8 @@ export function HomeSlider({ sliders, sideNews }: HomeSliderProps) {
             sideNews.map((news) => (
               <Card
                 key={news.id}
-                className="group overflow-hidden hover-lift border-0 shadow-lg">
+                className="group overflow-hidden hover-lift border-0 shadow-lg"
+              >
                 <Link href={`/berita/${news.slug}`}>
                   <div className="flex gap-4 p-2">
                     <div className="relative w-28 h-25 shrink-0 rounded-lg overflow-hidden">
@@ -177,7 +184,8 @@ export function HomeSlider({ sliders, sideNews }: HomeSliderProps) {
                           backgroundColor: `${news.kategori.color}20`,
                           color: news.kategori.color,
                           borderColor: news.kategori.color,
-                        }}>
+                        }}
+                      >
                         {news.kategori.nama}
                       </Badge>
 
@@ -193,8 +201,17 @@ export function HomeSlider({ sliders, sideNews }: HomeSliderProps) {
                             {
                               day: "numeric",
                               month: "short",
+                              year: "numeric",
+                              hour: "2-digit",
+                              minute: "2-digit",
                             }
                           )}
+                        </span>
+                        <span className="flex items-center gap-1 pl-2">
+                          <Eye className="h-3 w-3" />
+                          <span>
+                            {news.views?.toLocaleString("id-ID") ?? "0"}
+                          </span>
                         </span>
                       </div>
                     </div>

@@ -11,6 +11,13 @@ import {
   getHalamanByMenuId,
 } from "@/lib/models/halaman.model";
 import { getMenuBySlug } from "@/lib/models/menu.model";
+import {
+  generatePublicMetadata,
+  generateBreadcrumbStructuredData,
+  generateArticleStructuredData,
+  BASE_URL,
+} from "@/lib/metadata-helpers";
+import { getAppSettings } from "@/lib/models/settings.model";
 
 interface HalamanPageProps {
   params: Promise<{
@@ -41,178 +48,217 @@ export default async function HalamanPage({ params }: HalamanPageProps) {
   const relatedHalaman = await getHalamanByMenuId(menu.id);
   const otherHalaman = relatedHalaman.filter((h) => h.id !== halaman.id);
 
+  // Generate breadcrumb structured data
+  const breadcrumbData = generateBreadcrumbStructuredData([
+    { name: "Beranda", url: "/" },
+    { name: menu.nama, url: `/${menuSlug}` },
+    { name: halaman.judul, url: `/${menuSlug}/${halamanSlug}` },
+  ]);
+
+  // Generate article structured data
+  const settings = await getAppSettings();
+  const articleData = generateArticleStructuredData({
+    title: halaman.judul,
+    excerpt: halaman.excerpt || "",
+    slug: halamanSlug,
+    url: `${BASE_URL}/${menuSlug}/${halamanSlug}`,
+    publishedAt: halaman.created_at,
+    updatedAt: halaman.updated_at,
+    author: halaman.author_name || undefined,
+    publisherName: settings?.nama_aplikasi || "Portal Berita",
+    publisherLogo: settings?.logo ? `${BASE_URL}${settings.logo}` : undefined,
+    category: menu.nama,
+  });
+
   return (
-    <main className="py-8 px-4 sm:px-8">
-      <div className="container max-w-7xl">
-        {/* Breadcrumb */}
-        <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
-          <Link
-            href="/"
-            className="flex items-center hover:text-foreground transition-colors"
-          >
-            <Home className="h-4 w-4" />
-          </Link>
-          <ChevronRight className="h-4 w-4" />
-          <Link
-            href={`/${menuSlug}`}
-            className="hover:text-foreground transition-colors"
-          >
-            {menu.nama}
-          </Link>
-          <ChevronRight className="h-4 w-4" />
-          <span className="text-foreground font-medium">{halaman.judul}</span>
-        </nav>
+    <>
+      {/* Structured Data for SEO */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbData) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleData) }}
+      />
 
-        <div className="grid lg:grid-cols-3 gap-8">
-          {/* Main Content */}
-          <article className="lg:col-span-2">
-            {/* Header */}
-            <div className="mb-6">
-              <h1 className="text-3xl md:text-4xl font-bold mb-4 text-balance">
-                {halaman.judul}
-              </h1>
+      <main className="py-8 px-4 sm:px-8">
+        <div className="container max-w-7xl">
+          {/* Breadcrumb */}
+          <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
+            <Link
+              href="/"
+              className="flex items-center hover:text-foreground transition-colors"
+            >
+              <Home className="h-4 w-4" />
+            </Link>
+            <ChevronRight className="h-4 w-4" />
+            <Link
+              href={`/${menuSlug}`}
+              className="hover:text-foreground transition-colors"
+            >
+              {menu.nama}
+            </Link>
+            <ChevronRight className="h-4 w-4" />
+            <span className="text-foreground font-medium">{halaman.judul}</span>
+          </nav>
 
-              {/* Meta Info */}
-              <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-                {halaman.author_name && (
-                  <>
-                    <div className="flex items-center gap-2">
-                      <Avatar className="h-7 w-7">
-                        <AvatarFallback className="bg-primary/10 text-primary text-xs">
-                          {halaman.author_name.charAt(0).toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                      <span>{halaman.author_name}</span>
-                    </div>
-                    <Separator orientation="vertical" className="h-4" />
-                  </>
-                )}
-                <div className="flex items-center gap-1">
-                  <Calendar className="h-4 w-4" />
-                  <span>
-                    {new Date(halaman.created_at).toLocaleDateString("id-ID", {
-                      day: "numeric",
-                      month: "long",
-                      year: "numeric",
-                    })}
-                  </span>
-                </div>
-                <Separator orientation="vertical" className="h-4" />
-                <div className="flex items-center gap-1">
-                  <Eye className="h-4 w-4" />
-                  <span>{halaman.views.toLocaleString()} views</span>
-                </div>
-              </div>
+          <div className="grid lg:grid-cols-3 gap-8">
+            {/* Main Content */}
+            <article className="lg:col-span-2">
+              {/* Header */}
+              <div className="mb-6">
+                <h1 className="text-3xl md:text-4xl font-bold mb-4 text-balance">
+                  {halaman.judul}
+                </h1>
 
-              {/* Excerpt */}
-              {halaman.excerpt && (
-                <div className="mt-4 p-4 bg-muted/50 rounded-lg border-l-4 border-primary">
-                  <p className="text-muted-foreground italic">
-                    {halaman.excerpt}
-                  </p>
-                </div>
-              )}
-            </div>
-
-            {/* Content */}
-            <Card className="border-0 shadow-lg">
-              <CardContent className="p-6 md:p-8">
-                <div
-                  className="news-content"
-                  dangerouslySetInnerHTML={{ __html: halaman.konten }}
-                />
-              </CardContent>
-            </Card>
-
-            {/* Updated Info */}
-            <div className="mt-6 text-sm text-muted-foreground">
-              Terakhir diperbarui:{" "}
-              {new Date(halaman.updated_at).toLocaleDateString("id-ID", {
-                day: "numeric",
-                month: "long",
-                year: "numeric",
-              })}
-            </div>
-          </article>
-
-          {/* Sidebar */}
-          <aside className="space-y-6">
-            {/* Menu Info */}
-            <Card className="border-0 shadow-lg">
-              <CardHeader>
-                <CardTitle className="text-lg">Tentang Menu Ini</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div>
-                    <h3 className="font-semibold text-lg mb-1">{menu.nama}</h3>
-                    {menu.deskripsi && (
-                      <p className="text-sm text-muted-foreground">
-                        {menu.deskripsi}
-                      </p>
-                    )}
+                {/* Meta Info */}
+                <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+                  {halaman.author_name && (
+                    <>
+                      <div className="flex items-center gap-2">
+                        <Avatar className="h-7 w-7">
+                          <AvatarFallback className="bg-primary/10 text-primary text-xs">
+                            {halaman.author_name.charAt(0).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                        <span>{halaman.author_name}</span>
+                      </div>
+                      <Separator orientation="vertical" className="h-4" />
+                    </>
+                  )}
+                  <div className="flex items-center gap-1">
+                    <Calendar className="h-4 w-4" />
+                    <span>
+                      {new Date(halaman.created_at).toLocaleDateString(
+                        "id-ID",
+                        {
+                          day: "numeric",
+                          month: "long",
+                          year: "numeric",
+                        }
+                      )}
+                    </span>
+                  </div>
+                  <Separator orientation="vertical" className="h-4" />
+                  <div className="flex items-center gap-1">
+                    <Eye className="h-4 w-4" />
+                    <span>{halaman.views.toLocaleString()} views</span>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
 
-            {/* Related Pages */}
-            {otherHalaman.length > 0 && (
+                {/* Excerpt */}
+                {halaman.excerpt && (
+                  <div className="mt-4 p-4 bg-muted/50 rounded-lg border-l-4 border-primary">
+                    <p className="text-muted-foreground italic">
+                      {halaman.excerpt}
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Content */}
               <Card className="border-0 shadow-lg">
-                <CardHeader>
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <FileText className="h-5 w-5" />
-                    Halaman Terkait
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  {otherHalaman.map((h) => (
-                    <Link
-                      key={h.id}
-                      href={`/${menuSlug}/${h.slug}`}
-                      className="block p-3 rounded-lg hover:bg-accent transition-colors group"
-                    >
-                      <div className="flex items-start gap-3">
-                        <div className="mt-1">
-                          <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-medium text-sm line-clamp-2 group-hover:text-primary transition-colors">
-                            {h.judul}
-                          </h4>
-                          {h.excerpt && (
-                            <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                              {h.excerpt}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    </Link>
-                  ))}
+                <CardContent className="p-6 md:p-8">
+                  <div
+                    className="news-content"
+                    dangerouslySetInnerHTML={{ __html: halaman.konten }}
+                  />
                 </CardContent>
               </Card>
-            )}
 
-            {/* Back to Menu */}
-            <Card className="border-0 shadow-lg bg-primary/5">
-              <CardContent className="p-4">
-                <Link
-                  href={`/${menuSlug}`}
-                  className="flex items-center justify-center gap-2 text-sm font-medium text-primary hover:underline"
-                >
-                  <ChevronRight className="h-4 w-4 rotate-180" />
-                  Kembali ke {menu.nama}
-                </Link>
-              </CardContent>
-            </Card>
-          </aside>
+              {/* Updated Info */}
+              <div className="mt-6 text-sm text-muted-foreground">
+                Terakhir diperbarui:{" "}
+                {new Date(halaman.updated_at).toLocaleDateString("id-ID", {
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                })}
+              </div>
+            </article>
+
+            {/* Sidebar */}
+            <aside className="space-y-6">
+              {/* Menu Info */}
+              <Card className="border-0 shadow-lg">
+                <CardHeader>
+                  <CardTitle className="text-lg">Tentang Menu Ini</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    <div>
+                      <h3 className="font-semibold text-lg mb-1">
+                        {menu.nama}
+                      </h3>
+                      {menu.deskripsi && (
+                        <p className="text-sm text-muted-foreground">
+                          {menu.deskripsi}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Related Pages */}
+              {otherHalaman.length > 0 && (
+                <Card className="border-0 shadow-lg">
+                  <CardHeader>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <FileText className="h-5 w-5" />
+                      Halaman Terkait
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    {otherHalaman.map((h) => (
+                      <Link
+                        key={h.id}
+                        href={`/${menuSlug}/${h.slug}`}
+                        className="block p-3 rounded-lg hover:bg-accent transition-colors group"
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className="mt-1">
+                            <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-medium text-sm line-clamp-2 group-hover:text-primary transition-colors">
+                              {h.judul}
+                            </h4>
+                            {h.excerpt && (
+                              <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                                {h.excerpt}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </Link>
+                    ))}
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Back to Menu */}
+              <Card className="border-0 shadow-lg bg-primary/5">
+                <CardContent className="p-4">
+                  <Link
+                    href={`/${menuSlug}`}
+                    className="flex items-center justify-center gap-2 text-sm font-medium text-primary hover:underline"
+                  >
+                    <ChevronRight className="h-4 w-4 rotate-180" />
+                    Kembali ke {menu.nama}
+                  </Link>
+                </CardContent>
+              </Card>
+            </aside>
+          </div>
         </div>
-      </div>
-    </main>
+      </main>
+    </>
   );
 }
 
-// Generate metadata for SEO
+// Generate metadata for SEO dengan helper dari database
 export async function generateMetadata({ params }: HalamanPageProps) {
   const { menuSlug, halamanSlug } = await params;
 
@@ -227,47 +273,31 @@ export async function generateMetadata({ params }: HalamanPageProps) {
   const menu = await getMenuBySlug(menuSlug);
 
   // Use meta_title or fallback to judul
-  const title =
-    halaman.meta_title ||
-    `${halaman.judul} - ${
-      menu?.nama || "Portal"
-    } | Portal Berita Kabupaten Merauke`;
+  const title = halaman.meta_title || halaman.judul;
 
   // Use meta_description or fallback to excerpt
   const description =
     halaman.meta_description ||
     halaman.excerpt ||
-    `Informasi tentang ${halaman.judul} - ${
-      menu?.nama || ""
-    } Kabupaten Merauke`;
+    `Informasi tentang ${halaman.judul}`;
 
-  return {
+  // Generate keywords from title, menu, and content
+  const keywords = [
+    halaman.judul,
+    menu?.nama || "",
+    "kabupaten merauke",
+    "pemerintah merauke",
+    "informasi publik",
+  ];
+
+  return generatePublicMetadata({
     title,
     description,
-    keywords: [
-      halaman.judul,
-      menu?.nama || "",
-      "kabupaten merauke",
-      "pemerintah merauke",
-      "informasi publik",
-      "portal berita merauke",
-    ],
-    openGraph: {
-      title,
-      description,
-      type: "article",
-      publishedTime: halaman.created_at,
-      modifiedTime: halaman.updated_at,
-      authors: halaman.author_name ? [halaman.author_name] : [],
-      section: menu?.nama,
-    },
-    twitter: {
-      card: "summary_large_image",
-      title,
-      description,
-    },
-    alternates: {
-      canonical: `/${menuSlug}/${halamanSlug}`,
-    },
-  };
+    keywords,
+    path: `/${menuSlug}/${halamanSlug}`,
+    publishedTime: halaman.created_at,
+    modifiedTime: halaman.updated_at,
+    author: halaman.author_name || undefined,
+    type: "article",
+  });
 }

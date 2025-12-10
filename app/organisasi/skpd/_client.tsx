@@ -1,3 +1,5 @@
+// app/organisasi/skpd/_client.tsx
+
 "use client";
 
 import { useState, useMemo } from "react";
@@ -49,19 +51,23 @@ export default function SKPDContent({ skpdData }: SKPDContentProps) {
     <main className="py-8 px-4 sm:px-8">
       <div className="container max-w-7xl">
         {/* Breadcrumb */}
-        <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
+        <nav
+          className="flex items-center gap-2 text-sm text-muted-foreground mb-6"
+          aria-label="Breadcrumb"
+        >
           <Link
             href="/"
             className="flex items-center hover:text-foreground transition-colors"
           >
             <Home className="h-4 w-4" />
+            <span className="sr-only">Beranda</span>
           </Link>
-          <ChevronRight className="h-4 w-4" />
+          <ChevronRight className="h-4 w-4" aria-hidden="true" />
           <span className="text-foreground font-medium">Daftar SKPD</span>
         </nav>
 
         {/* Header */}
-        <div className="mb-8">
+        <header className="mb-8">
           <h1 className="text-3xl md:text-4xl font-bold mb-4 text-balance">
             Satuan Kerja Perangkat Daerah (SKPD)
           </h1>
@@ -73,7 +79,7 @@ export default function SKPDContent({ skpdData }: SKPDContentProps) {
               jawab.
             </p>
           </div>
-        </div>
+        </header>
 
         <div className="grid lg:grid-cols-4 gap-8">
           {/* Main Content */}
@@ -84,18 +90,30 @@ export default function SKPDContent({ skpdData }: SKPDContentProps) {
                 <div className="flex flex-col sm:flex-row gap-4">
                   {/* Search */}
                   <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <label htmlFor="search-skpd" className="sr-only">
+                      Cari SKPD
+                    </label>
+                    <Search
+                      className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"
+                      aria-hidden="true"
+                    />
                     <Input
-                      type="text"
+                      id="search-skpd"
+                      type="search"
                       placeholder="Cari SKPD..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       className="pl-10"
+                      aria-label="Cari SKPD berdasarkan nama atau singkatan"
                     />
                   </div>
 
                   {/* Category Filter */}
-                  <div className="flex gap-2 overflow-x-auto pb-2">
+                  <div
+                    className="flex gap-2 overflow-x-auto pb-2"
+                    role="group"
+                    aria-label="Filter kategori SKPD"
+                  >
                     {categories.map((cat) => (
                       <button
                         key={cat}
@@ -105,6 +123,7 @@ export default function SKPDContent({ skpdData }: SKPDContentProps) {
                             ? "bg-primary text-primary-foreground"
                             : "bg-muted hover:bg-muted/80"
                         }`}
+                        aria-pressed={selectedKategori === cat}
                       >
                         {cat === "all" ? "Semua" : cat}
                       </button>
@@ -113,106 +132,165 @@ export default function SKPDContent({ skpdData }: SKPDContentProps) {
                 </div>
 
                 {/* Results Count */}
-                <div className="mt-4 text-sm text-muted-foreground">
+                <div
+                  className="mt-4 text-sm text-muted-foreground"
+                  role="status"
+                  aria-live="polite"
+                >
                   Menampilkan {filteredSKPD.length} dari {skpdData.length} SKPD
                 </div>
               </CardContent>
             </Card>
 
             {/* SKPD List */}
-            <div className="space-y-4">
+            <section className="space-y-4" aria-label="Daftar SKPD">
               {filteredSKPD.length > 0 ? (
                 filteredSKPD.map((skpd) => (
-                  <Card key={skpd.id} className="border-0 shadow-lg">
-                    <CardContent className="p-6">
-                      <div className="flex flex-col lg:flex-row lg:items-start gap-4">
-                        {/* Icon */}
-                        <div className="shrink-0">
-                          <div className="w-16 h-16 bg-primary/10 rounded-lg flex items-center justify-center">
-                            <Building2 className="h-8 w-8 text-primary" />
-                          </div>
-                        </div>
-
-                        {/* Content */}
-                        <div className="flex-1 min-w-0">
-                          {/* Header */}
-                          <div className="mb-3">
-                            <div className="flex flex-wrap items-start gap-2 mb-2">
-                              <h3 className="text-lg font-bold">{skpd.nama}</h3>
-                              <Badge variant="secondary">
-                                {skpd.singkatan}
-                              </Badge>
-                              <Badge variant="outline">{skpd.kategori}</Badge>
+                  <article
+                    key={skpd.id}
+                    itemScope
+                    itemType="https://schema.org/GovernmentOrganization"
+                  >
+                    <Card className="border-0 shadow-lg">
+                      <CardContent className="p-6">
+                        <div className="flex flex-col lg:flex-row lg:items-start gap-4">
+                          {/* Icon */}
+                          <div className="shrink-0">
+                            <div className="w-16 h-16 bg-primary/10 rounded-lg flex items-center justify-center">
+                              <Building2
+                                className="h-8 w-8 text-primary"
+                                aria-hidden="true"
+                              />
                             </div>
-                            {skpd.kepala && (
-                              <p className="text-sm text-muted-foreground">
-                                Kepala: {skpd.kepala}
+                          </div>
+
+                          {/* Content */}
+                          <div className="flex-1 min-w-0">
+                            {/* Header */}
+                            <div className="mb-3">
+                              <div className="flex flex-wrap items-start gap-2 mb-2">
+                                <h2
+                                  className="text-lg font-bold"
+                                  itemProp="name"
+                                >
+                                  {skpd.nama}
+                                </h2>
+                                <Badge
+                                  variant="secondary"
+                                  itemProp="alternateName"
+                                >
+                                  {skpd.singkatan}
+                                </Badge>
+                                <Badge variant="outline">{skpd.kategori}</Badge>
+                              </div>
+                              {skpd.kepala && (
+                                <p
+                                  className="text-sm text-muted-foreground"
+                                  itemProp="employee"
+                                  itemScope
+                                  itemType="https://schema.org/Person"
+                                >
+                                  Kepala:{" "}
+                                  <span itemProp="name">{skpd.kepala}</span>
+                                </p>
+                              )}
+                            </div>
+
+                            {/* Description */}
+                            {skpd.deskripsi && (
+                              <p
+                                className="text-sm text-muted-foreground mb-3"
+                                itemProp="description"
+                              >
+                                {skpd.deskripsi}
                               </p>
                             )}
-                          </div>
 
-                          {/* Description */}
-                          {skpd.deskripsi && (
-                            <p className="text-sm text-muted-foreground mb-3">
-                              {skpd.deskripsi}
-                            </p>
-                          )}
-
-                          {/* Info Grid */}
-                          <div className="grid sm:grid-cols-2 gap-3 text-sm">
-                            {skpd.alamat && (
-                              <div className="flex items-start gap-2">
-                                <MapPin className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
-                                <span className="text-muted-foreground">
-                                  {skpd.alamat}
-                                </span>
-                              </div>
-                            )}
-                            {skpd.telepon && (
-                              <div className="flex items-center gap-2">
-                                <Phone className="h-4 w-4 text-muted-foreground shrink-0" />
-                                <a
-                                  href={`tel:${skpd.telepon}`}
-                                  className="text-primary hover:underline"
+                            {/* Info Grid */}
+                            <div className="grid sm:grid-cols-2 gap-3 text-sm">
+                              {skpd.alamat && (
+                                <div
+                                  className="flex items-start gap-2"
+                                  itemProp="address"
+                                  itemScope
+                                  itemType="https://schema.org/PostalAddress"
                                 >
-                                  {skpd.telepon}
-                                </a>
-                              </div>
-                            )}
-                            {skpd.email && (
-                              <div className="flex items-center gap-2">
-                                <Mail className="h-4 w-4 text-muted-foreground shrink-0" />
-                                <a
-                                  href={`mailto:${skpd.email}`}
-                                  className="text-primary hover:underline truncate"
-                                >
-                                  {skpd.email}
-                                </a>
-                              </div>
-                            )}
-                            {skpd.website && (
-                              <div className="flex items-center gap-2">
-                                <ExternalLink className="h-4 w-4 text-muted-foreground shrink-0" />
-                                <a
-                                  href={skpd.website}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-primary hover:underline truncate"
-                                >
-                                  Website
-                                </a>
-                              </div>
-                            )}
+                                  <MapPin
+                                    className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5"
+                                    aria-hidden="true"
+                                  />
+                                  <address
+                                    className="text-muted-foreground not-italic"
+                                    itemProp="streetAddress"
+                                  >
+                                    {skpd.alamat}
+                                  </address>
+                                </div>
+                              )}
+                              {skpd.telepon && (
+                                <div className="flex items-center gap-2">
+                                  <Phone
+                                    className="h-4 w-4 text-muted-foreground shrink-0"
+                                    aria-hidden="true"
+                                  />
+                                  <a
+                                    href={`tel:${skpd.telepon.replace(
+                                      /\s/g,
+                                      ""
+                                    )}`}
+                                    className="text-primary hover:underline"
+                                    itemProp="telephone"
+                                  >
+                                    {skpd.telepon}
+                                  </a>
+                                </div>
+                              )}
+                              {skpd.email && (
+                                <div className="flex items-center gap-2">
+                                  <Mail
+                                    className="h-4 w-4 text-muted-foreground shrink-0"
+                                    aria-hidden="true"
+                                  />
+                                  <a
+                                    href={`mailto:${skpd.email}`}
+                                    className="text-primary hover:underline truncate"
+                                    itemProp="email"
+                                  >
+                                    {skpd.email}
+                                  </a>
+                                </div>
+                              )}
+                              {skpd.website && (
+                                <div className="flex items-center gap-2">
+                                  <ExternalLink
+                                    className="h-4 w-4 text-muted-foreground shrink-0"
+                                    aria-hidden="true"
+                                  />
+                                  <a
+                                    href={skpd.website}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-primary hover:underline truncate"
+                                    itemProp="url"
+                                  >
+                                    Website
+                                  </a>
+                                </div>
+                              )}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </CardContent>
-                  </Card>
+                      </CardContent>
+                    </Card>
+                  </article>
                 ))
               ) : (
                 <Card className="border-0 shadow-lg">
                   <CardContent className="p-12 text-center">
-                    <Building2 className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                    <Building2
+                      className="h-12 w-12 text-muted-foreground mx-auto mb-4"
+                      aria-hidden="true"
+                    />
                     <h3 className="text-lg font-semibold mb-2">
                       SKPD Tidak Ditemukan
                     </h3>
@@ -223,7 +301,7 @@ export default function SKPDContent({ skpdData }: SKPDContentProps) {
                   </CardContent>
                 </Card>
               )}
-            </div>
+            </section>
           </div>
 
           {/* Sidebar */}
@@ -285,7 +363,10 @@ export default function SKPDContent({ skpdData }: SKPDContentProps) {
             {/* Contact CTA */}
             <Card className="border-0 shadow-lg bg-primary/5">
               <CardContent className="p-6 text-center">
-                <Building2 className="h-10 w-10 text-primary mx-auto mb-3" />
+                <Building2
+                  className="h-10 w-10 text-primary mx-auto mb-3"
+                  aria-hidden="true"
+                />
                 <h3 className="font-semibold mb-2">Perlu Informasi SKPD?</h3>
                 <p className="text-sm text-muted-foreground mb-4">
                   Hubungi Bagian Organisasi Setda untuk informasi lebih lanjut
