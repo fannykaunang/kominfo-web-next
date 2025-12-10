@@ -97,6 +97,15 @@ export function TinyMCEEditor({
           "bold italic forecolor | alignleft aligncenter " +
           "alignright alignjustify | bullist numlist outdent indent | " +
           "removeformat | image media link | code | help",
+        images_upload_handler: (blobInfo: any) =>
+          new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => {
+              resolve(reader.result as string);
+            };
+            reader.onerror = reject;
+            reader.readAsDataURL(blobInfo.blob());
+          }),
         content_style: `
           body { 
             font-family: Helvetica, Arial, sans-serif; 

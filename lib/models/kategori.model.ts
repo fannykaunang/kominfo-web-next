@@ -207,3 +207,21 @@ export async function isSlugExists(
   const result = await queryOne<any>(sql, params);
   return (result?.count || 0) > 0;
 }
+
+/**
+ * Get all categories with published berita count (for public pages)
+ * Only counts berita that are published
+ */
+export async function getAllKategoriWithBeritaCount(): Promise<Kategori[]> {
+  return query<Kategori>(
+    `
+    SELECT 
+      k.*,
+      COUNT(b.id) as berita_count
+    FROM kategori k
+    LEFT JOIN berita b ON k.id = b.kategori_id AND b.is_published = 1
+    GROUP BY k.id
+    ORDER BY k.nama ASC
+    `
+  );
+}

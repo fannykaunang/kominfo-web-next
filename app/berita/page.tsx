@@ -1,3 +1,5 @@
+// app/berita/page.tsx
+
 import { ChevronLeft, ChevronRight, Newspaper } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -62,8 +64,8 @@ export default async function BeritaPage({ searchParams }: BeritaPageProps) {
   };
 
   return (
-    <main className="py-8 px-4 sm:px-8">
-      <div className="container max-w-7xl">
+    <main className="py-8 px-4 sm:px-6 lg:px-8">
+      <div className="container mx-auto max-w-7xl px-4">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-4">

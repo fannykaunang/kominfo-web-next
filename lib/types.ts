@@ -780,7 +780,15 @@ export interface SKPD extends RowDataPacket {
   id: number;
   nama: string;
   singkatan: string;
-  kategori: "Sekretariat" | "Dinas" | "Badan" | "Inspektorat" | "Satuan";
+  kategori:
+    | "Setda"
+    | "Sekretariat DPRD"
+    | "Dinas"
+    | "Lembaga Teknis"
+    | "UPTD"
+    | "Satuan"
+    | "Distrik"
+    | "Kelurahan";
   alamat: string | null;
   telepon: string | null;
   email: string | null;
@@ -797,7 +805,15 @@ export interface SKPD extends RowDataPacket {
 export interface SKPDInput {
   nama: string;
   singkatan: string;
-  kategori: "Sekretariat" | "Dinas" | "Badan" | "Inspektorat" | "Satuan";
+  kategori:
+    | "Setda"
+    | "Sekretariat DPRD"
+    | "Dinas"
+    | "Lembaga Teknis"
+    | "UPTD"
+    | "Satuan"
+    | "Distrik"
+    | "Kelurahan";
   alamat?: string;
   telepon?: string;
   email?: string;

@@ -254,7 +254,8 @@ export default async function HomePage() {
                     <NewsCardSkeleton key={i} />
                   ))}
                 </>
-              }>
+              }
+            >
               {transformedLatestNews.length > 0 ? (
                 transformedLatestNews.map((news) => (
                   <NewsCard key={news.id} {...news} />
@@ -293,7 +294,8 @@ export default async function HomePage() {
                 <Button variant="outline" asChild>
                   <Link
                     href="/berita"
-                    className="text-sm text-primary inline-flex items-center gap-1">
+                    className="text-sm text-primary inline-flex items-center gap-1"
+                  >
                     Lihat semua
                     <ArrowRight className="h-4 w-4" />
                   </Link>
@@ -317,8 +319,9 @@ export default async function HomePage() {
                 <h4 className="text-lg font-semibold">Informasi Penting</h4>
                 <Button variant="outline" asChild>
                   <Link
-                    href="/kategori/info-penting"
-                    className="text-sm text-primary inline-flex items-center gap-1">
+                    href="/berita/kategori/info-penting"
+                    className="text-sm text-primary inline-flex items-center gap-1"
+                  >
                     Lihat semua
                     <ArrowRight className="h-4 w-4" />
                   </Link>
@@ -342,8 +345,9 @@ export default async function HomePage() {
                 <h4 className="text-lg font-semibold">Informasi Masyarakat</h4>
                 <Button variant="outline" asChild>
                   <Link
-                    href="/kategori/informasi-masyarakat"
-                    className="text-sm text-primary inline-flex items-center gap-1">
+                    href="/berita/kategori/informasi-masyarakat"
+                    className="text-sm text-primary inline-flex items-center gap-1"
+                  >
                     Lihat semua
                     <ArrowRight className="h-4 w-4" />
                   </Link>
@@ -390,7 +394,8 @@ export default async function HomePage() {
               size="lg"
               variant="outline"
               className="text-white border-white hover:bg-white hover:text-blue-500"
-              asChild>
+              asChild
+            >
               <Link href="/kontak">Hubungi Kami</Link>
             </Button>
           </div>

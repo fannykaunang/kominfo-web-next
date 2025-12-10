@@ -27,16 +27,21 @@ export async function GET(request: NextRequest) {
 
       return NextResponse.json({
         total: skpdList.length,
-        sekretariat:
-          countByKategori.find((c) => c.kategori === "Sekretariat")?.jumlah ||
-          0,
+        setda: countByKategori.find((c) => c.kategori === "Setda")?.jumlah || 0,
+        sekretariat_dprd:
+          countByKategori.find((c) => c.kategori === "Sekretariat DPRD")
+            ?.jumlah || 0,
         dinas: countByKategori.find((c) => c.kategori === "Dinas")?.jumlah || 0,
-        badan: countByKategori.find((c) => c.kategori === "Badan")?.jumlah || 0,
-        inspektorat:
-          countByKategori.find((c) => c.kategori === "Inspektorat")?.jumlah ||
-          0,
+        lembaga_teknis:
+          countByKategori.find((c) => c.kategori === "Lembaga Teknis")
+            ?.jumlah || 0,
+        uptd: countByKategori.find((c) => c.kategori === "UPTD")?.jumlah || 0,
         satuan:
           countByKategori.find((c) => c.kategori === "Satuan")?.jumlah || 0,
+        distrik:
+          countByKategori.find((c) => c.kategori === "Distrik")?.jumlah || 0,
+        kelurahan:
+          countByKategori.find((c) => c.kategori === "Kelurahan")?.jumlah || 0,
       });
     }
 

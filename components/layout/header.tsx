@@ -78,7 +78,7 @@ const staticNavItems: NavItem[] = [
       {
         id: "kategori-berita",
         judul: "Kategori Berita",
-        slug: "kategori", // hasil URL: /berita/kategori
+        slug: "berita/kategori", // hasil URL: /berita/kategori
         urutan: 2,
       },
     ],

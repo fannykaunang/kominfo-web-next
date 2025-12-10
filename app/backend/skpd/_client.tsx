@@ -53,11 +53,14 @@ interface SKPDClientProps {
   initialSKPD: SKPD[];
   initialStats: {
     total: number;
-    sekretariat: number;
+    setda: number;
+    sekretariat_dprd: number;
     dinas: number;
-    badan: number;
-    inspektorat: number;
+    lembaga_teknis: number;
+    uptd: number;
     satuan: number;
+    distrik: number;
+    kelurahan: number;
   };
 }
 
@@ -69,7 +72,15 @@ export default function SKPDClient({
   const [stats, setStats] = useState(initialStats);
   const [search, setSearch] = useState("");
   const [kategoriFilter, setKategoriFilter] = useState<
-    "all" | "Sekretariat" | "Dinas" | "Badan" | "Inspektorat" | "Satuan"
+    | "all"
+    | "Setda"
+    | "Sekretariat DPRD"
+    | "Dinas"
+    | "Lembaga Teknis"
+    | "UPTD"
+    | "Satuan"
+    | "Distrik"
+    | "Kelurahan"
   >("all");
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -165,16 +176,20 @@ export default function SKPDClient({
 
   const getKategoriBadgeColor = (kategori: string) => {
     switch (kategori) {
-      case "Sekretariat":
+      case "Setda":
         return "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200";
+      case "Sekretariat DPRD":
+        return "bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-200";
       case "Dinas":
         return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200";
-      case "Badan":
+      case "Lembaga Teknis":
         return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
-      case "Inspektorat":
+      case "UPTD":
         return "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200";
-      case "Satuan":
+      case "Distrik":
         return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200";
+      case "Kelurahan":
+        return "bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200";
       default:
         return "";
     }
@@ -182,15 +197,21 @@ export default function SKPDClient({
 
   const getKategoriIcon = (kategori: string) => {
     switch (kategori) {
-      case "Sekretariat":
+      case "Setda":
         return <FileText className="h-5 w-5" />;
+      case "Sekretariat DPRD":
+        return <Users className="h-5 w-5" />;
       case "Dinas":
         return <Building2 className="h-5 w-5" />;
-      case "Badan":
+      case "Lembaga Teknis":
         return <FolderOpen className="h-5 w-5" />;
-      case "Inspektorat":
+      case "UPTD":
         return <Shield className="h-5 w-5" />;
       case "Satuan":
+        return <Users className="h-5 w-5" />;
+      case "Distrik":
+        return <Users className="h-5 w-5" />;
+      case "Kelurahan":
         return <Users className="h-5 w-5" />;
       default:
         return <Building2 className="h-5 w-5" />;
@@ -233,14 +254,32 @@ export default function SKPDClient({
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-xs font-medium text-gray-600 dark:text-gray-400">
-                    Sekretariat
+                    Setda
                   </p>
                   <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
-                    {stats.sekretariat}
+                    {stats.setda}
                   </p>
                 </div>
                 <div className="h-10 w-10 rounded-lg bg-purple-50 dark:bg-purple-900/20 flex items-center justify-center">
                   <FileText className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-medium text-gray-600 dark:text-gray-400">
+                    Sekretariat DPRD
+                  </p>
+                  <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
+                    {stats.sekretariat_dprd}
+                  </p>
+                </div>
+                <div className="h-10 w-10 rounded-lg bg-pink-50 dark:bg-pink-900/20 flex items-center justify-center">
+                  <Users className="h-5 w-5 text-pink-600 dark:text-pink-400" />
                 </div>
               </div>
             </CardContent>
@@ -269,10 +308,10 @@ export default function SKPDClient({
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-xs font-medium text-gray-600 dark:text-gray-400">
-                    Badan
+                    Lembaga Teknis
                   </p>
                   <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
-                    {stats.badan}
+                    {stats.lembaga_teknis}
                   </p>
                 </div>
                 <div className="h-10 w-10 rounded-lg bg-green-50 dark:bg-green-900/20 flex items-center justify-center">
@@ -287,10 +326,10 @@ export default function SKPDClient({
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-xs font-medium text-gray-600 dark:text-gray-400">
-                    Inspektorat
+                    UPTD
                   </p>
                   <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
-                    {stats.inspektorat}
+                    {stats.uptd}
                   </p>
                 </div>
                 <div className="h-10 w-10 rounded-lg bg-orange-50 dark:bg-orange-900/20 flex items-center justify-center">
@@ -305,14 +344,32 @@ export default function SKPDClient({
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-xs font-medium text-gray-600 dark:text-gray-400">
-                    Satuan
+                    Distrik
                   </p>
                   <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
-                    {stats.satuan}
+                    {stats.distrik}
                   </p>
                 </div>
                 <div className="h-10 w-10 rounded-lg bg-red-50 dark:bg-red-900/20 flex items-center justify-center">
                   <Users className="h-5 w-5 text-red-600 dark:text-red-400" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-medium text-gray-600 dark:text-gray-400">
+                    Kelurahan
+                  </p>
+                  <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
+                    {stats.kelurahan}
+                  </p>
+                </div>
+                <div className="h-10 w-10 rounded-lg bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center">
+                  <Users className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
                 </div>
               </div>
             </CardContent>
@@ -378,15 +435,17 @@ export default function SKPDClient({
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="all">Semua Kategori</SelectItem>
-                          <SelectItem value="Sekretariat">
-                            Sekretariat
+                          <SelectItem value="Setda">Setda</SelectItem>
+                          <SelectItem value="Sekretariat DPRD">
+                            Sekretariat DPRD
                           </SelectItem>
                           <SelectItem value="Dinas">Dinas</SelectItem>
-                          <SelectItem value="Badan">Badan</SelectItem>
-                          <SelectItem value="Inspektorat">
-                            Inspektorat
+                          <SelectItem value="Lembaga Teknis">
+                            Lembaga Teknis
                           </SelectItem>
-                          <SelectItem value="Satuan">Satuan</SelectItem>
+                          <SelectItem value="UPTD">UPTD</SelectItem>
+                          <SelectItem value="Distrik">Distrik</SelectItem>
+                          <SelectItem value="Kelurahan">Kelurahan</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -432,6 +491,7 @@ export default function SKPDClient({
                     <TableHead>Kategori</TableHead>
                     <TableHead>Kepala</TableHead>
                     <TableHead>Kontak</TableHead>
+                    <TableHead>Dibuat</TableHead>
                     <TableHead className="text-center">Aksi</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -493,6 +553,15 @@ export default function SKPDClient({
                               </div>
                             )}
                           </div>
+                        </TableCell>
+                        <TableCell
+                          className="text-sm text-gray-600 dark:text-gray-400"
+                          title={formatDate(s.created_at)}
+                        >
+                          {formatDistanceToNow(new Date(s.created_at), {
+                            addSuffix: true,
+                            locale: idLocale,
+                          })}
                         </TableCell>
                         <TableCell className="text-right">
                           <div className="flex items-center justify-end gap-0">

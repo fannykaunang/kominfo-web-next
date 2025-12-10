@@ -175,11 +175,15 @@ export default function SKPDModal({
                   <SelectValue placeholder="Pilih kategori" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Sekretariat">Sekretariat</SelectItem>
+                  <SelectItem value="Setda">Setda</SelectItem>
+                  <SelectItem value="Sekretariat DPRD">
+                    Sekretariat DPRD
+                  </SelectItem>
                   <SelectItem value="Dinas">Dinas</SelectItem>
-                  <SelectItem value="Badan">Badan</SelectItem>
-                  <SelectItem value="Inspektorat">Inspektorat</SelectItem>
-                  <SelectItem value="Satuan">Satuan</SelectItem>
+                  <SelectItem value="Lembaga Teknis">Lembaga Teknis</SelectItem>
+                  <SelectItem value="UPTD">UPTD</SelectItem>
+                  <SelectItem value="Distrik">Distrik</SelectItem>
+                  <SelectItem value="Kelurahan">Kelurahan</SelectItem>
                 </SelectContent>
               </Select>
             </div>
