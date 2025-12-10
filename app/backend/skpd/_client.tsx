@@ -432,7 +432,6 @@ export default function SKPDClient({
                     <TableHead>Kategori</TableHead>
                     <TableHead>Kepala</TableHead>
                     <TableHead>Kontak</TableHead>
-                    <TableHead>Dibuat</TableHead>
                     <TableHead className="text-center">Aksi</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -453,12 +452,14 @@ export default function SKPDClient({
                       <TableRow key={s.id}>
                         <TableCell>
                           <div className="flex items-center gap-3">
-                            <div className="h-10 w-10 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center">
+                            <div className="flex-shrink-0 h-10 w-10 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center">
                               {getKategoriIcon(s.kategori)}
                             </div>
-                            <div>
-                              <div className="font-medium">{s.nama}</div>
-                              <div className="text-xs text-gray-500">
+                            <div className="min-w-0">
+                              <div className="font-medium truncate">
+                                {s.nama}
+                              </div>
+                              <div className="text-xs text-gray-500 truncate">
                                 {s.alamat || "-"}
                               </div>
                             </div>
@@ -492,15 +493,6 @@ export default function SKPDClient({
                               </div>
                             )}
                           </div>
-                        </TableCell>
-                        <TableCell
-                          className="text-sm text-gray-600 dark:text-gray-400"
-                          title={formatDate(s.created_at)}
-                        >
-                          {formatDistanceToNow(new Date(s.created_at), {
-                            addSuffix: true,
-                            locale: idLocale,
-                          })}
                         </TableCell>
                         <TableCell className="text-right">
                           <div className="flex items-center justify-end gap-0">

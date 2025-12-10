@@ -23,6 +23,7 @@ import {
   History,
   Timer,
   Eye,
+  Building2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -87,6 +88,11 @@ const menuCategories = [
         title: "Newsletter",
         href: "/backend/newsletter",
         icon: Mail,
+      },
+      {
+        title: "SKPD",
+        href: "/backend/skpd",
+        icon: Building2,
       },
     ],
   },
