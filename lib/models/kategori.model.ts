@@ -35,9 +35,13 @@ export async function getAllKategoriByNewsPublished(
   let sql = `
     SELECT 
       k.*,
-      COUNT(b.id) as berita_count
+      (
+        SELECT COUNT(*) 
+        FROM berita b 
+        WHERE b.kategori_id = k.id 
+        AND b.is_published = 1
+      ) as berita_count
     FROM kategori k
-    LEFT JOIN berita b ON k.id = b.kategori_id AND b.is_published = 1
   `;
   const params: any[] = [];
 
@@ -46,7 +50,7 @@ export async function getAllKategoriByNewsPublished(
     params.push(`%${search}%`, `%${search}%`, `%${search}%`);
   }
 
-  sql += ` GROUP BY k.id ORDER BY k.created_at DESC`;
+  sql += ` ORDER BY k.created_at DESC`;
 
   return query<Kategori>(sql, params);
 }

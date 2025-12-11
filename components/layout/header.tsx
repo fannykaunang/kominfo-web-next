@@ -266,7 +266,7 @@ export function Header() {
             <Button
               variant="ghost"
               size="icon"
-              className="h-6 w-6"
+              className="h-7 w-7"
               aria-label="Search"
             >
               <Search className="h-5 w-5" />
@@ -276,7 +276,7 @@ export function Header() {
             <Button
               variant="ghost"
               size="icon"
-              className="h-5 w-5 cursor-pointer"
+              className="h-7 w-7 cursor-pointer"
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
               aria-label="Toggle theme"
             >
@@ -292,7 +292,7 @@ export function Header() {
               asChild
               variant="ghost"
               size="icon"
-              className="h-6 w-6"
+              className="h-7 w-7"
               aria-label="User profile"
             >
               <Link href="/login" title="Halaman Login">

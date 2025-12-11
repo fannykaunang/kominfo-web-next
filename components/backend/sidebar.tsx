@@ -1,3 +1,5 @@
+// components/backend/sidebar.tsx
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -11,7 +13,6 @@ import {
   MessageSquare,
   Users,
   Settings,
-  Image,
   BarChart3,
   X,
   ChevronLeft,
@@ -24,9 +25,12 @@ import {
   Timer,
   Eye,
   Building2,
+  Icon,
 } from "lucide-react";
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { AppSettings } from "@/lib/types";
 
 interface AdminSidebarProps {
   isOpen?: boolean;
@@ -161,6 +165,7 @@ export default function AdminSidebar({
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
+  const [settings, setSettings] = useState<AppSettings | null>(null);
 
   // Detect mobile screen
   useEffect(() => {
@@ -175,6 +180,23 @@ export default function AdminSidebar({
     checkMobile();
     window.addEventListener("resize", checkMobile);
     return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
+  // Fetch app settings for logo and alias
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const response = await fetch("/api/settings");
+        if (!response.ok) return;
+
+        const data = await response.json();
+        setSettings(data);
+      } catch (error) {
+        console.error("Failed to load settings", error);
+      }
+    };
+
+    fetchSettings();
   }, []);
 
   // Close sidebar when clicking menu item on mobile
@@ -205,13 +227,29 @@ export default function AdminSidebar({
         {/* Logo Header */}
         <div className="h-16 flex items-center justify-between px-4 border-b border-gray-200 dark:border-gray-700 shrink-0">
           <Link href="/backend/dashboard" className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-lg bg-linear-to-br from-blue-600 to-blue-800 flex items-center justify-center text-white font-bold text-lg shadow-lg shrink-0">
-              M
-            </div>
+            {settings?.logo ? (
+              <div className="relative h-10 w-10 rounded-lg overflow-hidden bg-tranparent shadow-lg shrink-0">
+                <Image
+                  src={settings.logo}
+                  alt={
+                    settings.alias_aplikasi ||
+                    settings.nama_aplikasi ||
+                    "Logo aplikasi"
+                  }
+                  fill
+                  className="object-contain"
+                  sizes="40px"
+                />
+              </div>
+            ) : (
+              <div className="h-10 w-10 rounded-lg bg-linear-to-br from-blue-600 to-blue-800 flex items-center justify-center text-white font-bold text-lg shadow-lg shrink-0">
+                {settings?.alias_aplikasi?.charAt(0) || "PM"}
+              </div>
+            )}
             {isOpen && (
               <div className="flex-1 min-w-0">
                 <div className="font-bold text-gray-900 dark:text-white text-sm truncate">
-                  Portal Merauke
+                  {settings?.alias_aplikasi || "Portal Merauke"}
                 </div>
                 <div className="text-xs text-gray-500 dark:text-gray-400 truncate">
                   Admin Panel
@@ -256,9 +294,7 @@ export default function AdminSidebar({
                 <div className="space-y-1">
                   {category.items.map((item) => {
                     // Hide admin-only items for non-admins
-                    if (item.adminOnly && user.role !== "ADMIN") {
-                      return null;
-                    }
+                    "ADMIN";
 
                     const isActive =
                       pathname === item.href ||
@@ -278,7 +314,7 @@ export default function AdminSidebar({
                         )}
                         title={!isOpen ? item.title : undefined}
                       >
-                        <Icon className="h-5 w-5 shrink-0" />
+                        <Users className="h-5 w-5 shrink-0" />
                         {isOpen && <span>{item.title}</span>}
 
                         {/* Tooltip for collapsed state */}

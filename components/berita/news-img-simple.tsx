@@ -1,40 +1,29 @@
-// components/berita/news-image.tsx
+// components/berita/news-image-simple.tsx
 "use client";
 
-import { useState } from "react";
-import Image from "next/image";
+import { useState, useRef, useEffect } from "react";
 
-interface NewsImageProps {
+interface NewsImageSimpleProps {
   src: string | null | undefined;
   alt: string;
-  fill?: boolean;
   className?: string;
-  sizes?: string;
-  priority?: boolean;
-  width?: number;
-  height?: number;
 }
 
-// Default fallback SVG
 const DEFAULT_FALLBACK =
   "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='450'%3E%3Crect fill='%23374151' width='800' height='450'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='%239ca3af' font-size='24' font-family='system-ui'%3ENo Image%3C/text%3E%3C/svg%3E";
 
-export function NewsImage({
+export function NewsImageSimple({
   src,
   alt,
-  fill = true,
   className = "",
-  sizes,
-  priority,
-  width,
-  height,
-}: NewsImageProps) {
-  // If no src provided, use fallback immediately
+}: NewsImageSimpleProps) {
+  // If no src, use fallback immediately
   const initialSrc = src && src.trim() !== "" ? src : DEFAULT_FALLBACK;
-
   const [imgSrc, setImgSrc] = useState(initialSrc);
   const [hasError, setHasError] = useState(!src || src.trim() === "");
+  const imgRef = useRef<HTMLImageElement>(null);
 
+  // Handle image error
   const handleError = () => {
     console.log("Image failed to load:", src);
     if (!hasError) {
@@ -43,43 +32,45 @@ export function NewsImage({
     }
   };
 
+  // Handle successful load
   const handleLoad = () => {
     console.log("Image loaded successfully:", src);
   };
 
-  // Use fill or width/height
-  const imageProps = fill
-    ? { fill: true }
-    : { width: width || 800, height: height || 450 };
+  // Check if image src changed
+  useEffect(() => {
+    if (src && src.trim() !== "" && src !== imgSrc) {
+      setImgSrc(src);
+      setHasError(false);
+    } else if (!src || src.trim() === "") {
+      setImgSrc(DEFAULT_FALLBACK);
+      setHasError(true);
+    }
+  }, [src]);
 
   return (
-    <Image
-      {...imageProps}
+    <img
+      ref={imgRef}
       src={imgSrc}
       alt={alt || "News image"}
       className={className}
-      sizes={sizes}
-      priority={priority}
       onError={handleError}
       onLoad={handleLoad}
-      unoptimized={hasError} // Don't optimize fallback SVG
+      loading="lazy"
     />
   );
 }
 
 // Compact version for smaller images
-export function NewsImageCompact({
+export function NewsImageCompactSimple({
   src,
   alt,
-  fill = true,
   className = "",
-  sizes,
-}: NewsImageProps) {
+}: NewsImageSimpleProps) {
   const compactFallback =
     "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Crect fill='%23374151' width='100' height='100'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='%239ca3af' font-size='12' font-family='system-ui'%3ENo Image%3C/text%3E%3C/svg%3E";
 
   const initialSrc = src && src.trim() !== "" ? src : compactFallback;
-
   const [imgSrc, setImgSrc] = useState(initialSrc);
   const [hasError, setHasError] = useState(!src || src.trim() === "");
 
@@ -90,32 +81,37 @@ export function NewsImageCompact({
     }
   };
 
+  useEffect(() => {
+    if (src && src.trim() !== "" && src !== imgSrc) {
+      setImgSrc(src);
+      setHasError(false);
+    } else if (!src || src.trim() === "") {
+      setImgSrc(compactFallback);
+      setHasError(true);
+    }
+  }, [src]);
+
   return (
-    <Image
+    <img
       src={imgSrc}
       alt={alt || "News image"}
-      fill={fill}
       className={className}
-      sizes={sizes}
       onError={handleError}
-      unoptimized={hasError}
+      loading="lazy"
     />
   );
 }
 
 // Horizontal version
-export function NewsImageHorizontal({
+export function NewsImageHorizontalSimple({
   src,
   alt,
-  fill = true,
   className = "",
-  sizes,
-}: NewsImageProps) {
+}: NewsImageSimpleProps) {
   const horizontalFallback =
     "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='640' height='360'%3E%3Crect fill='%23374151' width='640' height='360'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='%239ca3af' font-size='20' font-family='system-ui'%3ENo Image%3C/text%3E%3C/svg%3E";
 
   const initialSrc = src && src.trim() !== "" ? src : horizontalFallback;
-
   const [imgSrc, setImgSrc] = useState(initialSrc);
   const [hasError, setHasError] = useState(!src || src.trim() === "");
 
@@ -126,15 +122,23 @@ export function NewsImageHorizontal({
     }
   };
 
+  useEffect(() => {
+    if (src && src.trim() !== "" && src !== imgSrc) {
+      setImgSrc(src);
+      setHasError(false);
+    } else if (!src || src.trim() === "") {
+      setImgSrc(horizontalFallback);
+      setHasError(true);
+    }
+  }, [src]);
+
   return (
-    <Image
+    <img
       src={imgSrc}
       alt={alt || "News image"}
-      fill={fill}
       className={className}
-      sizes={sizes}
       onError={handleError}
-      unoptimized={hasError}
+      loading="lazy"
     />
   );
 }

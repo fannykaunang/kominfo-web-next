@@ -95,8 +95,8 @@ export class BeritaRepository {
         u.name as author_name,
         u.avatar
       FROM berita b
-      INNER JOIN kategori k ON b.kategori_id = k.id
-      INNER JOIN users u ON b.author_id = u.id
+      LEFT JOIN kategori k ON b.kategori_id = k.id
+      LEFT JOIN users u ON b.author_id = u.id
       ${whereClause}
       ORDER BY COALESCE(b.published_at, b.created_at) DESC
       ${limitClause}
