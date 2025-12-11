@@ -1,6 +1,14 @@
 "use client";
 
-import { Bell, Search, LogOut, Eye, Menu, Settings } from "lucide-react";
+import {
+  Bell,
+  Search,
+  LogOut,
+  Eye,
+  Menu,
+  Settings,
+  UserCircle,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
@@ -122,9 +130,9 @@ export default function AdminTopbar({ user, onMenuClick }: AdminTopbarProps) {
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
-              <Link href="/" target="_blank">
-                <Eye className="h-4 w-4 mr-2" />
-                Lihat Website
+              <Link href="/backend/profile">
+                <UserCircle className="h-4 w-4 mr-2" />
+                Profil saya
               </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />

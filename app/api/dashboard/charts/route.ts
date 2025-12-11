@@ -1,3 +1,5 @@
+// app/api/dashboard/charts/route.ts
+
 import { NextResponse } from "next/server";
 import { query } from "@/lib/db-helpers";
 
@@ -47,7 +49,9 @@ export async function GET() {
 
     for (let i = 5; i >= 0; i--) {
       const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      const monthKey = date.toISOString().slice(0, 7); // YYYY-MM
+      const monthKey = `${date.getFullYear()}-${String(
+        date.getMonth() + 1
+      ).padStart(2, "0")}`;
       const monthName = date.toLocaleDateString("id-ID", {
         month: "short",
         year: "numeric",
@@ -72,9 +76,6 @@ export async function GET() {
         count: found ? Number(found.count) : 0,
       };
     });
-
-    console.log("Berita Data:", beritaData);
-    console.log("Visitor Data:", visitorData);
 
     return NextResponse.json({
       beritaData,
