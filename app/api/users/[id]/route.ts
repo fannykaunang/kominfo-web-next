@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
+import { z } from "zod"; // Import Zod
 import {
   getUserById,
   updateUser,
@@ -10,11 +11,57 @@ import {
 } from "@/lib/models/user.model";
 import { UserUpdateInput } from "@/lib/types";
 
+// ==========================================
+// 1. Definisikan Skema Validasi dengan Zod
+// ==========================================
+
+// Skema untuk Update User (PUT)
+const updateUserSchema = z.object({
+  name: z.string().min(1, "Nama tidak boleh kosong").trim().optional(),
+  email: z
+    .string()
+    .email("Format email tidak valid")
+    .trim()
+    .toLowerCase()
+    .optional(),
+
+  // Password: minimal 6 karakter jika diisi.
+  // Jika frontend mengirim string kosong "", kita anggap undefined (tidak diupdate)
+  password: z
+    .string()
+    .optional() // Boleh tidak dikirim key-nya dari frontend
+    .transform((val) => (val === "" ? undefined : val)) // Ubah string kosong jadi undefined
+    .pipe(z.string().min(6, "Password minimal 6 karakter").optional()),
+
+  role: z
+    .enum(["ADMIN", "EDITOR", "AUTHOR"], {
+      errorMap: () => ({ message: "Role harus ADMIN, EDITOR, atau AUTHOR" }),
+    })
+    .optional(),
+
+  avatar: z.string().nullable().optional(),
+
+  // Menerima boolean atau number (0/1), dikonversi jadi number untuk DB
+  is_active: z
+    .union([z.boolean(), z.number()])
+    .transform((val) => (val === true || val === 1 ? 1 : 0))
+    .optional(),
+});
+
+// Skema untuk Patch Action (PATCH)
+const patchActionSchema = z.object({
+  action: z.enum(["toggle_active", "verify_email"], {
+    errorMap: () => ({
+      message: "Action harus 'toggle_active' atau 'verify_email'",
+    }),
+  }),
+});
+
 type Props = {
   params: Promise<{ id: string }>;
 };
 
-// Helper to get client info
+// Helper: Get Client Info
 function getClientInfo(request: NextRequest) {
   const ipAddress =
     request.headers.get("x-forwarded-for") ||
@@ -23,6 +70,10 @@ function getClientInfo(request: NextRequest) {
   const userAgent = request.headers.get("user-agent") || "unknown";
   return { ipAddress, userAgent };
 }
+
+// ==========================================
+// 2. Route Handlers
+// ==========================================
 
 // GET - Get single user
 export async function GET(request: NextRequest, props: Props) {
@@ -34,7 +85,6 @@ export async function GET(request: NextRequest, props: Props) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Only ADMIN can view other users, or user can view themselves
     if (session.user.role !== "ADMIN" && session.user.id !== params.id) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
@@ -45,11 +95,14 @@ export async function GET(request: NextRequest, props: Props) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    return NextResponse.json(user);
+    // SECURITY: Hapus password hash sebelum dikirim ke client
+    const { password, ...userWithoutPassword } = user;
+
+    return NextResponse.json(userWithoutPassword);
   } catch (error: any) {
-    console.error("GET /api/users/[id] error:", error);
+    console.error("GET Error:", error);
     return NextResponse.json(
-      { error: error.message || "Failed to fetch user" },
+      { error: "Internal Server Error" },
       { status: 500 }
     );
   }
@@ -61,85 +114,69 @@ export async function PUT(request: NextRequest, props: Props) {
     const params = await props.params;
     const session = await auth();
 
+    // 1. Auth Check
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Only ADMIN can update other users, or user can update themselves
+    // 2. Permission Check
     if (session.user.role !== "ADMIN" && session.user.id !== params.id) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
+    // 3. Parse & Validate Body dengan Zod
     const body = await request.json();
+    const validation = updateUserSchema.safeParse(body);
 
-    // Check if user exists
+    if (!validation.success) {
+      // Mengambil pesan error pertama dari Zod
+      const errorMessage = validation.error.errors[0].message;
+      return NextResponse.json({ error: errorMessage }, { status: 400 });
+    }
+
+    const data = validation.data; // Data yang sudah bersih dan valid
+
+    // 4. Logic Validation (Business Logic)
+
+    // Cek User Existence
     const existingUser = await getUserById(params.id);
     if (!existingUser) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    // Validate email if provided
-    if (body.email) {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(body.email)) {
-        return NextResponse.json(
-          { error: "Invalid email format" },
-          { status: 400 }
-        );
-      }
-
-      // Check if email already exists (excluding current user)
-      const exists = await emailExists(body.email, params.id);
+    // Cek Email Duplikat (Hanya jika email berubah)
+    if (data.email && data.email !== existingUser.email) {
+      const exists = await emailExists(data.email, params.id);
       if (exists) {
         return NextResponse.json(
-          { error: "Email already exists" },
+          { error: "Email sudah digunakan" },
           { status: 400 }
         );
       }
     }
 
-    // Validate role if provided (only ADMIN can change roles)
-    if (body.role !== undefined) {
-      if (session.user.role !== "ADMIN") {
-        return NextResponse.json(
-          { error: "Only admin can change user roles" },
-          { status: 403 }
-        );
-      }
-
-      if (!["ADMIN", "EDITOR", "AUTHOR"].includes(body.role)) {
-        return NextResponse.json(
-          { error: "Invalid role. Must be ADMIN, EDITOR, or AUTHOR" },
-          { status: 400 }
-        );
-      }
-    }
-
-    // Validate password length if provided
-    if (body.password && body.password.length < 6) {
+    // Cek Hak Akses Admin untuk field Sensitif (Role & Is Active)
+    if (
+      (data.role !== undefined || data.is_active !== undefined) &&
+      session.user.role !== "ADMIN"
+    ) {
       return NextResponse.json(
-        { error: "Password must be at least 6 characters" },
-        { status: 400 }
-      );
-    }
-
-    // Only ADMIN can change is_active status
-    if (body.is_active !== undefined && session.user.role !== "ADMIN") {
-      return NextResponse.json(
-        { error: "Only admin can change active status" },
+        { error: "Hanya Admin yang dapat mengubah Role atau Status Aktif" },
         { status: 403 }
       );
     }
 
+    // 5. Siapkan data untuk update
+    // Kita hapus properti undefined agar tidak menimpa data lama dengan NULL/Undefined
     const updateData: UserUpdateInput = {};
-    if (body.name !== undefined) updateData.name = body.name.trim();
-    if (body.email !== undefined)
-      updateData.email = body.email.trim().toLowerCase();
-    if (body.password) updateData.password = body.password;
-    if (body.role !== undefined) updateData.role = body.role;
-    if (body.avatar !== undefined) updateData.avatar = body.avatar;
-    if (body.is_active !== undefined) updateData.is_active = body.is_active;
+    if (data.name) updateData.name = data.name;
+    if (data.email) updateData.email = data.email;
+    if (data.password) updateData.password = data.password;
+    if (data.role) updateData.role = data.role;
+    if (data.avatar !== undefined) updateData.avatar = data.avatar;
+    if (data.is_active !== undefined) updateData.is_active = data.is_active;
 
+    // 6. Eksekusi Update
     const { ipAddress, userAgent } = getClientInfo(request);
 
     await updateUser(
@@ -152,9 +189,9 @@ export async function PUT(request: NextRequest, props: Props) {
 
     return NextResponse.json({ message: "User updated successfully" });
   } catch (error: any) {
-    console.error("PUT /api/users/[id] error:", error);
+    console.error("PUT Error:", error);
     return NextResponse.json(
-      { error: error.message || "Failed to update user" },
+      { error: "Gagal mengupdate user" },
       { status: 500 }
     );
   }
@@ -170,21 +207,18 @@ export async function DELETE(request: NextRequest, props: Props) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Only ADMIN can delete users
     if (session.user.role !== "ADMIN") {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    // Check if user exists
     const user = await getUserById(params.id);
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    // Prevent deleting yourself
     if (params.id === session.user.id) {
       return NextResponse.json(
-        { error: "Cannot delete your own account" },
+        { error: "Tidak dapat menghapus akun sendiri" },
         { status: 400 }
       );
     }
@@ -195,63 +229,68 @@ export async function DELETE(request: NextRequest, props: Props) {
 
     return NextResponse.json({ message: "User deleted successfully" });
   } catch (error: any) {
-    console.error("DELETE /api/users/[id] error:", error);
+    console.error("DELETE Error:", error);
     return NextResponse.json(
-      { error: error.message || "Failed to delete user" },
+      { error: "Gagal menghapus user" },
       { status: 500 }
     );
   }
 }
 
-// PATCH - Toggle active status or verify email
+// PATCH - Toggle actions
 export async function PATCH(request: NextRequest, props: Props) {
   try {
     const params = await props.params;
     const session = await auth();
 
-    const { ipAddress, userAgent } = getClientInfo(request);
-
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Only ADMIN can perform these actions
     if (session.user.role !== "ADMIN") {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
+    // 1. Validasi Body dengan Zod
     const body = await request.json();
-    const { action } = body;
+    const validation = patchActionSchema.safeParse(body);
 
-    // Check if user exists
+    if (!validation.success) {
+      return NextResponse.json(
+        { error: validation.error.errors[0].message },
+        { status: 400 }
+      );
+    }
+
+    const { action } = validation.data;
+    const { ipAddress, userAgent } = getClientInfo(request);
+
+    // Cek User
     const user = await getUserById(params.id);
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
+    // 2. Handle Actions
     if (action === "toggle_active") {
-      // Prevent deactivating yourself
       if (params.id === session.user.id) {
         return NextResponse.json(
-          { error: "Cannot deactivate your own account" },
+          { error: "Tidak dapat menonaktifkan akun sendiri" },
           { status: 400 }
         );
       }
-
       await toggleUserActive(params.id, session.user.id, ipAddress, userAgent);
-      return NextResponse.json({ message: "User status updated successfully" });
+      return NextResponse.json({ message: "Status user berhasil diubah" });
     }
 
     if (action === "verify_email") {
       await verifyUserEmail(params.id, session.user.id, ipAddress, userAgent);
-      return NextResponse.json({ message: "Email verified successfully" });
+      return NextResponse.json({ message: "Email berhasil diverifikasi" });
     }
-
-    return NextResponse.json({ error: "Invalid action" }, { status: 400 });
   } catch (error: any) {
-    console.error("PATCH /api/users/[id] error:", error);
+    console.error("PATCH Error:", error);
     return NextResponse.json(
-      { error: error.message || "Failed to update user" },
+      { error: "Terjadi kesalahan sistem" },
       { status: 500 }
     );
   }

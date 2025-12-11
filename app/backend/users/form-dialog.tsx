@@ -1,9 +1,11 @@
-"use client"
+// app/backend/users/form-dialog.tsx
 
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+"use client";
+
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Dialog,
   DialogContent,
@@ -11,36 +13,34 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
+} from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { Switch } from "@/components/ui/switch"
-import { Eye, EyeOff, Loader2 } from "lucide-react"
-import { toast } from "sonner"
-
-interface User {
-  id: string
-  name: string
-  email: string
-  role: "ADMIN" | "EDITOR" | "AUTHOR"
-  avatar: string | null
-  is_active: number
-}
+} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { toast } from "sonner";
+import { User, SafeUser } from "@/lib/types";
 
 interface UserFormDialogProps {
-  open: boolean
-  onClose: (refresh?: boolean) => void
-  user: User | null
+  open: boolean;
+  onClose: (refresh?: boolean) => void;
+  user: User | SafeUser | null;
+  isProfileMode?: boolean;
 }
 
-export function UserFormDialog({ open, onClose, user }: UserFormDialogProps) {
-  const [loading, setLoading] = useState(false)
-  const [showPassword, setShowPassword] = useState(false)
+export function UserFormDialog({
+  open,
+  onClose,
+  user,
+  isProfileMode = false,
+}: UserFormDialogProps) {
+  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -48,8 +48,8 @@ export function UserFormDialog({ open, onClose, user }: UserFormDialogProps) {
     role: "AUTHOR" as "ADMIN" | "EDITOR" | "AUTHOR",
     avatar: "",
     is_active: 1,
-  })
-  const [errors, setErrors] = useState<Record<string, string>>({})
+  });
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   // Reset form when dialog opens/closes
   useEffect(() => {
@@ -62,7 +62,7 @@ export function UserFormDialog({ open, onClose, user }: UserFormDialogProps) {
           role: user.role,
           avatar: user.avatar || "",
           is_active: user.is_active,
-        })
+        });
       } else {
         setFormData({
           name: "",
@@ -71,100 +71,100 @@ export function UserFormDialog({ open, onClose, user }: UserFormDialogProps) {
           role: "AUTHOR",
           avatar: "",
           is_active: 1,
-        })
+        });
       }
-      setErrors({})
-      setShowPassword(false)
+      setErrors({});
+      setShowPassword(false);
     }
-  }, [open, user])
+  }, [open, user]);
 
   // Validate form
   const validateForm = () => {
-    const newErrors: Record<string, string> = {}
+    const newErrors: Record<string, string> = {};
 
     if (!formData.name.trim()) {
-      newErrors.name = "Nama wajib diisi"
+      newErrors.name = "Nama wajib diisi";
     }
 
     if (!formData.email.trim()) {
-      newErrors.email = "Email wajib diisi"
+      newErrors.email = "Email wajib diisi";
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = "Format email tidak valid"
+      newErrors.email = "Format email tidak valid";
     }
 
     if (!user && !formData.password) {
-      newErrors.password = "Password wajib diisi untuk user baru"
+      newErrors.password = "Password wajib diisi untuk user baru";
     } else if (formData.password && formData.password.length < 6) {
-      newErrors.password = "Password minimal 6 karakter"
+      newErrors.password = "Password minimal 6 karakter";
     }
 
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   // Handle submit
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
-    if (!validateForm()) return
+    if (!validateForm()) return;
 
-    setLoading(true)
+    setLoading(true);
 
     try {
-      const url = user
-        ? `/api/users/${user.id}`
-        : "/api/users"
-      const method = user ? "PUT" : "POST"
+      const url = user ? `/api/users/${user.id}` : "/api/users";
+      const method = user ? "PUT" : "POST";
 
       const payload: any = {
         name: formData.name.trim(),
         email: formData.email.trim().toLowerCase(),
         role: formData.role,
         avatar: formData.avatar || null,
-      }
+      };
 
       // Only send password if it's filled
       if (formData.password) {
-        payload.password = formData.password
+        payload.password = formData.password;
       }
 
       // Only send is_active for edit
       if (user) {
-        payload.is_active = formData.is_active
+        payload.is_active = formData.is_active;
       }
 
       const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
-      })
+      });
 
       if (!res.ok) {
-        const error = await res.json()
-        throw new Error(error.error || "Failed to save user")
+        const error = await res.json();
+        throw new Error(error.error || "Failed to save user");
       }
 
-      toast.success(user ? "User berhasil diupdate" : "User berhasil ditambahkan")
-      onClose(true)
+      toast.success(
+        user ? "User berhasil diupdate" : "User berhasil ditambahkan"
+      );
+      onClose(true);
     } catch (error: any) {
-      toast.error(error.message || "Terjadi kesalahan")
+      toast.error(error.message || "Terjadi kesalahan");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   // Handle input change
   const handleChange = (field: string, value: any) => {
-    setFormData((prev) => ({ ...prev, [field]: value }))
+    setFormData((prev) => ({ ...prev, [field]: value }));
     // Clear error when user types
     if (errors[field]) {
       setErrors((prev) => {
-        const newErrors = { ...prev }
-        delete newErrors[field]
-        return newErrors
-      })
+        const newErrors = { ...prev };
+        delete newErrors[field];
+        return newErrors;
+      });
     }
-  }
+  };
 
   return (
     <Dialog open={open} onOpenChange={() => onClose()}>
@@ -218,7 +218,11 @@ export function UserFormDialog({ open, onClose, user }: UserFormDialogProps) {
           <div className="space-y-2">
             <Label htmlFor="password">
               Password {!user && <span className="text-red-500">*</span>}
-              {user && <span className="text-sm text-gray-500">(Kosongkan jika tidak diubah)</span>}
+              {user && (
+                <span className="text-sm text-gray-500">
+                  (Kosongkan jika tidak diubah)
+                </span>
+              )}
             </Label>
             <div className="relative">
               <Input
@@ -249,29 +253,36 @@ export function UserFormDialog({ open, onClose, user }: UserFormDialogProps) {
           </div>
 
           {/* Role */}
-          <div className="space-y-2">
-            <Label htmlFor="role">
-              Role <span className="text-red-500">*</span>
-            </Label>
-            <Select
-              value={formData.role}
-              onValueChange={(value: any) => handleChange("role", value)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Pilih role" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="AUTHOR">Author - Dapat menulis berita</SelectItem>
-                <SelectItem value="EDITOR">Editor - Dapat mengedit semua berita</SelectItem>
-                <SelectItem value="ADMIN">Admin - Full access</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          {!isProfileMode && (
+            <div className="space-y-2">
+              <Label htmlFor="role">
+                Role <span className="text-red-500">*</span>
+              </Label>
+              <Select
+                value={formData.role}
+                onValueChange={(value: any) => handleChange("role", value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Pilih role" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="AUTHOR">
+                    Author - Dapat menulis berita
+                  </SelectItem>
+                  <SelectItem value="EDITOR">
+                    Editor - Dapat mengedit semua berita
+                  </SelectItem>
+                  <SelectItem value="ADMIN">Admin - Full access</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
           {/* Avatar URL (Optional) */}
           <div className="space-y-2">
             <Label htmlFor="avatar">
-              Avatar URL <span className="text-sm text-gray-500">(Opsional)</span>
+              Avatar URL{" "}
+              <span className="text-sm text-gray-500">(Opsional)</span>
             </Label>
             <Input
               id="avatar"
@@ -286,7 +297,7 @@ export function UserFormDialog({ open, onClose, user }: UserFormDialogProps) {
           </div>
 
           {/* Active Status (Edit only) */}
-          {user && (
+          {user && !isProfileMode && (
             <div className="flex items-center justify-between rounded-lg border border-gray-200 dark:border-gray-700 p-4">
               <div className="space-y-0.5">
                 <Label htmlFor="is_active">Status Aktif</Label>
@@ -321,5 +332,5 @@ export function UserFormDialog({ open, onClose, user }: UserFormDialogProps) {
         </form>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

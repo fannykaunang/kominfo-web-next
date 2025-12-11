@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { getUserById } from "@/lib/models/user.model";
 import { query, queryOne } from "@/lib/db-helpers";
+import { ProfileEditButton } from "./profile-edit-button";
 
 // Get user statistics
 async function getUserStatistics(userId: string) {
@@ -252,13 +253,15 @@ export default async function ProfilePage() {
 
           {/* Edit Profile Button */}
           <div>
-            <a
+            {/* <a
               href={`/backend/users/${user.id}/edit`}
               className="inline-flex items-center gap-2 px-4 py-2 bg-white text-blue-600 rounded-lg hover:bg-blue-50 transition-colors"
             >
               <User className="w-4 h-4" />
               Edit Profile
-            </a>
+            </a> */}
+
+            <ProfileEditButton user={user} />
           </div>
         </div>
       </div>

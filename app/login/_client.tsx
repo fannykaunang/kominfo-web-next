@@ -305,6 +305,7 @@ export default function LoginForm({ settings }: LoginFormProps) {
               <br></br>
               <a
                 href="https://merauke.go.id"
+                target="_blank"
                 className="hover:text-blue-600 transition-colors"
               >
                 {settings?.copyright || "Kominfo Merauke"}

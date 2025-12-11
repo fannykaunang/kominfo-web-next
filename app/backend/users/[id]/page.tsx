@@ -1,3 +1,5 @@
+// app/backend/users/[id]/page.tsx
+
 import { auth } from "@/lib/auth";
 import { redirect, notFound } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -19,10 +21,12 @@ import {
 import { getUserById } from "@/lib/models/user.model";
 import { query, queryOne } from "@/lib/db-helpers";
 import Link from "next/link";
-import { EditUserButton } from "./edit-button-client";
+import EditButtonClient from "./user-edit-button";
 
-interface PageProps {
-  params: Promise<{ id: string }>;
+interface UserDetailPageProps {
+  params: Promise<{
+    id: string;
+  }>;
 }
 
 // Get user statistics
@@ -165,7 +169,7 @@ async function getUserStatistics(userId: string) {
   };
 }
 
-export default async function UserDetailPage({ params }: PageProps) {
+export default async function UserDetailPage({ params }: UserDetailPageProps) {
   const session = await auth();
   const resolvedParams = await params;
 
@@ -277,10 +281,13 @@ export default async function UserDetailPage({ params }: PageProps) {
             </div>
           </div>
 
-          {/* Edit Button with Dialog */}
-          {(session.user.role === "ADMIN" || isOwnProfile) && (
-            <EditUserButton userName={user.name} />
-          )}
+          {/* Edit Profile Button */}
+          <div>
+            {/* 👇 GANTI BAGIAN INI 👇 */}
+            <EditButtonClient user={user} />
+
+            {/* 👆 SELESAI GANTI 👆 */}
+          </div>
         </div>
       </div>
 
