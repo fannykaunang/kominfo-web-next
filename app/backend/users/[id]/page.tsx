@@ -1,7 +1,5 @@
-// app/backend/profile/page.tsx
-
 import { auth } from "@/lib/auth";
-import { redirect } from "next/navigation";
+import { redirect, notFound } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   User,
@@ -15,9 +13,17 @@ import {
   Mail,
   Shield,
   TrendingUp,
+  ArrowLeft,
+  Edit,
 } from "lucide-react";
 import { getUserById } from "@/lib/models/user.model";
 import { query, queryOne } from "@/lib/db-helpers";
+import Link from "next/link";
+import { EditUserButton } from "./edit-button-client";
+
+interface PageProps {
+  params: Promise<{ id: string }>;
+}
 
 // Get user statistics
 async function getUserStatistics(userId: string) {
@@ -159,19 +165,26 @@ async function getUserStatistics(userId: string) {
   };
 }
 
-export default async function ProfilePage() {
+export default async function UserDetailPage({ params }: PageProps) {
   const session = await auth();
+  const resolvedParams = await params;
 
   if (!session?.user?.id) {
     redirect("/login");
   }
 
-  const user = await getUserById(session.user.id);
-  const stats = await getUserStatistics(session.user.id);
+  // Only ADMIN can view other users' details
+  if (session.user.role !== "ADMIN" && session.user.id !== resolvedParams.id) {
+    redirect("/backend/dashboard");
+  }
+
+  const user = await getUserById(resolvedParams.id);
 
   if (!user) {
-    redirect("/login");
+    notFound();
   }
+
+  const stats = await getUserStatistics(resolvedParams.id);
 
   // Format dates
   const formatDate = (date: Date | string) => {
@@ -198,8 +211,22 @@ export default async function ProfilePage() {
       ? Math.round(stats.berita.total_views / stats.berita.total)
       : 0;
 
+  // Check if viewing own profile
+  const isOwnProfile = session.user.id === resolvedParams.id;
+
   return (
     <div className="space-y-6">
+      {/* Back Button */}
+      <div>
+        <Link
+          href="/backend/users"
+          className="inline-flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Kembali ke Users
+        </Link>
+      </div>
+
       {/* Header with User Info */}
       <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg p-6 text-white">
         <div className="flex items-center gap-6">
@@ -250,16 +277,10 @@ export default async function ProfilePage() {
             </div>
           </div>
 
-          {/* Edit Profile Button */}
-          <div>
-            <a
-              href={`/backend/users/${user.id}/edit`}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-white text-blue-600 rounded-lg hover:bg-blue-50 transition-colors"
-            >
-              <User className="w-4 h-4" />
-              Edit Profile
-            </a>
-          </div>
+          {/* Edit Button with Dialog */}
+          {(session.user.role === "ADMIN" || isOwnProfile) && (
+            <EditUserButton userName={user.name} />
+          )}
         </div>
       </div>
 

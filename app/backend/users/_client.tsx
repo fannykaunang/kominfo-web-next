@@ -3,6 +3,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -49,11 +50,8 @@ import {
   Users,
   UserCheck,
   UserX,
-  Shield,
-  Edit,
-  Mail,
   Eye,
-  EyeOff,
+  Mail,
 } from "lucide-react";
 import { toast } from "sonner";
 import { UserFormDialog } from "./form-dialog";
@@ -85,6 +83,7 @@ interface Stats {
 }
 
 export default function UsersClient() {
+  const router = useRouter();
   const [users, setUsers] = useState<User[]>([]);
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -162,6 +161,11 @@ export default function UsersClient() {
   const handleEdit = (user: User) => {
     setEditingUser(user);
     setIsDialogOpen(true);
+  };
+
+  // Handle view detail
+  const handleViewDetail = (userId: string) => {
+    router.push(`/backend/users/${userId}`);
   };
 
   // Handle dialog close
@@ -487,7 +491,11 @@ export default function UsersClient() {
               </TableHeader>
               <TableBody>
                 {users.map((user) => (
-                  <TableRow key={user.id}>
+                  <TableRow
+                    key={user.id}
+                    className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                    onClick={() => handleViewDetail(user.id)}
+                  >
                     <TableCell>
                       <div className="flex items-center gap-3">
                         <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center text-white font-semibold">
@@ -556,7 +564,10 @@ export default function UsersClient() {
                         </span>
                       )}
                     </TableCell>
-                    <TableCell className="text-right">
+                    <TableCell
+                      className="text-right"
+                      onClick={(e) => e.stopPropagation()}
+                    >
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="ghost" size="icon">
@@ -564,6 +575,12 @@ export default function UsersClient() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
+                          <DropdownMenuItem
+                            onClick={() => handleViewDetail(user.id)}
+                          >
+                            <Eye className="h-4 w-4 mr-2" />
+                            View Details
+                          </DropdownMenuItem>
                           <DropdownMenuItem onClick={() => handleEdit(user)}>
                             <Pencil className="h-4 w-4 mr-2" />
                             Edit

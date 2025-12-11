@@ -25,7 +25,7 @@ import {
   Timer,
   Eye,
   Building2,
-  Icon,
+  Image as ImageIcon,
 } from "lucide-react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
@@ -81,7 +81,7 @@ const menuCategories = [
       {
         title: "Galeri",
         href: "/backend/galeri",
-        icon: Image,
+        icon: ImageIcon,
       },
       {
         title: "Slider",
@@ -151,7 +151,7 @@ const menuCategories = [
         title: "Session",
         href: "/backend/sessions",
         icon: Timer,
-        // adminOnly: true, // aktifkan kalau mau khusus admin
+        adminOnly: true, // aktifkan kalau mau khusus admin
       },
     ],
   },
@@ -294,7 +294,13 @@ export default function AdminSidebar({
                 <div className="space-y-1">
                   {category.items.map((item) => {
                     // Hide admin-only items for non-admins
-                    "ADMIN";
+
+                    if (
+                      item.adminOnly &&
+                      user?.role?.toUpperCase() !== "ADMIN"
+                    ) {
+                      return null;
+                    }
 
                     const isActive =
                       pathname === item.href ||
@@ -314,7 +320,7 @@ export default function AdminSidebar({
                         )}
                         title={!isOpen ? item.title : undefined}
                       >
-                        <Users className="h-5 w-5 shrink-0" />
+                        <Icon className="h-5 w-5 shrink-0" />
                         {isOpen && <span>{item.title}</span>}
 
                         {/* Tooltip for collapsed state */}
