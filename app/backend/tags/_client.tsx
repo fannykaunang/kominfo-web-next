@@ -18,6 +18,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import {
   Table,
   TableBody,
@@ -108,6 +109,10 @@ export function TagsClient({
 
   // Flag untuk skip fetch pertama (karena data sudah dari server)
   const isFirstLoad = useRef(true);
+
+  // Check if filters are active
+  const hasActiveFilters =
+    searchQuery || usedFilter !== "all" || sortOrder !== "default";
 
   // ====== FETCH FUNCTIONS ======
 
@@ -290,7 +295,7 @@ export function TagsClient({
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
             Kelola Tag
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
+          <p className="text-gray-600 dark:text-gray-400 mt-2">
             Atur tag untuk berita dan konten
           </p>
         </div>
@@ -362,12 +367,13 @@ export function TagsClient({
           </CardTitle>
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
             <Button
-              variant="outline"
+              variant={hasActiveFilters ? "default" : "outline"}
               onClick={handleOpenFilter}
               className="gap-2"
             >
               <Filter className="h-4 w-4" />
               Filter & Pencarian
+              {hasActiveFilters && <Badge variant="secondary">Aktif</Badge>}
             </Button>
             <Button onClick={handleCreateClick} className="gap-2">
               <Plus className="h-4 w-4" />

@@ -6,6 +6,8 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 import {
   Table,
   TableBody,
@@ -22,6 +24,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -31,7 +41,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import {
@@ -44,6 +53,7 @@ import {
   XCircle,
   Eye,
   Loader2,
+  Filter,
 } from "lucide-react";
 import { MenuFormDialog } from "./form-dialog";
 
@@ -75,13 +85,25 @@ export function MenuClient() {
     draft: 0,
   });
   const [loading, setLoading] = useState(true);
+
+  // Active filters
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState<string>("all");
+
+  // Temporary filters for dialog
+  const [tempSearchTerm, setTempSearchTerm] = useState("");
+  const [tempFilterStatus, setTempFilterStatus] = useState<string>("all");
+
+  // Dialog states
+  const [filterDialogOpen, setFilterDialogOpen] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingMenu, setEditingMenu] = useState<Menu | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [menuToDelete, setMenuToDelete] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+
+  // Check if filters are active
+  const hasActiveFilters = searchTerm || filterStatus !== "all";
 
   // Fetch menu
   const fetchMenu = async () => {
@@ -108,6 +130,24 @@ export function MenuClient() {
   useEffect(() => {
     fetchMenu();
   }, [searchTerm, filterStatus]);
+
+  // Handle filter dialog
+  const handleOpenFilter = () => {
+    setTempSearchTerm(searchTerm);
+    setTempFilterStatus(filterStatus);
+    setFilterDialogOpen(true);
+  };
+
+  const handleApplyFilters = () => {
+    setSearchTerm(tempSearchTerm);
+    setFilterStatus(tempFilterStatus);
+    setFilterDialogOpen(false);
+  };
+
+  const handleResetFilters = () => {
+    setTempSearchTerm("");
+    setTempFilterStatus("all");
+  };
 
   // Handle create
   const handleCreate = () => {
@@ -181,84 +221,85 @@ export function MenuClient() {
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Menu</CardTitle>
-            <List className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.total}</div>
-            <p className="text-xs text-muted-foreground">
-              Semua menu di sistem
-            </p>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                  Total Menu
+                </p>
+                <p className="text-3xl font-bold text-gray-900 dark:text-white mt-2">
+                  {stats.total}
+                </p>
+              </div>
+              <div className="h-12 w-12 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center">
+                <List className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+              </div>
+            </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Published</CardTitle>
-            <CheckCircle className="h-4 w-4 text-green-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.published}</div>
-            <p className="text-xs text-muted-foreground">
-              Menu yang dipublikasikan
-            </p>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                  Published
+                </p>
+                <p className="text-3xl font-bold text-gray-900 dark:text-white mt-2">
+                  {stats.published}
+                </p>
+              </div>
+              <div className="h-12 w-12 rounded-lg bg-green-50 dark:bg-green-900/20 flex items-center justify-center">
+                <CheckCircle className="h-6 w-6 text-green-600 dark:text-green-400" />
+              </div>
+            </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Draft</CardTitle>
-            <XCircle className="h-4 w-4 text-orange-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.draft}</div>
-            <p className="text-xs text-muted-foreground">
-              Menu belum dipublikasikan
-            </p>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                  Draft
+                </p>
+                <p className="text-3xl font-bold text-gray-900 dark:text-white mt-2">
+                  {stats.draft}
+                </p>
+              </div>
+              <div className="h-12 w-12 rounded-lg bg-orange-50 dark:bg-orange-900/20 flex items-center justify-center">
+                <XCircle className="h-6 w-6 text-orange-600 dark:text-orange-400" />
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Filters */}
+      {/* Table Card */}
       <Card>
-        <CardHeader>
-          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-            <div>
-              <CardTitle>Kelola Menu</CardTitle>
-              <p className="text-sm text-muted-foreground mt-1">
-                Kelola menu navigasi website
-              </p>
-            </div>
-            <Button onClick={handleCreate}>
-              <Plus className="h-4 w-4 mr-2" />
+        <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <CardTitle className="flex items-center gap-2">
+            <List className="h-5 w-5" />
+            Daftar Menu
+          </CardTitle>
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+            <Button
+              variant={hasActiveFilters ? "default" : "outline"}
+              onClick={handleOpenFilter}
+              className="gap-2"
+            >
+              <Filter className="h-4 w-4" />
+              Filter & Pencarian
+              {hasActiveFilters && <Badge variant="secondary">Aktif</Badge>}
+            </Button>
+            <Button onClick={handleCreate} className="gap-2">
+              <Plus className="h-4 w-4" />
               Tambah Menu
             </Button>
           </div>
         </CardHeader>
-        <CardContent>
-          <div className="flex flex-col sm:flex-row gap-4 mb-6">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Cari menu..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            <Select value={filterStatus} onValueChange={setFilterStatus}>
-              <SelectTrigger className="w-full sm:w-[200px]">
-                <SelectValue placeholder="Filter Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Semua Status</SelectItem>
-                <SelectItem value="1">Published</SelectItem>
-                <SelectItem value="0">Draft</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
 
+        <CardContent className="space-y-4">
           {/* Loading State */}
           {loading ? (
             <div className="flex items-center justify-center py-12">
@@ -279,7 +320,7 @@ export function MenuClient() {
             </div>
           ) : (
             /* Data Table */
-            <div className="border rounded-lg">
+            <div className="border rounded-lg overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -345,28 +386,30 @@ export function MenuClient() {
                         </div>
                       </TableCell>
                       <TableCell className="text-right">
-                        <div className="flex items-center justify-end gap-2">
+                        <div className="flex items-center justify-end gap-0">
                           <Button
                             variant="ghost"
-                            size="icon"
+                            size="sm"
                             onClick={() => handleEdit(item)}
                             disabled={actionLoading === item.id}
+                            className="h-8 w-8 p-0"
                           >
                             <Pencil className="h-4 w-4" />
                           </Button>
                           <Button
                             variant="ghost"
-                            size="icon"
+                            size="sm"
                             onClick={() => {
                               setMenuToDelete(item.id);
                               setDeleteDialogOpen(true);
                             }}
                             disabled={actionLoading === item.id}
+                            className="h-8 w-8 p-0 text-red-600 hover:bg-red-50 hover:text-red-700 dark:text-red-400 dark:hover:bg-red-900/20"
                           >
                             {actionLoading === item.id ? (
                               <Loader2 className="h-4 w-4 animate-spin" />
                             ) : (
-                              <Trash2 className="h-4 w-4 text-destructive" />
+                              <Trash2 className="h-4 w-4" />
                             )}
                           </Button>
                         </div>
@@ -379,6 +422,70 @@ export function MenuClient() {
           )}
         </CardContent>
       </Card>
+
+      {/* Filter Dialog */}
+      <Dialog
+        open={filterDialogOpen}
+        onOpenChange={(open) => {
+          setFilterDialogOpen(open);
+          if (open) {
+            setTempSearchTerm(searchTerm);
+            setTempFilterStatus(filterStatus);
+          }
+        }}
+      >
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Pencarian & Filter</DialogTitle>
+            <DialogDescription>
+              Sesuaikan pencarian dan status untuk daftar menu.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="menu-search">Pencarian</Label>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                <Input
+                  id="menu-search"
+                  type="text"
+                  placeholder="Cari menu..."
+                  value={tempSearchTerm}
+                  onChange={(e) => setTempSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Status</Label>
+              <Select
+                value={tempFilterStatus}
+                onValueChange={(value) => setTempFilterStatus(value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Pilih status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Semua Status</SelectItem>
+                  <SelectItem value="1">Published</SelectItem>
+                  <SelectItem value="0">Draft</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <DialogFooter className="flex flex-col gap-2 sm:flex-row sm:justify-between">
+            <Button variant="ghost" onClick={handleResetFilters}>
+              Reset
+            </Button>
+            <Button onClick={handleApplyFilters} className="w-full sm:w-auto">
+              Terapkan
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Form Dialog */}
       <MenuFormDialog

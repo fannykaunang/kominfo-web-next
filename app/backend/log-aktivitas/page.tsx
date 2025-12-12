@@ -45,20 +45,7 @@ export default async function LogAktivitasPage({ searchParams }: PageProps) {
 
   return (
     <Suspense fallback={<LogPageSkeleton />}>
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-              Log Aktivitas
-            </h1>
-            <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-              Monitor semua aktivitas pengguna di sistem
-            </p>
-          </div>
-        </div>
-
-        {/* Client Component */}
+      <div className="container mx-auto py-6 px-4">
         <LogClient
           initialStats={finalStats}
           initialLogs={pageData.logs}
@@ -99,13 +86,6 @@ function LogPageSkeleton() {
             </CardContent>
           </Card>
         ))}
-      </div>
-
-      {/* Filters Skeleton */}
-      <div className="flex flex-col gap-4 md:flex-row">
-        <Skeleton className="h-10 flex-1" />
-        <Skeleton className="h-10 w-[180px]" />
-        <Skeleton className="h-10 w-[180px]" />
       </div>
 
       {/* Table Skeleton */}

@@ -122,6 +122,36 @@ export async function getRecentLogs(
 }
 
 /**
+ * Delete log by log_id
+ */
+export async function deleteLog(
+  log_id: string,
+  userId?: string,
+  ipAddress?: string,
+  userAgent?: string
+): Promise<void> {
+  const log = await getLogById(log_id);
+
+  await execute(`DELETE FROM log_aktivitas WHERE log_id = ?`, [log_id]);
+
+  // Log activity
+  if (userId && log) {
+    await createLogWithData({
+      user_id: userId,
+      aksi: "Delete",
+      modul: "log_aktivitas",
+      detail_aksi: `Menghapus log: ${log.log_id}`,
+      data_sebelum: log,
+      data_sesudah: null,
+      ip_address: ipAddress || null,
+      user_agent: userAgent || null,
+      endpoint: "/api/log/" + log_id,
+      method: "DELETE",
+    });
+  }
+}
+
+/**
  * Delete old logs (cleanup)
  */
 export async function deleteOldLogs(daysOld: number = 90): Promise<number> {

@@ -127,8 +127,6 @@ export async function GET(request: NextRequest) {
         la.endpoint,
         la.ip_address,
         la.user_agent,
-        la.data_sebelum,
-        la.data_sesudah,
         la.created_at
       FROM log_aktivitas la
       JOIN users u ON la.user_id = u.id

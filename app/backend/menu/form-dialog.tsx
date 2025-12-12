@@ -1,3 +1,5 @@
+// app/backend/menu/form-dialog.tsx
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -196,7 +198,8 @@ export function MenuFormDialog({
                       ...prev,
                       icon: value === "none" ? "" : value,
                     }))
-                  }>
+                  }
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Pilih icon" />
                   </SelectTrigger>
@@ -271,7 +274,8 @@ export function MenuFormDialog({
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
-              disabled={loading}>
+              disabled={loading}
+            >
               Batal
             </Button>
             <Button type="submit" disabled={loading}>

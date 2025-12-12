@@ -12,10 +12,12 @@ import {
   Video,
   Eye,
   ImageOff,
+  Filter,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -23,6 +25,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   Table,
   TableBody,
@@ -103,14 +113,32 @@ export function GaleriClient() {
   });
   const [kategoriList, setKategoriList] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Active filters
   const [search, setSearch] = useState("");
   const [filterKategori, setFilterKategori] = useState("all");
   const [filterMediaType, setFilterMediaType] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
+
+  // Temporary filters for dialog
+  const [tempSearch, setTempSearch] = useState("");
+  const [tempFilterKategori, setTempFilterKategori] = useState("all");
+  const [tempFilterMediaType, setTempFilterMediaType] = useState("all");
+  const [tempFilterStatus, setTempFilterStatus] = useState("all");
+
+  // Dialog states
+  const [filterDialogOpen, setFilterDialogOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [editingGaleri, setEditingGaleri] = useState<Galeri | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
+
+  // Check if filters are active
+  const hasActiveFilters =
+    search ||
+    filterKategori !== "all" ||
+    filterMediaType !== "all" ||
+    filterStatus !== "all";
 
   // Fetch galeri data
   const fetchGaleri = async () => {
@@ -154,6 +182,30 @@ export function GaleriClient() {
     fetchGaleri();
     fetchKategori();
   }, [search, filterKategori, filterMediaType, filterStatus]);
+
+  // Handle filter dialog
+  const handleOpenFilter = () => {
+    setTempSearch(search);
+    setTempFilterKategori(filterKategori);
+    setTempFilterMediaType(filterMediaType);
+    setTempFilterStatus(filterStatus);
+    setFilterDialogOpen(true);
+  };
+
+  const handleApplyFilters = () => {
+    setSearch(tempSearch);
+    setFilterKategori(tempFilterKategori);
+    setFilterMediaType(tempFilterMediaType);
+    setFilterStatus(tempFilterStatus);
+    setFilterDialogOpen(false);
+  };
+
+  const handleResetFilters = () => {
+    setTempSearch("");
+    setTempFilterKategori("all");
+    setTempFilterMediaType("all");
+    setTempFilterStatus("all");
+  };
 
   // Delete galeri
   const handleDelete = async () => {
@@ -313,73 +365,30 @@ export function GaleriClient() {
         </Card>
       </div>
 
-      {/* Filters */}
+      {/* Table Card */}
       <Card>
-        <CardContent className="pt-6">
-          <div className="flex flex-col md:flex-row gap-4">
-            {/* Search */}
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Cari judul, deskripsi, atau kategori..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-            </div>
-
-            {/* Filter Kategori */}
-            <Select value={filterKategori} onValueChange={setFilterKategori}>
-              <SelectTrigger className="w-full md:w-[200px]">
-                <SelectValue placeholder="Kategori" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Semua Kategori</SelectItem>
-                {kategoriList.map((kat) => (
-                  <SelectItem key={kat} value={kat}>
-                    {kat}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            {/* Filter Media Type */}
-            <Select value={filterMediaType} onValueChange={setFilterMediaType}>
-              <SelectTrigger className="w-full md:w-[200px]">
-                <SelectValue placeholder="Tipe Media" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Semua Tipe</SelectItem>
-                <SelectItem value="image">Image</SelectItem>
-                <SelectItem value="video">Video</SelectItem>
-              </SelectContent>
-            </Select>
-
-            {/* Filter Status */}
-            <Select value={filterStatus} onValueChange={setFilterStatus}>
-              <SelectTrigger className="w-full md:w-[200px]">
-                <SelectValue placeholder="Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Semua Status</SelectItem>
-                <SelectItem value="published">Published</SelectItem>
-                <SelectItem value="draft">Draft</SelectItem>
-              </SelectContent>
-            </Select>
-
-            {/* Add Button */}
-            <Button onClick={handleAdd} className="w-full md:w-auto">
-              <Plus className="h-4 w-4 mr-2" />
-              Tambah
+        <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <CardTitle className="flex items-center gap-2">
+            <ImageIcon className="h-5 w-5" />
+            Daftar Galeri
+          </CardTitle>
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+            <Button
+              variant={hasActiveFilters ? "default" : "outline"}
+              onClick={handleOpenFilter}
+              className="gap-2"
+            >
+              <Filter className="h-4 w-4" />
+              Filter & Pencarian
+              {hasActiveFilters && <Badge variant="secondary">Aktif</Badge>}
+            </Button>
+            <Button onClick={handleAdd} className="gap-2">
+              <Plus className="h-4 w-4" />
+              Tambah Galeri
             </Button>
           </div>
-        </CardContent>
-      </Card>
+        </CardHeader>
 
-      {/* Table */}
-      <Card>
         <CardContent className="p-0">
           {loading ? (
             <div className="p-8 space-y-4">
@@ -567,6 +576,112 @@ export function GaleriClient() {
           )}
         </CardContent>
       </Card>
+
+      {/* Filter Dialog */}
+      <Dialog
+        open={filterDialogOpen}
+        onOpenChange={(open) => {
+          setFilterDialogOpen(open);
+          if (open) {
+            setTempSearch(search);
+            setTempFilterKategori(filterKategori);
+            setTempFilterMediaType(filterMediaType);
+            setTempFilterStatus(filterStatus);
+          }
+        }}
+      >
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Pencarian & Filter</DialogTitle>
+            <DialogDescription>
+              Sesuaikan pencarian, filter kategori, tipe media, dan status untuk
+              daftar galeri.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="galeri-search">Pencarian</Label>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                <Input
+                  id="galeri-search"
+                  type="text"
+                  placeholder="Cari judul, deskripsi, atau kategori..."
+                  value={tempSearch}
+                  onChange={(e) => setTempSearch(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label>Kategori</Label>
+                <Select
+                  value={tempFilterKategori}
+                  onValueChange={(value) => setTempFilterKategori(value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Pilih kategori" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Semua Kategori</SelectItem>
+                    {kategoriList.map((kat) => (
+                      <SelectItem key={kat} value={kat}>
+                        {kat}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Tipe Media</Label>
+                <Select
+                  value={tempFilterMediaType}
+                  onValueChange={(value) => setTempFilterMediaType(value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Pilih tipe" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Semua Tipe</SelectItem>
+                    <SelectItem value="image">Image</SelectItem>
+                    <SelectItem value="video">Video</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Status Publikasi</Label>
+              <Select
+                value={tempFilterStatus}
+                onValueChange={(value) => setTempFilterStatus(value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Pilih status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Semua Status</SelectItem>
+                  <SelectItem value="published">Published</SelectItem>
+                  <SelectItem value="draft">Draft</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <DialogFooter className="flex flex-col gap-2 sm:flex-row sm:justify-between">
+            <Button variant="ghost" onClick={handleResetFilters}>
+              Reset
+            </Button>
+            <Button onClick={handleApplyFilters} className="w-full sm:w-auto">
+              Terapkan
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Form Dialog */}
       <GaleriFormDialog
