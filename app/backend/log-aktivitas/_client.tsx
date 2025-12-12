@@ -1,6 +1,7 @@
+// app/backend/log-aktivitas/_client.tsx
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Search,
   Activity,
@@ -40,22 +41,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { LogDetailDialog } from "./detail-dialog";
-
-interface LogAktivitas {
-  log_id?: string;
-  id: string;
-  user_id: string;
-  user_name: string;
-  aksi: string;
-  modul: string;
-  detail_aksi: string;
-  endpoint?: string;
-  ip_address?: string;
-  user_agent?: string;
-  data_sebelum?: any;
-  data_sesudah?: any;
-  created_at: string;
-}
+import { LogAktivitas } from "@/lib/types";
 
 interface Stats {
   total: number;
@@ -64,67 +50,75 @@ interface Stats {
   uniqueActions: number;
 }
 
-export function LogClient() {
-  const [logs, setLogs] = useState<LogAktivitas[]>([]);
-  const [stats, setStats] = useState<Stats>({
-    total: 0,
-    filtered: 0,
-    uniqueModules: 0,
-    uniqueActions: 0,
-  });
-  const [loading, setLoading] = useState(true);
+interface LogClientProps {
+  initialLogs: LogAktivitas[];
+  initialStats: Stats;
+  initialFilters: {
+    modules: string[];
+    actions: string[];
+  };
+  initialPagination: {
+    currentPage: number;
+    totalPages: number;
+    total: number;
+    limit: number;
+  };
+}
+
+export function LogClient({
+  initialLogs,
+  initialStats,
+  initialFilters,
+  initialPagination,
+}: LogClientProps) {
+  // ====== STATE DATA DARI SERVER (INITIAL) ======
+  const [logs, setLogs] = useState<LogAktivitas[]>(initialLogs);
+  const [stats, setStats] = useState<Stats>(initialStats);
+  const [modules] = useState<string[]>(initialFilters.modules);
+  const [actions] = useState<string[]>(initialFilters.actions);
+
+  const [currentPage, setCurrentPage] = useState(initialPagination.currentPage);
+  const [totalPages, setTotalPages] = useState(initialPagination.totalPages);
+  const [total, setTotal] = useState(initialPagination.total);
+  const limit = initialPagination.limit;
+
+  // Loading state (false initially because we have server data)
+  const [loading, setLoading] = useState(false);
+  const [isDetailLoading, setIsDetailLoading] = useState(false);
+
+  // ====== FILTERS ======
   const [searchQuery, setSearchQuery] = useState("");
   const [moduleFilter, setModuleFilter] = useState("all");
   const [actionFilter, setActionFilter] = useState("all");
-  const [modules, setModules] = useState<string[]>([]);
-  const [actions, setActions] = useState<string[]>([]);
 
-  // Pagination
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [total, setTotal] = useState(0);
-  const limit = 20;
-
-  // Delete dialog
+  // ====== DIALOGS ======
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleteAllDialogOpen, setDeleteAllDialogOpen] = useState(false);
   const [logToDelete, setLogToDelete] = useState<string | null>(null);
-
-  // Detail dialog
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
   const [selectedLog, setSelectedLog] = useState<LogAktivitas | null>(null);
 
-  useEffect(() => {
-    fetchStats();
-    fetchFilters();
-  }, []);
+  // Flag untuk skip fetch pertama (karena data sudah dari server)
+  const isFirstLoad = useRef(true);
 
-  useEffect(() => {
-    fetchLogs();
-  }, [currentPage, searchQuery, moduleFilter, actionFilter]);
+  // ====== FETCH FUNCTIONS ======
 
   const fetchStats = async () => {
     try {
-      const res = await fetch("/api/log-aktivitas?stats=true");
+      // Kita kirim parameter filter juga agar stats filtered akurat
+      const params = new URLSearchParams({
+        stats: "true",
+        search: searchQuery,
+        modul: moduleFilter,
+        aksi: actionFilter,
+      });
+      const res = await fetch(`/api/log-aktivitas?${params}`);
       if (res.ok) {
         const data = await res.json();
         setStats(data);
       }
     } catch (error) {
       console.error("Error fetching stats:", error);
-    }
-  };
-
-  const fetchFilters = async () => {
-    try {
-      const res = await fetch("/api/log-aktivitas?filters=true");
-      if (res.ok) {
-        const data = await res.json();
-        setModules(data.modules || []);
-        setActions(data.actions || []);
-      }
-    } catch (error) {
-      console.error("Error fetching filters:", error);
     }
   };
 
@@ -156,6 +150,20 @@ export function LogClient() {
     }
   };
 
+  // Hanya fetchLogs setelah interaksi (pagination / filter),
+  // bukan saat mount pertama (data sudah dari server).
+  useEffect(() => {
+    if (isFirstLoad.current) {
+      isFirstLoad.current = false;
+      return;
+    }
+    fetchLogs();
+    fetchStats(); // Update stats filtered count when filter changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentPage, searchQuery, moduleFilter, actionFilter]);
+
+  // ====== HANDLERS ======
+
   const handleSearch = (value: string) => {
     setSearchQuery(value);
     setCurrentPage(1);
@@ -163,7 +171,6 @@ export function LogClient() {
 
   const handleFilterChange = () => {
     setCurrentPage(1);
-    fetchStats(); // Update filtered count
   };
 
   const handleDeleteClick = (id: string) => {
@@ -218,10 +225,32 @@ export function LogClient() {
     }
   };
 
-  const handleDetailClick = (log: LogAktivitas) => {
-    setSelectedLog(log);
+  const handleDetailClick = async (logPartial: LogAktivitas) => {
+    // 1. Buka dialog & set data sementara (agar user melihat respons cepat)
+    setSelectedLog(logPartial);
     setDetailDialogOpen(true);
+    setIsDetailLoading(true);
+
+    try {
+      // 2. Fetch data lengkap (termasuk data_sebelum/sesudah) dari API
+      // Pastikan Anda punya endpoint API GET /api/log-aktivitas/[id]
+      const res = await fetch(`/api/log-aktivitas/${logPartial.log_id}`);
+
+      if (res.ok) {
+        const fullData = await res.json();
+        // 3. Update selectedLog dengan data lengkap
+        setSelectedLog(fullData);
+      } else {
+        toast.error("Gagal memuat detail lengkap JSON");
+      }
+    } catch (error) {
+      console.error("Error fetching detail:", error);
+    } finally {
+      setIsDetailLoading(false);
+    }
   };
+
+  // ====== HELPERS (Badge Colors & Formatters) ======
 
   const getActionBadgeColor = (aksi: string) => {
     const lowerAksi = aksi.toLowerCase();
@@ -292,25 +321,13 @@ export function LogClient() {
       }
     } else {
       pages.push(1);
-
-      if (currentPage > 3) {
-        pages.push("...");
-      }
-
+      if (currentPage > 3) pages.push("...");
       const start = Math.max(2, currentPage - 1);
       const end = Math.min(totalPages - 1, currentPage + 1);
-
-      for (let i = start; i <= end; i++) {
-        pages.push(i);
-      }
-
-      if (currentPage < totalPages - 2) {
-        pages.push("...");
-      }
-
+      for (let i = start; i <= end; i++) pages.push(i);
+      if (currentPage < totalPages - 2) pages.push("...");
       pages.push(totalPages);
     }
-
     return pages;
   };
 
@@ -635,7 +652,7 @@ export function LogClient() {
         )}
       </div>
 
-      {/* Delete Dialog */}
+      {/* Delete Dialogs & Detail Dialog (Tidak berubah, hanya dirender) */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -657,7 +674,6 @@ export function LogClient() {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Delete All Dialog */}
       <AlertDialog
         open={deleteAllDialogOpen}
         onOpenChange={setDeleteAllDialogOpen}
@@ -682,7 +698,6 @@ export function LogClient() {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Detail Dialog */}
       <LogDetailDialog
         log={selectedLog}
         open={detailDialogOpen}

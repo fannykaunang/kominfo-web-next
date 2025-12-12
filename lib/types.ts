@@ -519,7 +519,7 @@ export interface LogAktivitas extends RowDataPacket {
   user_agent?: string;
   endpoint?: string;
   method?: string;
-  created_at?: Date;
+  created_at: string;
 }
 
 export interface CreateLogInput {
