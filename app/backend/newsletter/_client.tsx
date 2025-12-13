@@ -42,8 +42,10 @@ import {
   Mail,
   Plus,
   Search,
+  TagIcon,
   Trash2,
 } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 
 // Definisikan Interface Props
 interface NewsletterClientProps {
@@ -267,40 +269,68 @@ export function NewsletterClient({
       </div>
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-3">
-        <div className="rounded-xl border bg-card p-6 text-card-foreground shadow">
-          <div className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <h3 className="tracking-tight text-sm font-medium">
-              Total Subscriber
-            </h3>
-            <Mail className="h-4 w-4 text-muted-foreground" />
-          </div>
-          <div className="text-2xl font-bold">{stats.total}</div>
-          <p className="text-xs text-muted-foreground">Semua email terdaftar</p>
-        </div>
-        <div className="rounded-xl border bg-card p-6 text-card-foreground shadow">
-          <div className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <h3 className="tracking-tight text-sm font-medium">Aktif</h3>
-            <CheckCircle2 className="h-4 w-4 text-green-500" />
-          </div>
-          <div className="text-2xl font-bold text-green-600">
-            {stats.active}
-          </div>
-          <p className="text-xs text-muted-foreground">
-            Subscriber aktif menerima email
-          </p>
-        </div>
-        <div className="rounded-xl border bg-card p-6 text-card-foreground shadow">
-          <div className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <h3 className="tracking-tight text-sm font-medium">Tidak Aktif</h3>
-            <Ban className="h-4 w-4 text-red-500" />
-          </div>
-          <div className="text-2xl font-bold text-red-600">
-            {stats.inactive}
-          </div>
-          <p className="text-xs text-muted-foreground">
-            Subscriber berhenti berlangganan
-          </p>
-        </div>
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                  Total Subscriber
+                </p>
+                <p className="text-3xl font-bold text-gray-900 dark:text-white mt-2">
+                  {stats.total}
+                </p>
+              </div>
+              <div className="h-12 w-12 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center">
+                <Mail className="h-9 w-9 text-blue-600 dark:text-blue-400" />
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground mt-2">
+              Semua email terdaftar
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                  Aktif
+                </p>
+                <p className="text-3xl font-bold text-gray-900 dark:text-white mt-2">
+                  {stats.active}
+                </p>
+              </div>
+              <div className="h-12 w-12 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center">
+                <CheckCircle2 className="h-9 w-9 text-green-600 dark:text-green-400" />
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground mt-2">
+              Subscriber aktif menerima email
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                  Tidak Aktif
+                </p>
+                <p className="text-3xl font-bold text-gray-900 dark:text-white mt-2">
+                  {stats.inactive}
+                </p>
+              </div>
+              <div className="h-12 w-12 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center">
+                <Ban className="h-9 w-9 text-red-600 dark:text-red-500" />
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground mt-2">
+              Subscriber berhenti berlangganan
+            </p>
+          </CardContent>
+        </Card>
       </div>
 
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
