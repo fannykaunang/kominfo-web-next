@@ -229,8 +229,8 @@ export default function SKPDClient({
       </div>
 
       <div className="space-y-6">
-        {/* Stats Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+        {/* Stats Cards - 4 columns per row */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
@@ -563,12 +563,13 @@ export default function SKPDClient({
                             locale: idLocale,
                           })}
                         </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex items-center justify-end gap-0">
+                        <TableCell className="text-center">
+                          <div className="flex items-center justify-center gap-0">
                             <Button
                               variant="ghost"
                               size="sm"
                               onClick={() => handleEdit(s)}
+                              className="h-8 w-8 p-0"
                             >
                               <Edit className="h-4 w-4" />
                             </Button>
@@ -576,7 +577,7 @@ export default function SKPDClient({
                               variant="ghost"
                               size="sm"
                               onClick={() => handleDelete(s)}
-                              className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                              className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
