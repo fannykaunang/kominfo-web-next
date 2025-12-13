@@ -1,3 +1,5 @@
+// app/backend/newsletter/form-dialog.tsx
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -18,36 +20,36 @@ import { Newsletter } from "@/lib/types";
 
 interface NewsletterFormDialogProps {
   open: boolean;
-  onClose: () => void;
+  onOpenChange: (open: boolean) => void; // Diubah dari onClose agar sesuai dengan pola Radix UI/Shadcn
   onSuccess: () => void;
-  newsletter: Newsletter | null;
+  initialData: Newsletter | null; // Diubah dari 'newsletter' agar konsisten dengan _client.tsx
 }
 
 export function NewsletterFormDialog({
   open,
-  onClose,
+  onOpenChange,
   onSuccess,
-  newsletter,
+  initialData,
 }: NewsletterFormDialogProps) {
   const [email, setEmail] = useState("");
   const [isActive, setIsActive] = useState(true);
   const [errors, setErrors] = useState<{ email?: string }>({});
   const [loading, setLoading] = useState(false);
 
-  const isEdit = !!newsletter;
+  const isEdit = !!initialData;
 
   useEffect(() => {
     if (open) {
-      if (newsletter) {
-        setEmail(newsletter.email);
-        setIsActive(newsletter.is_active === 1);
+      if (initialData) {
+        setEmail(initialData.email);
+        setIsActive(initialData.is_active === 1);
       } else {
         setEmail("");
         setIsActive(true);
       }
       setErrors({});
     }
-  }, [open, newsletter]);
+  }, [open, initialData]);
 
   const validate = () => {
     const newErrors: { email?: string } = {};
@@ -69,9 +71,14 @@ export function NewsletterFormDialog({
     setLoading(true);
 
     try {
+      // Sesuaikan URL dan Method berdasarkan mode Edit/Create
       const url = isEdit
-        ? `/api/newsletter/${newsletter?.id}`
+        ? `/api/newsletter/${initialData?.id}`
         : "/api/newsletter";
+
+      // Gunakan PATCH atau PUT tergantung implementasi API Anda untuk update
+      // Biasanya update partial menggunakan PATCH, full update PUT.
+      // Di sini saya gunakan PATCH agar lebih aman jika API mendukungnya, atau PUT jika standard Anda PUT.
       const method = isEdit ? "PUT" : "POST";
 
       const res = await fetch(url, {
@@ -102,7 +109,7 @@ export function NewsletterFormDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>
@@ -155,7 +162,7 @@ export function NewsletterFormDialog({
             <Button
               type="button"
               variant="outline"
-              onClick={onClose}
+              onClick={() => onOpenChange(false)}
               disabled={loading}
             >
               Batal
